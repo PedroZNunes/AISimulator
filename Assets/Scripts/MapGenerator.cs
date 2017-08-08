@@ -11,14 +11,17 @@ public class MapGenerator : MonoBehaviour {
     private int size = 0;
 
     [SerializeField]
-    private float displacementGain = 0;
+    private float grain = 0;
 
     private List<int> sizeList;
 
     [SerializeField]
-    private int framesPerSecond = 30;
+    private int maxNodes = 10;
 
     private float[,] grid;
+    private bool[,] nodesGrid;
+
+    private List<Node> nodesList;
 
     private void Awake () {
         sizeList = new List<int> ();
@@ -47,6 +50,7 @@ public class MapGenerator : MonoBehaviour {
     private void Start () {
         ResetBase ();
         TriggerDiamond ();
+        SetNodes ();
     }
 
     public void TriggerDiamond () {
@@ -59,7 +63,7 @@ public class MapGenerator : MonoBehaviour {
         float corner2 = Random.value;
         float corner3 = Random.value;
         float corner4 = Random.value;
-
+        
         grid[0 , 0] = corner1;
         grid[size - 1 , 0] = corner2;
         grid[size - 1 , size - 1] = corner3;
@@ -68,20 +72,21 @@ public class MapGenerator : MonoBehaviour {
         DivideGrid (0 , 0 , size , corner1 , corner2 , corner3 , corner4);
 
         StringBuilder sb;
+        sb = new StringBuilder ();
         for (int rows = 0 ; rows < size ; rows++) {
-            sb = new StringBuilder ();
             for (int cols = 0 ; cols < size ; cols++) {
-                sb.AppendFormat ( "{0:0.00}  ", grid[cols , rows]);
+                sb.AppendFormat ( "{0:0.0}  ", grid[cols , rows]);
             }
-            Debug.Log (sb);
+            sb.AppendLine ();
         }
+        Debug.Log (sb);
+        Debug.Log ("end of grid");
     }
 
     private float DisplaceMiddle ( float num ) {
-        float max = num / (2 * size) * displacementGain;
+        float max = num / (2 * size) * grain;
         return Random.Range (-0.5f , 0.5f) * max;
     }
-
 
     private void DivideGrid ( int x , int y , int currentSize , float corner1 , float corner2 , float corner3 , float corner4 ) {
         int newSize = currentSize / 2;
@@ -121,9 +126,59 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    private void SetNodes () {
+        while (nodesList.Count < maxNodes) {
+            int col = Random.Range (0 , size);
+            int row = Random.Range (0 , size);
+
+            if (grid[col , row] != 0f && nodesGrid[col, row] != true) {
+                float randomValue = Random.Range (0f , 1f);
+                if (randomValue < grid[col, row]) {
+                    nodesList.Add (new Node (col , row));
+                    nodesGrid[col , row] = true;
+                }
+            }
+        }
+
+        StringBuilder sb;
+        sb = new StringBuilder ();
+        for (int rows = 0 ; rows < size ; rows++) {
+            for (int cols = 0 ; cols < size ; cols++) {
+                sb.AppendFormat ("{0} " , (nodesGrid[cols , rows] == true) ? 1 : 0);
+            }
+            sb.AppendLine ();
+        }
+        Debug.Log (sb);
+        Debug.Log ("end of grid");
+
+    }
 
     private void ResetBase () {
         grid = new float[size , size];
+        nodesGrid = new bool[size , size];
+
+        nodesList = new List<Node> ();
+    }
+
+    private class Node {
+        public Vector2 pos;
+        public List<Node> links { get; private set; }
+
+        public bool isSet { get; private set; }
+
+        public Node () {
+            this.pos = new Vector2 ();
+        }
+
+        public Node ( int x , int y ) {
+            pos.x = x;
+            pos.y = y;
+        }
+
+        public void AddLink (Node node) {
+            links.Add (node);
+        }
+
     }
 
 }
