@@ -33,6 +33,12 @@ public class MapGenerator : MonoBehaviour {
 
     private List<Node> nodes;
 
+    private void OnValidate () {
+        if (maxNodes > size*size / 2) {
+            maxNodes = size*size / 2 ;
+        }
+    }
+
     private void Awake () {
         sizeList = new List<int> ();
         sizeList.Add (5);
@@ -172,16 +178,51 @@ public class MapGenerator : MonoBehaviour {
     private void SetLinks () {
         for (int i = 0 ; i < nodes.Count ; i++) {
             Node node = nodes[i];
+            //generate a list of possible connections for each node, getting everything from twice the max distance down and getting all of it into a table ordered by the closest to the furthest
+
+            List<NodeDist> possibleConnections = new List<NodeDist> ();
             for (int j = 0 ; j < nodes.Count ; j++) {
                 if (i == j)
                     continue;
 
                 float distance = Vector2.Distance (node.pos , nodes[j].pos);
-                if (distance <= maxDistance) {
-                    if (node.links.Count < maxLinksPerNode && nodes[j].links.Count < maxLinksPerNode) {
-                        if (!nodes[j].isSet) {
-                            node.AddLink (nodes[j]);
-                            nodes[j].AddLink (node);
+                if (distance <= maxDistance)
+                    possibleConnections.Add (new NodeDist (nodes[j] , distance));
+            }
+
+            possibleConnections.Sort ();
+
+            ///printing the connections
+            StringBuilder stringBuilder;
+            stringBuilder = new StringBuilder ();
+            stringBuilder.AppendFormat ("Possible Conenctions for node {0}: \n" , node.ID);
+            for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                stringBuilder.AppendFormat ("{0} \t {1} units away \n" , possibleConnections[j].node.ID , possibleConnections[j].distance);
+            }
+            stringBuilder.AppendLine ();
+            Debug.Log (stringBuilder);
+            ///end of printing
+            
+
+            for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                Node connection = possibleConnections[j].node;
+
+                //float distance = Vector2.Distance (node.pos , nodes[j].pos);
+                //chance of setting the link by link count
+                //(max-linkcount) / max
+                float linkCountProb = Mathf.Clamp01 (( maxLinksPerNode - node.links.Count ) / (float) maxLinksPerNode);
+
+                //chance of setting the link by distance
+                //(max-dist) / max
+                //float distanceProb = Mathf.Clamp01 (( maxDistance - distance ) / (float) maxDistance);
+
+                float random = Random.value;
+                //if (random <= linkCountProb && random <= distanceProb) {
+                if (random <= linkCountProb) {
+                    if (connection.links.Count < maxLinksPerNode) {
+                        if (!connection.links.Contains (node)) {
+                            node.AddLink (connection);
+                            connection.AddLink (node);
                         }
                     }
                 }
@@ -210,22 +251,22 @@ public class MapGenerator : MonoBehaviour {
         for (int i = 0 ; i < nodes.Count ; i++) {
             Node node = nodes[i];
 
-            Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
+            GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
+            nodeGO.name = "node "+ node.ID;
+
             for (int j = 0 ; j < node.links.Count ; j++) {
                 Node link = node.links[j];
 
                 //prep the link
                 //angulo
-                
+                double angle =  Mathf.Atan2 (link.pos.y - node.pos.y , link.pos.x - node.pos.x) * Mathf.Rad2Deg + 90;
                 //posição
                 Vector2 pos = ( link.pos + node.pos ) / 2;
-                Debug.Log (pos.ToString ());
                 //scale
                 float scale = Vector2.Distance (node.pos , link.pos);
 
                 GameObject go = Instantiate (linkPrefab , pos , Quaternion.identity , transform);
                 go.transform.localScale = new Vector3 (1f , scale * 4 , 1f);
-                double angle =  Mathf.Atan2 (link.pos.y - node.pos.y , link.pos.x - node.pos.x) * Mathf.Rad2Deg + 90;
                 go.transform.eulerAngles = new Vector3 (0f , 0f , (float) angle);
             }
         }
@@ -246,8 +287,28 @@ public class MapGenerator : MonoBehaviour {
 
         nodes = new List<Node> ();
 
-        maxDistance = size / 10;
+        maxDistance = size / 4;
         Debug.LogFormat ("Max link distance: {0}" , maxDistance);
+    }
+
+    private class NodeDist : IComparable {
+        public float distance;
+        public Node node;
+
+        public NodeDist (Node node, float distance) {
+            this.distance = distance;
+            this.node = node;
+        }
+
+        public int CompareTo ( object obj ) {
+            if (obj == null) return 1;
+
+            NodeDist other = obj as NodeDist;
+            if (other != null)
+                return this.distance.CompareTo (other.distance);
+            else
+                throw new ArgumentException ("Object is not valid");
+        }
     }
 
     private class Node {
