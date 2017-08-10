@@ -25,6 +25,8 @@ public class MapGenerator : MonoBehaviour {
     private int maxNodes = 10;
     [SerializeField]
     private int maxLinksPerNode = 4;
+    [SerializeField]
+    private float maxCosAngle = 0.85f;
     
     private float maxDistance;
 
@@ -150,10 +152,13 @@ public class MapGenerator : MonoBehaviour {
             int row = Random.Range (0 , size);
 
             if (grid[col , row] != 0f && nodesGrid[col, row] != true) {
-                float randomValue = Random.Range (0f , 1f);
-                if (randomValue < grid[col, row]) {
-                    nodes.Add (new Node (col , row));
-                    nodesGrid[col , row] = true;
+                //avoid placing nodes right next to each other
+                if (!NodeHasNeighbours(col, row)) {
+                    float randomValue = Random.Range (0f , 1f);
+                    if (randomValue < grid[col , row]) {
+                        nodes.Add (new Node (col , row));
+                        nodesGrid[col , row] = true;
+                    }
                 }
             }
         }
@@ -179,18 +184,56 @@ public class MapGenerator : MonoBehaviour {
         for (int i = 0 ; i < nodes.Count ; i++) {
             Node node = nodes[i];
             //generate a list of possible connections for each node, getting everything from twice the max distance down and getting all of it into a table ordered by the closest to the furthest
-
             List<NodeDist> possibleConnections = new List<NodeDist> ();
             for (int j = 0 ; j < nodes.Count ; j++) {
                 if (i == j)
                     continue;
+                Node other = nodes[j];
 
-                float distance = Vector2.Distance (node.pos , nodes[j].pos);
-                if (distance <= maxDistance)
-                    possibleConnections.Add (new NodeDist (nodes[j] , distance));
+                float distance = Vector2.Distance (node.pos , other.pos);
+                if (distance <= maxDistance) {
+                    possibleConnections.Add (new NodeDist (other , distance));
+                }
             }
 
             possibleConnections.Sort ();
+
+            //clean up connections with very close angles, giving priority to the closer nodes
+            if (possibleConnections.Count > 0) {
+                for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                    if (j == 0)
+                        continue;
+
+                    //also just keep the first maxLinkCount nodes
+                    if (j > maxLinksPerNode) {
+                        possibleConnections.RemoveAt (j);
+                        j--;
+                    }
+
+                    Node linkTarget = possibleConnections[j].node;
+                    bool toBeDiscarded = false;
+                    for (int k = 0 ; k < j ; k++) {
+                        Node connection = possibleConnections[k].node;
+
+                        Vector2 toTarget = linkTarget.pos - node.pos;
+                        Vector2 toConnection = connection.pos - node.pos;
+                        float cos = Vector2.Dot (toTarget , toConnection) / ( toTarget.magnitude * toConnection.magnitude );
+
+                        if (cos > maxCosAngle) {
+                            Debug.LogFormat ("From node {0}, node {1} discarded as being too close to node {2}." , node.ID, linkTarget.ID , connection.ID);
+                            toBeDiscarded = true;
+                            break;
+                        }
+                    }
+
+                    if (toBeDiscarded) {
+                        possibleConnections.RemoveAt (j);
+                        j--;
+                    }
+                }
+            }
+
+                
 
             ///printing the connections
             StringBuilder stringBuilder;
@@ -202,29 +245,27 @@ public class MapGenerator : MonoBehaviour {
             stringBuilder.AppendLine ();
             Debug.Log (stringBuilder);
             ///end of printing
-            
 
+            //spawning links by chance
             for (int j = 0 ; j < possibleConnections.Count ; j++) {
                 Node connection = possibleConnections[j].node;
 
-                //float distance = Vector2.Distance (node.pos , nodes[j].pos);
                 //chance of setting the link by link count
-                //(max-linkcount) / max
                 float linkCountProb = Mathf.Clamp01 (( maxLinksPerNode - node.links.Count ) / (float) maxLinksPerNode);
 
-                //chance of setting the link by distance
-                //(max-dist) / max
-                //float distanceProb = Mathf.Clamp01 (( maxDistance - distance ) / (float) maxDistance);
-
                 float random = Random.value;
-                //if (random <= linkCountProb && random <= distanceProb) {
                 if (random <= linkCountProb) {
                     if (connection.links.Count < maxLinksPerNode) {
                         if (!connection.links.Contains (node)) {
-                            node.AddLink (connection);
-                            connection.AddLink (node);
+                            if (!connection.isSet || (connection.isSet && node.links.Count == 0 && possibleConnections.Count < 3) || (node.links.Count == 0 && j == possibleConnections.Count -1)) {
+                                node.AddLink (connection);
+                                connection.AddLink (node);
+                            }
                         }
                     }
+                }
+                else {
+                    Debug.LogFormat ("Link between {0} and {1} not instantiated by chance.", node.ID, connection.ID);
                 }
             }
             node.isSet = true;
@@ -287,8 +328,29 @@ public class MapGenerator : MonoBehaviour {
 
         nodes = new List<Node> ();
 
-        maxDistance = size / 4;
+        maxDistance = (size*size) / (1.5f*maxNodes);
         Debug.LogFormat ("Max link distance: {0}" , maxDistance);
+    }
+
+    private bool NodeHasNeighbours (int x, int y) {
+        bool hasNeighbours = false;
+
+        if (x + 1 < size)
+            if (nodesGrid[x + 1 , y])
+                hasNeighbours = true;
+
+        if (y + 1 < size)
+            if (nodesGrid[x , y + 1])
+                hasNeighbours = true;
+
+        if (x - 1 >= 0)
+            if (nodesGrid[x - 1 , y])
+                hasNeighbours = true;
+        if (y - 1 >= 0)
+            if (nodesGrid[x , y - 1])
+                hasNeighbours = true;
+
+        return hasNeighbours;
     }
 
     private class NodeDist : IComparable {
