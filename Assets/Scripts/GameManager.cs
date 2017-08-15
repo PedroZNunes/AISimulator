@@ -40,9 +40,11 @@ public class GameManager : MonoBehaviour {
             Debug.Log ("Algorythm set to BFS");
         }
         else if (Input.GetKeyDown (KeyCode.Alpha3)) {
+            searchManager.SetAlgorythm (new DFS ());
             Debug.Log ("Algorythm set to DFS");
         }
         else if (Input.GetKeyDown (KeyCode.Alpha4)) {
+            searchManager.SetAlgorythm (new HillClimbing ());
             Debug.Log ("Algorythm set to HillClimbing");
         }
         else if (Input.GetKeyDown (KeyCode.Alpha5)) {

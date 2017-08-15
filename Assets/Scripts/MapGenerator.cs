@@ -163,6 +163,8 @@ public class MapGenerator : MonoBehaviour {
             }
         }
 
+        nodes.Sort ();
+
         int[,] tempGrid = new int[size , size];
         for (int i = 0 ; i < nodes.Count ; i++) {
             Node node = nodes[i];
@@ -234,14 +236,14 @@ public class MapGenerator : MonoBehaviour {
             }
 
             ///printing the connections
-            StringBuilder stringBuilder;
-            stringBuilder = new StringBuilder ();
-            stringBuilder.AppendFormat ("Possible Conenctions for node {0}: \n" , node.ID);
-            for (int j = 0 ; j < possibleConnections.Count ; j++) {
-                stringBuilder.AppendFormat ("{0} \t {1} units away \n" , possibleConnections[j].node.ID , possibleConnections[j].distance);
-            }
-            stringBuilder.AppendLine ();
-            Debug.Log (stringBuilder);
+            //StringBuilder stringBuilder;
+            //stringBuilder = new StringBuilder ();
+            //stringBuilder.AppendFormat ("Possible Conenctions for node {0}: \n" , node.ID);
+            //for (int j = 0 ; j < possibleConnections.Count ; j++) {
+            //    stringBuilder.AppendFormat ("{0} \t {1} units away \n" , possibleConnections[j].node.ID , possibleConnections[j].distance);
+            //}
+            //stringBuilder.AppendLine ();
+            //Debug.Log (stringBuilder);
             ///end of printing
 
             //spawning links by chance
@@ -263,22 +265,22 @@ public class MapGenerator : MonoBehaviour {
                     }
                 }
                 else {
-                    Debug.LogFormat ("Link between {0} and {1} not instantiated by chance." , node.ID , connection.ID);
+                    //Debug.LogFormat ("Link between {0} and {1} not instantiated by chance." , node.ID , connection.ID);
                 }
             }
             node.isSet = true;
         }
 
-        StringBuilder sb;
-        sb = new StringBuilder ("List of all Links: \n");
-        for (int i = 0 ; i < nodes.Count ; i++) {
-            Node node = nodes[i];
-            for (int j = 0 ; j < node.links.Count ; j++) {
-                sb.AppendFormat ("{0} <-> {1} |\t" , node.ID , node.links[j].ID);
-            }
-            sb.AppendLine ();
-        }
-        Debug.Log (sb);
+        //StringBuilder sb;
+        //sb = new StringBuilder ("List of all Links: \n");
+        //for (int i = 0 ; i < nodes.Count ; i++) {
+        //    Node node = nodes[i];
+        //    for (int j = 0 ; j < node.links.Count ; j++) {
+        //        sb.AppendFormat ("{0} <-> {1} |\t" , node.ID , node.links[j].ID);
+        //    }
+        //    sb.AppendLine ();
+        //}
+        //Debug.Log (sb);
     }
 
     private void CleanUp () {
