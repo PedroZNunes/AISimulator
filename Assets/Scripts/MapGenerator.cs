@@ -70,6 +70,7 @@ public class MapGenerator : MonoBehaviour {
 
     public void Generate () {
 
+        ClearPreviousMap ();
         ResetBase ();
         Diamond ();
         SetNodes ();
@@ -292,6 +293,14 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    private void ClearPreviousMap () {
+        foreach (Transform child in transform) {
+            GameObject.Destroy (child.gameObject);
+        }
+
+        Node.ResetIDs ();
+    }
+
     private void ToScreen () {
 
         for (int i = 0 ; i < nodes.Count ; i++) {
@@ -337,7 +346,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     public Node RandomNode () {
-        Node node = nodes[Random.Range (0 , size - 1)];
+        Node node = nodes[Random.Range (0 , maxNodes - 1)];
         Debug.LogFormat ("Returning random node {0}", node.ID);
         return ( node );
     }
@@ -379,27 +388,6 @@ public class MapGenerator : MonoBehaviour {
 
         return hasNeighbours;
     }
-
-    private class NodeDist : IComparable {
-        public float distance;
-        public Node node;
-
-        public NodeDist ( Node node , float distance ) {
-            this.distance = distance;
-            this.node = node;
-        }
-
-        public int CompareTo ( object obj ) {
-            if (obj == null) return 1;
-
-            NodeDist other = obj as NodeDist;
-            if (other != null)
-                return this.distance.CompareTo (other.distance);
-            else
-                throw new ArgumentException ("Object is not valid");
-        }
-    }
-
 
 }
 

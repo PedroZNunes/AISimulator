@@ -21,6 +21,9 @@ public class SearchManager : MonoBehaviour {
     [SerializeField]
     private int framesPerSecond = 30;
 
+    [SerializeField]
+    private int beamMaxPaths = 3;
+
     private static Stack<Link> linksChanged = new Stack<Link> ();
     private static Stack<Node> nodesChanged = new Stack<Node> ();
 
@@ -28,6 +31,41 @@ public class SearchManager : MonoBehaviour {
 
     private void Awake () {
         instance = FindObjectOfType<SearchManager> ();
+    }
+
+    private void Update () {
+        GetInput ();
+    }
+
+    private void GetInput () {
+        //setting up algorythm
+        if (Input.GetKeyDown (KeyCode.Alpha1)) {
+            Debug.Log ("Algorythm set to BrittishMuseum");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha2)) {
+            SetAlgorythm (new BFS ());
+            Debug.Log ("Algorythm set to BFS");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha3)) {
+            SetAlgorythm (new DFS ());
+            Debug.Log ("Algorythm set to DFS");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha4)) {
+            SetAlgorythm (new HillClimbing ());
+            Debug.Log ("Algorythm set to HillClimbing");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha5)) {
+            SetAlgorythm (new Beam (beamMaxPaths));
+            Debug.Log ("Algorythm set to Beam");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha6)) {
+            Debug.Log ("Algorythm set to Branch and Bound");
+        }
+        else if (Input.GetKeyDown (KeyCode.Alpha7)) {
+            Debug.Log ("Algorythm set to A*");
+        }
+        
+
     }
 
     public void StartPathing ( int size , Node start , Node goal , bool trackVisitedNodes ) {

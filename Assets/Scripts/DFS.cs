@@ -51,6 +51,10 @@ public class DFS : SearchAlgorythm {
             Debug.Log ("No path exists.");
             yield break;
         }
+        else {
+            Debug.Log ("Path complete.");
+            yield break;
+        }
     }
 
 

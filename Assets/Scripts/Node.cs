@@ -27,6 +27,10 @@ public class Node : IComparable {
         ID = ++Count;
     }
 
+    static public void ResetIDs () {
+        Count = 0;
+    }
+
     public void AddLink ( Node node ) {
         links.Add (node);
     }
