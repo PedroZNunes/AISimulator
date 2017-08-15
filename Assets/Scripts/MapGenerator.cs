@@ -8,17 +8,38 @@ using Random = UnityEngine.Random;
 public class MapGenerator : MonoBehaviour {
 
     [SerializeField]
+    private GameObject nodePrefab;
+
+    [SerializeField]
+    private GameObject linkPrefab;
+
+    [SerializeField]
     private int size = 0;
 
     [SerializeField]
-    private float displacementGain = 0;
+    private float grain = 0;
 
     private List<int> sizeList;
 
     [SerializeField]
-    private int framesPerSecond = 30;
+    private int maxNodes = 10;
+    [SerializeField]
+    private int maxLinksPerNode = 4;
+    [SerializeField]
+    private float maxCosAngle = 0.85f;
+    
+    private float maxDistance;
 
     private float[,] grid;
+    private bool[,] nodesGrid;
+
+    private List<Node> nodes;
+
+    private void OnValidate () {
+        if (maxNodes > size*size / 2) {
+            maxNodes = size*size / 2 ;
+        }
+    }
 
     private void Awake () {
         sizeList = new List<int> ();
@@ -47,6 +68,10 @@ public class MapGenerator : MonoBehaviour {
     private void Start () {
         ResetBase ();
         TriggerDiamond ();
+        SetNodes ();
+        SetLinks ();
+        CleanUp ();
+        ToScreen ();
     }
 
     public void TriggerDiamond () {
@@ -59,7 +84,7 @@ public class MapGenerator : MonoBehaviour {
         float corner2 = Random.value;
         float corner3 = Random.value;
         float corner4 = Random.value;
-
+        
         grid[0 , 0] = corner1;
         grid[size - 1 , 0] = corner2;
         grid[size - 1 , size - 1] = corner3;
@@ -68,20 +93,20 @@ public class MapGenerator : MonoBehaviour {
         DivideGrid (0 , 0 , size , corner1 , corner2 , corner3 , corner4);
 
         StringBuilder sb;
+        sb = new StringBuilder ();
         for (int rows = 0 ; rows < size ; rows++) {
-            sb = new StringBuilder ();
             for (int cols = 0 ; cols < size ; cols++) {
-                sb.AppendFormat ( "{0:0.00}  ", grid[cols , rows]);
+                sb.AppendFormat ( "{0:0.0}  ", grid[cols , rows]);
             }
-            Debug.Log (sb);
+            sb.AppendLine ();
         }
+        Debug.Log (sb);
     }
 
     private float DisplaceMiddle ( float num ) {
-        float max = num / (2 * size) * displacementGain;
+        float max = num / (2 * size) * grain;
         return Random.Range (-0.5f , 0.5f) * max;
     }
-
 
     private void DivideGrid ( int x , int y , int currentSize , float corner1 , float corner2 , float corner3 , float corner4 ) {
         int newSize = currentSize / 2;
@@ -121,9 +146,260 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    private void SetNodes () {
+        while (nodes.Count < maxNodes) {
+            int col = Random.Range (0 , size);
+            int row = Random.Range (0 , size);
+
+            if (grid[col , row] != 0f && nodesGrid[col, row] != true) {
+                //avoid placing nodes right next to each other
+                if (!NodeHasNeighbours(col, row)) {
+                    float randomValue = Random.Range (0f , 1f);
+                    if (randomValue < grid[col , row]) {
+                        nodes.Add (new Node (col , row));
+                        nodesGrid[col , row] = true;
+                    }
+                }
+            }
+        }
+
+        int[,] tempGrid = new int[size , size];
+        for (int i = 0 ; i < nodes.Count; i++) {
+            Node node = nodes[i];
+            tempGrid[(int) node.pos.x , (int) node.pos.y] = nodes[i].ID;
+        }
+
+        StringBuilder sb;
+        sb = new StringBuilder ();
+        for (int rows = 0 ; rows < size ; rows++) {
+            for (int cols = 0 ; cols < size ; cols++) {
+                sb.AppendFormat ("{0:00} " , tempGrid[cols, rows]);
+            }
+            sb.AppendLine ();
+        }
+        Debug.Log (sb);
+    }
+
+    private void SetLinks () {
+        for (int i = 0 ; i < nodes.Count ; i++) {
+            Node node = nodes[i];
+            //generate a list of possible connections for each node, getting everything from twice the max distance down and getting all of it into a table ordered by the closest to the furthest
+            List<NodeDist> possibleConnections = new List<NodeDist> ();
+            for (int j = 0 ; j < nodes.Count ; j++) {
+                if (i == j)
+                    continue;
+                Node other = nodes[j];
+
+                float distance = Vector2.Distance (node.pos , other.pos);
+                if (distance <= maxDistance) {
+                    possibleConnections.Add (new NodeDist (other , distance));
+                }
+            }
+
+            possibleConnections.Sort ();
+
+            //clean up connections with very close angles, giving priority to the closer nodes
+            if (possibleConnections.Count > 0) {
+                for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                    if (j == 0)
+                        continue;
+
+                    //also just keep the first maxLinkCount nodes
+                    if (j > maxLinksPerNode) {
+                        possibleConnections.RemoveAt (j);
+                        j--;
+                    }
+
+                    Node linkTarget = possibleConnections[j].node;
+                    bool toBeDiscarded = false;
+                    for (int k = 0 ; k < j ; k++) {
+                        Node connection = possibleConnections[k].node;
+
+                        Vector2 toTarget = linkTarget.pos - node.pos;
+                        Vector2 toConnection = connection.pos - node.pos;
+                        float cos = Vector2.Dot (toTarget , toConnection) / ( toTarget.magnitude * toConnection.magnitude );
+
+                        if (cos > maxCosAngle) {
+                            Debug.LogFormat ("From node {0}, node {1} discarded as being too close to node {2}." , node.ID, linkTarget.ID , connection.ID);
+                            toBeDiscarded = true;
+                            break;
+                        }
+                    }
+
+                    if (toBeDiscarded) {
+                        possibleConnections.RemoveAt (j);
+                        j--;
+                    }
+                }
+            }
+
+                
+
+            ///printing the connections
+            StringBuilder stringBuilder;
+            stringBuilder = new StringBuilder ();
+            stringBuilder.AppendFormat ("Possible Conenctions for node {0}: \n" , node.ID);
+            for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                stringBuilder.AppendFormat ("{0} \t {1} units away \n" , possibleConnections[j].node.ID , possibleConnections[j].distance);
+            }
+            stringBuilder.AppendLine ();
+            Debug.Log (stringBuilder);
+            ///end of printing
+
+            //spawning links by chance
+            for (int j = 0 ; j < possibleConnections.Count ; j++) {
+                Node connection = possibleConnections[j].node;
+
+                //chance of setting the link by link count
+                float linkCountProb = Mathf.Clamp01 (( maxLinksPerNode - node.links.Count ) / (float) maxLinksPerNode);
+
+                float random = Random.value;
+                if (random <= linkCountProb) {
+                    if (connection.links.Count < maxLinksPerNode) {
+                        if (!connection.links.Contains (node)) {
+                            if (!connection.isSet || (connection.isSet && node.links.Count == 0 && possibleConnections.Count < 3) || (node.links.Count == 0 && j == possibleConnections.Count -1)) {
+                                node.AddLink (connection);
+                                connection.AddLink (node);
+                            }
+                        }
+                    }
+                }
+                else {
+                    Debug.LogFormat ("Link between {0} and {1} not instantiated by chance.", node.ID, connection.ID);
+                }
+            }
+            node.isSet = true;
+        }
+
+        StringBuilder sb;
+        sb = new StringBuilder ("List of all Links: \n");
+        for (int i = 0 ; i < nodes.Count ; i++) {
+            Node node = nodes[i];
+            for (int j = 0 ; j < node.links.Count; j++) {
+                sb.AppendFormat ("{0} <-> {1} \t | \t" , node.ID , node.links[j].ID);
+            }
+            sb.AppendLine ();
+        }
+        Debug.Log (sb);
+    }
+
+    private void CleanUp () {
+
+    }
+
+    private void ToScreen () {
+
+        for (int i = 0 ; i < nodes.Count ; i++) {
+            Node node = nodes[i];
+
+            GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
+            nodeGO.name = "node "+ node.ID;
+
+            for (int j = 0 ; j < node.links.Count ; j++) {
+                Node link = node.links[j];
+
+                //prep the link
+                //angulo
+                double angle =  Mathf.Atan2 (link.pos.y - node.pos.y , link.pos.x - node.pos.x) * Mathf.Rad2Deg + 90;
+                //posição
+                Vector2 pos = ( link.pos + node.pos ) / 2;
+                //scale
+                float scale = Vector2.Distance (node.pos , link.pos);
+
+                GameObject go = Instantiate (linkPrefab , pos , Quaternion.identity , transform);
+                go.transform.localScale = new Vector3 (1f , scale * 4 , 1f);
+                go.transform.eulerAngles = new Vector3 (0f , 0f , (float) angle);
+            }
+        }
+
+        SetCamera ();
+        
+    }
+
+    public void SetCamera () {
+        Camera camera = Camera.main;
+        camera.orthographicSize = ( ( size - 1 ) / 2 ) + 1;
+        camera.transform.position = new Vector3 (camera.orthographicSize - 1 , camera.orthographicSize - 1  , camera.transform.position.z);
+    }
 
     private void ResetBase () {
         grid = new float[size , size];
+        nodesGrid = new bool[size , size];
+
+        nodes = new List<Node> ();
+
+        maxDistance = (size*size) / (1.5f*maxNodes);
+        Debug.LogFormat ("Max link distance: {0}" , maxDistance);
+    }
+
+    private bool NodeHasNeighbours (int x, int y) {
+        bool hasNeighbours = false;
+
+        if (x + 1 < size)
+            if (nodesGrid[x + 1 , y])
+                hasNeighbours = true;
+
+        if (y + 1 < size)
+            if (nodesGrid[x , y + 1])
+                hasNeighbours = true;
+
+        if (x - 1 >= 0)
+            if (nodesGrid[x - 1 , y])
+                hasNeighbours = true;
+        if (y - 1 >= 0)
+            if (nodesGrid[x , y - 1])
+                hasNeighbours = true;
+
+        return hasNeighbours;
+    }
+
+    private class NodeDist : IComparable {
+        public float distance;
+        public Node node;
+
+        public NodeDist (Node node, float distance) {
+            this.distance = distance;
+            this.node = node;
+        }
+
+        public int CompareTo ( object obj ) {
+            if (obj == null) return 1;
+
+            NodeDist other = obj as NodeDist;
+            if (other != null)
+                return this.distance.CompareTo (other.distance);
+            else
+                throw new ArgumentException ("Object is not valid");
+        }
+    }
+
+    private class Node {
+        static private int Count = 0;
+
+        public int ID { get; private set; }
+
+        public Vector2 pos;
+        public List<Node> links { get; private set; }
+
+        public bool isSet;
+
+        public Node () {
+            this.pos = new Vector2 ();
+            links = new List<Node> ();
+            ID = ++Count;
+        }
+
+        public Node ( int x , int y ) {
+            pos.x = x;
+            pos.y = y;
+            links = new List<Node> ();
+            ID = ++Count;
+        }
+
+        public void AddLink (Node node) {
+            links.Add (node);
+        }
+
     }
 
 }
