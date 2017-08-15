@@ -34,8 +34,8 @@ public class MapGenerator : MonoBehaviour {
     private float[,] grid;
     private bool[,] nodesGrid;
 
-    public List<Node> nodes { get; private set; }
-    public List<Link> allLinks { get; private set; }
+    static public List<Node> nodes { get; private set; }
+    static public List<Link> allLinks { get; private set; }
 
 
     private void OnValidate () {
@@ -298,7 +298,7 @@ public class MapGenerator : MonoBehaviour {
             GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
             nodeGO.name = "node " + node.ID;
 
-            nodes[i].nodeGO = nodeGO;
+            nodes[i].GO = nodeGO;
 
             for (int j = 0 ; j < node.links.Count ; j++) {
                 Node link = node.links[j];

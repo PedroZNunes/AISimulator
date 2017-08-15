@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class SearchAlgorythm {
+public class SearchAlgorythm {
 
-    public abstract Queue<Node> Search ( List<Node> nodes , int size , Node start , Node goal , bool trackVisitedNodes );
+    public Dictionary <Node, Node> cameFrom { get; protected set; }
+
+    public virtual IEnumerator Search ( List<Node> nodes , int size , Node start , Node goal , int framesPerSecond, bool trackVisitedNodes ) { return null; }
+
 }
