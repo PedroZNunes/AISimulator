@@ -9,7 +9,7 @@ public class Node {
     public Vector2 pos;
     public List<Node> links { get; private set; }
 
-    public GameObject nodeGO;
+    public GameObject GO;
 
     public bool isSet;
 

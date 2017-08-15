@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour {
         //search, set goal and start
         else if (Input.GetKeyDown (KeyCode.Space)) {
             Debug.Log ("SearchInput Detected.");
-            searchManager.StartPathing (mapGenerator.nodes , mapGenerator.Size, mapGenerator.RandomNode (), mapGenerator.RandomNode(), true);
+            searchManager.StartPathing (mapGenerator.Size , mapGenerator.RandomNode () , mapGenerator.RandomNode () , true);
         }
         else if (Input.GetKeyDown (KeyCode.G)) {
             Debug.Log ("Setting Goal Node. Select the desired goal node.");

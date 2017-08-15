@@ -5,7 +5,7 @@ using System.Text;
 
 public class BFS : SearchAlgorythm {
 
-	public override Queue<Node> Search (List<Node> nodes, int size, Node start, Node goal, bool trackVisitedNodes) {
+	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
         Debug.Log ("Searching path using BFS.");
         bool hasPath = false;
 
@@ -19,6 +19,10 @@ public class BFS : SearchAlgorythm {
 
         while (frontier.Count > 0) {
             current = frontier.Dequeue ();
+
+            //visualize path to current
+            SearchManager.VisualizePath (cameFrom, current , start);
+            yield return new WaitForSeconds (1f/framesPerSecond); 
 
             if (current == goal) {
                 hasPath = true;
@@ -45,26 +49,25 @@ public class BFS : SearchAlgorythm {
 
         if (!hasPath) {
             Debug.Log ("Path Not Found.");
-            return null;
+            yield break;
         }
 
-        Stack<Node> path = new Stack<Node> ();
+        //Stack<Node> path = new Stack<Node> ();
         
-        current = goal;
-        path.Push (current);
+        //current = goal;
+        //path.Push (current);
 
-        while (current != start) {
-            current = cameFrom[current];
-            path.Push(current);
-        }
+        //while (current != start) {
+        //    current = cameFrom[current];
+        //    path.Push(current);
+        //}
 
-        StringBuilder sb = new StringBuilder ();
-        while (path.Count > 0) {
-            sb.AppendFormat ("{0} ", path.Pop ().ID);
-        }
+        //StringBuilder sb = new StringBuilder ();
+        //while (path.Count > 0) {
+        //    sb.AppendFormat ("{0} ", path.Pop ().ID);
+        //}
         
-        Debug.LogFormat ("Returning path: \n {0}", sb);
-        return null;
+        //Debug.LogFormat ("Returning path: \n {0}", sb);
     }
 
 
