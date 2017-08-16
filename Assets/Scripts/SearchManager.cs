@@ -19,13 +19,21 @@ public class SearchManager : MonoBehaviour {
     private Sprite activeNode;
 
     [SerializeField]
+    private Sprite exploredLink;
+
+    [SerializeField]
+    private Sprite exploredNode;
+
+    [SerializeField]
     private int framesPerSecond = 30;
 
     [SerializeField]
     private int beamMaxPaths = 3;
 
     private static Stack<Link> linksChanged = new Stack<Link> ();
+    private static Stack<Link> allLinksChanged = new Stack<Link> ();
     private static Stack<Node> nodesChanged = new Stack<Node> ();
+    private static Stack<Node> allNodesChanged = new Stack<Node> ();
 
     static private SearchManager instance;
 
@@ -59,9 +67,11 @@ public class SearchManager : MonoBehaviour {
             Debug.Log ("Algorythm set to Beam");
         }
         else if (Input.GetKeyDown (KeyCode.Alpha6)) {
+            SetAlgorythm (new BranchAndBound ());
             Debug.Log ("Algorythm set to Branch and Bound");
         }
         else if (Input.GetKeyDown (KeyCode.Alpha7)) {
+            SetAlgorythm (new AStar ());
             Debug.Log ("Algorythm set to A*");
         }
         
@@ -69,8 +79,10 @@ public class SearchManager : MonoBehaviour {
     }
 
     public void StartPathing ( int size , Node start , Node goal , bool trackVisitedNodes ) {
-        if (searchAlgorythm != null)
-            StartCoroutine (searchAlgorythm.Search (MapGenerator.nodes , size , start , goal , framesPerSecond , trackVisitedNodes));
+        if (searchAlgorythm != null) {
+            HardResetPathVisualization ();
+            StartCoroutine (searchAlgorythm.Search (MapGenerator.nodes, size, start, goal, framesPerSecond, trackVisitedNodes));
+        }
         else
             Debug.LogError ("Algorythm not set. Search canceled.");
     }
@@ -80,8 +92,7 @@ public class SearchManager : MonoBehaviour {
     }
 
     static public void VisualizePath ( Dictionary<Node , Node> cameFrom , Node current , Node start ) {
-
-        ResetPathVisualization ();
+        SoftResetPathVisualization ();
 
         Sprite activeLink = instance.activeLink;
         Sprite activeNode = instance.activeNode;
@@ -96,6 +107,7 @@ public class SearchManager : MonoBehaviour {
             if (renderer != null) {
                 renderer.sprite = activeNode;
                 nodesChanged.Push (current);
+                allNodesChanged.Push (current);
             }
 
             previous = current;
@@ -116,6 +128,7 @@ public class SearchManager : MonoBehaviour {
                 if (renderer != null) {
                     renderer.sprite = activeLink;
                     linksChanged.Push (link);
+                    allLinksChanged.Push (link);
                 }
             }
 
@@ -129,12 +142,38 @@ public class SearchManager : MonoBehaviour {
 
     }
 
-    static private void ResetPathVisualization () {
-        Sprite inactiveLink = instance.inactiveLink;
-        Sprite inactiveNode = instance.inactiveNode;
+    static private void SoftResetPathVisualization () {
+        Sprite exploredLink = instance.exploredLink;
+        Sprite exploredNode = instance.exploredNode;
 
         while (linksChanged.Count > 0) {
             Link link = linksChanged.Pop ();
+
+            SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
+            if (renderer != null) {
+                renderer.sprite = exploredLink;
+            }
+        }
+
+        while (nodesChanged.Count > 0) {
+            Node node = nodesChanged.Pop ();
+
+            SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
+            if (renderer != null) {
+                renderer.sprite = exploredNode;
+            }
+        }
+
+    }
+
+    static private void HardResetPathVisualization () {
+        SoftResetPathVisualization ();
+
+        Sprite inactiveLink = instance.inactiveLink;
+        Sprite inactiveNode = instance.inactiveNode;
+
+        while (allLinksChanged.Count > 0) {
+            Link link = allLinksChanged.Pop ();
 
             SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
@@ -142,8 +181,8 @@ public class SearchManager : MonoBehaviour {
             }
         }
 
-        while (nodesChanged.Count > 0) {
-            Node node = nodesChanged.Pop ();
+        while (allNodesChanged.Count > 0) {
+            Node node = allNodesChanged.Pop ();
 
             SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
