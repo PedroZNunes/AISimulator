@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour {
     [SerializeField]
     private SearchManager searchManager;
 
+    private bool isWaitingMaxPaths = false;
+
     private void Start () {
         mapGenerator.Generate ();
 
@@ -21,43 +23,21 @@ public class GameManager : MonoBehaviour {
         Debug.Log ("3 - DFS");
         Debug.Log ("4 - Hill Climbing");
         Debug.Log ("5 - Beam");
-        Debug.Log ("6 - A*");
-        Debug.Log ("7 - Branch and Bound");
+        Debug.Log ("6 - Branch and Bound");
+        Debug.Log ("7 - A*");
+
+        Debug.Log ("S - Set Start Pos");
+        Debug.Log ("G - Set Goal Pos");
+        Debug.Log ("M - Generate new Map");
+        Debug.Log ("Space - Search");
 
     }
 
     private void Update () {
-        GetInput ();
-    }
-
-    private void GetInput () {
-        //setting up algorythm
-        if (Input.GetKeyDown (KeyCode.Alpha1)) {
-            Debug.Log ("Algorythm set to BrittishMuseum");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha2)) {
-            searchManager.SetAlgorythm (new BFS ());
-            Debug.Log ("Algorythm set to BFS");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha3)) {
-            Debug.Log ("Algorythm set to DFS");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha4)) {
-            Debug.Log ("Algorythm set to HillClimbing");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha5)) {
-            Debug.Log ("Algorythm set to Beam");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha6)) {
-            Debug.Log ("Algorythm set to A*");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha7)) {
-            Debug.Log ("Algorythm set to Branch and Bound");
-        }
         //search, set goal and start
-        else if (Input.GetKeyDown (KeyCode.Space)) {
-            Debug.Log ("SearchInput Detected.");
-            searchManager.StartPathing (mapGenerator.Size , mapGenerator.RandomNode () , mapGenerator.RandomNode () , true);
+        if (Input.GetKeyDown (KeyCode.Space)) {
+            Debug.Log ("Showing the way.");
+            searchManager.StartPathing (mapGenerator.Size, mapGenerator.RandomNode (), mapGenerator.RandomNode (), true);
         }
         else if (Input.GetKeyDown (KeyCode.G)) {
             Debug.Log ("Setting Goal Node. Select the desired goal node.");
@@ -65,7 +45,9 @@ public class GameManager : MonoBehaviour {
         else if (Input.GetKeyDown (KeyCode.S)) {
             Debug.Log ("Setting Start Node. Select the desired start node.");
         }
-
+        else if (Input.GetKeyDown (KeyCode.M)) {
+            Debug.Log ("Generating another map with the same parameters.");
+            mapGenerator.Generate ();
+        }
     }
-
 }

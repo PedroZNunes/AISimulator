@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System;
 using UnityEngine;
 
-public class Node {
+public class Node : IComparable {
     static private int Count = 0;
 
     public int ID { get; private set; }
@@ -26,8 +27,21 @@ public class Node {
         ID = ++Count;
     }
 
+    static public void ResetIDs () {
+        Count = 0;
+    }
+
     public void AddLink ( Node node ) {
         links.Add (node);
     }
 
+    public int CompareTo ( object obj ) {
+        if (obj == null) return 1;
+
+        Node other = obj as Node;
+        if (other != null)
+            return this.ID.CompareTo (other.ID);
+        else
+            throw new ArgumentException ("Object is not valid");
+    }
 }

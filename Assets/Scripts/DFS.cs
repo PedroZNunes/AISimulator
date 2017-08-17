@@ -3,22 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-public class BFS : SearchAlgorythm {
+public class DFS : SearchAlgorythm {
 
 	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
-        Debug.Log ("Searching path using Breadth First Search algorythm.");
+        Debug.Log ("Searching path using Depth First Search algorythm.");
         bool hasPath = false;
 
         bool[,] visited = new bool[size , size];
         Dictionary<Node , Node> cameFrom = new Dictionary<Node , Node> ();
-        Queue<Node> frontier = new Queue<Node> ();
+        Stack<Node> frontier = new Stack<Node> ();
         Node current = new Node();
 
-        frontier.Enqueue (start);
+        frontier.Push (start);
         cameFrom[start] = null;
 
         while (frontier.Count > 0) {
-            current = frontier.Dequeue ();
+            current = frontier.Pop ();
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);
@@ -37,12 +37,12 @@ public class BFS : SearchAlgorythm {
                         visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
 
                         cameFrom[neighbour] = current;
-                        frontier.Enqueue (neighbour);
+                        frontier.Push (neighbour);
                     }
                 }
                 else {
                     cameFrom[neighbour] = current;
-                    frontier.Enqueue (neighbour);
+                    frontier.Push (neighbour);
                 }
             }
         }
