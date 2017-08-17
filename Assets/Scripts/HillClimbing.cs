@@ -5,7 +5,8 @@ using System.Text;
 
 public class HillClimbing : SearchAlgorythm {
 
-	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.Log ("Searching path using Hill Climbing algorythm.");
         bool hasPath = false;
 
@@ -46,16 +47,9 @@ public class HillClimbing : SearchAlgorythm {
 
             // extend path
             if (closestNeighbour != null) {
-                if (trackVisitedNodes) {
-                    if (!visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y]) {
-                        visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y] = true;
+                if (!visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y]) {
+                    visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y] = true;
 
-                        cameFrom[closestNeighbour] = current;
-                        frontier.Push (closestNeighbour);
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
                     cameFrom[closestNeighbour] = current;
                     frontier.Push (closestNeighbour);
                     UIIncrementEnqueuings ();
@@ -66,14 +60,16 @@ public class HillClimbing : SearchAlgorythm {
             }
         }
 
+        IsSearching = false;
+
         if (!hasPath) {
             Debug.Log ("No path exists.");
             yield break;
-        } else {
+        }
+        else {
             Debug.Log ("Path complete.");
             yield break;
         }
     }
-
 
 }

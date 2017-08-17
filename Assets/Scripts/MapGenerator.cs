@@ -13,18 +13,12 @@ public class MapGenerator : MonoBehaviour {
     [SerializeField]
     private GameObject linkPrefab;
 
-    [SerializeField]
-    private int size = 0;
-    public int Size { get { return size; } }
+    static public int Size;
 
-    [SerializeField]
     private float grain = 0;
 
-    private List<int> sizeList;
-
-    [SerializeField]
     private int maxNodes = 10;
-    [SerializeField]
+
     private int maxLinksPerNode = 4;
     [SerializeField]
     private float maxCosAngle = 0.85f;
@@ -34,49 +28,51 @@ public class MapGenerator : MonoBehaviour {
     private float[,] grid;
     private bool[,] nodesGrid;
 
-    static public List<Node> nodes { get; private set; }
+    static public List<Node> Nodes { get; private set; }
     static public List<Link> allLinks { get; private set; }
 
+    static private MapGenerator instance;
 
     private void OnValidate () {
-        if (maxNodes > size * size / 2) {
-            maxNodes = size * size / 2;
+        if (maxNodes > Size * Size / 2) {
+            maxNodes = Size * Size / 2;
         }
+    }
+
+    private void OnEnable () {
+        UIManager.GenerateMapEvent += Generate;
+    }
+    private void OnDisable () {
+        UIManager.GenerateMapEvent -= Generate;
     }
 
     private void Awake () {
-        sizeList = new List<int> ();
-        sizeList.Add (5);
-        sizeList.Add (9);
-        sizeList.Add (17);
-        sizeList.Add (33);
-        sizeList.Add (65);
-        sizeList.Add (129);
-        sizeList.Add (257);
-        sizeList.Add (513);
-        sizeList.Add (1025);
-        sizeList.Add (2049);
-
-        bool validSize = false;
-        for (int i = 0 ; i < sizeList.Count ; i++) {
-            if (size == sizeList[i]) {
-                validSize = true;
-            }
-        }
-        if (!validSize) {
-            Debug.LogError ("Invalid Size.");
-        }
+        if (instance == null)
+            instance = this;
+        else
+            Debug.LogError ("Multiple map generator instances found.");
     }
 
-    public void Generate () {
+    public void Generate (int size, int nodeCount, int maxLinks, int grain) {
+        if (SearchAlgorythm.IsSearching)
+            return ;
+
+        Initialize (size, nodeCount, maxLinks, grain);
 
         ClearPreviousMap ();
-        ResetBase ();
+        ResetAll ();
         Diamond ();
         SetNodes ();
         SetLinks ();
-        CleanUp ();
+        CleanUpSingleNodes ();
         ToScreen ();
+    }
+
+    private void Initialize (int size, int maxNodes , int maxLinksPerNode , int grain) {
+        Size = size;
+        this.maxNodes = maxNodes;
+        this.maxLinksPerNode = maxLinksPerNode;
+        this.grain = grain;
     }
 
     private void Diamond () {
@@ -87,16 +83,16 @@ public class MapGenerator : MonoBehaviour {
         float corner4 = Random.value;
 
         grid[0 , 0] = corner1;
-        grid[size - 1 , 0] = corner2;
-        grid[size - 1 , size - 1] = corner3;
-        grid[0 , size - 1] = corner4;
+        grid[Size - 1 , 0] = corner2;
+        grid[Size - 1 , Size - 1] = corner3;
+        grid[0 , Size - 1] = corner4;
 
-        DivideGrid (0 , 0 , size , corner1 , corner2 , corner3 , corner4);
+        DivideGrid (0 , 0 , Size , corner1 , corner2 , corner3 , corner4);
 
         StringBuilder sb;
         sb = new StringBuilder ();
-        for (int rows = 0 ; rows < size ; rows++) {
-            for (int cols = 0 ; cols < size ; cols++) {
+        for (int rows = 0 ; rows < Size ; rows++) {
+            for (int cols = 0 ; cols < Size ; cols++) {
                 sb.AppendFormat ("{0:0.0}  " , grid[cols , rows]);
             }
             sb.AppendLine ();
@@ -105,7 +101,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private float DisplaceMiddle ( float num ) {
-        float max = num / ( 2 * size ) * grain;
+        float max = num / ( 2 * Size ) * grain;
         return Random.Range (-0.5f , 0.5f) * max;
     }
 
@@ -147,35 +143,45 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    private void ClearPreviousMap () {
+        SearchManager.HardResetPathVisualization ();
+
+        foreach (Transform child in transform) {
+            GameObject.Destroy (child.gameObject);
+        }
+
+        Node.ResetIDs ();
+    }
+
     private void SetNodes () {
-        while (nodes.Count < maxNodes) {
-            int col = Random.Range (0 , size);
-            int row = Random.Range (0 , size);
+        while (Nodes.Count < maxNodes) {
+            int col = Random.Range (0 , Size);
+            int row = Random.Range (0 , Size);
 
             if (grid[col , row] != 0f && nodesGrid[col , row] != true) {
                 //avoid placing nodes right next to each other
                 if (!NodeHasNeighbours (col , row)) {
                     float randomValue = Random.Range (0f , 1f);
                     if (randomValue < grid[col , row]) {
-                        nodes.Add (new Node (col , row));
+                        Nodes.Add (new Node (col , row));
                         nodesGrid[col , row] = true;
                     }
                 }
             }
         }
 
-        nodes.Sort ();
+        Nodes.Sort ();
 
-        int[,] tempGrid = new int[size , size];
-        for (int i = 0 ; i < nodes.Count ; i++) {
-            Node node = nodes[i];
-            tempGrid[(int) node.pos.x , (int) node.pos.y] = nodes[i].ID;
+        int[,] tempGrid = new int[Size , Size];
+        for (int i = 0 ; i < Nodes.Count ; i++) {
+            Node node = Nodes[i];
+            tempGrid[(int) node.pos.x , (int) node.pos.y] = Nodes[i].ID;
         }
 
         StringBuilder sb;
         sb = new StringBuilder ();
-        for (int rows = 0 ; rows < size ; rows++) {
-            for (int cols = 0 ; cols < size ; cols++) {
+        for (int rows = 0 ; rows < Size ; rows++) {
+            for (int cols = 0 ; cols < Size ; cols++) {
                 sb.AppendFormat ("{0:00} " , tempGrid[cols , rows]);
             }
             sb.AppendLine ();
@@ -184,14 +190,14 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void SetLinks () {
-        for (int i = 0 ; i < nodes.Count ; i++) {
-            Node node = nodes[i];
+        for (int i = 0 ; i < Nodes.Count ; i++) {
+            Node node = Nodes[i];
             //generate a list of possible connections for each node, getting everything from twice the max distance down and getting all of it into a table ordered by the closest to the furthest
             List<NodeDist> possibleConnections = new List<NodeDist> ();
-            for (int j = 0 ; j < nodes.Count ; j++) {
+            for (int j = 0 ; j < Nodes.Count ; j++) {
                 if (i == j)
                     continue;
-                Node other = nodes[j];
+                Node other = Nodes[j];
 
                 float distance = Vector2.Distance (node.pos , other.pos);
                 if (distance <= maxDistance) {
@@ -284,34 +290,30 @@ public class MapGenerator : MonoBehaviour {
         //Debug.Log (sb);
     }
 
-    private void CleanUp () {
-        for (int i = 0 ; i < nodes.Count ; i++) {
-            if (nodes[i].links.Count == 0) {
-                nodes.RemoveAt (i);
+    private void CleanUpSingleNodes () {
+        for (int i = 0 ; i < Nodes.Count ; i++) {
+            if (Nodes[i].links.Count == 0) {
+                Nodes.RemoveAt (i);
                 i--;
             }
         }
     }
 
-    private void ClearPreviousMap () {
-        SearchManager.HardResetPathVisualization ();
-
-        foreach (Transform child in transform) {
-            GameObject.Destroy (child.gameObject);
-        }
-
-        Node.ResetIDs ();
+    public void SetCamera () {
+        Camera camera = Camera.main;
+        camera.orthographicSize = ( ( Size - 1 ) / 2 ) + 1;
+        camera.transform.position = new Vector3 (camera.orthographicSize - 1 , camera.orthographicSize - 1 , camera.transform.position.z);
     }
 
     private void ToScreen () {
 
-        for (int i = 0 ; i < nodes.Count ; i++) {
-            Node node = nodes[i];
+        for (int i = 0 ; i < Nodes.Count ; i++) {
+            Node node = Nodes[i];
 
             GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
             nodeGO.name = "node " + node.ID;
 
-            nodes[i].GO = nodeGO;
+            Nodes[i].GO = nodeGO;
 
             for (int j = 0 ; j < node.links.Count ; j++) {
                 Node link = node.links[j];
@@ -347,37 +349,31 @@ public class MapGenerator : MonoBehaviour {
 
     }
 
-    public Node RandomNode () {
-        Node node = nodes[Random.Range (0 , maxNodes - 1)];
-        Debug.LogFormat ("Returning random node {0}", node.ID);
-        return ( node );
-    }
+    private void ResetAll () {
+        grid = new float[Size , Size];
+        nodesGrid = new bool[Size , Size];
 
-    public void SetCamera () {
-        Camera camera = Camera.main;
-        camera.orthographicSize = ( ( size - 1 ) / 2 ) + 1;
-        camera.transform.position = new Vector3 (camera.orthographicSize - 1 , camera.orthographicSize - 1 , camera.transform.position.z);
-    }
-
-    private void ResetBase () {
-        grid = new float[size , size];
-        nodesGrid = new bool[size , size];
-
-        nodes = new List<Node> ();
+        Nodes = new List<Node> ();
         allLinks = new List<Link> ();
 
-        maxDistance = ( size * size ) / ( 1.5f * maxNodes );
+        maxDistance = ( Size * Size ) / ( 1.5f * maxNodes );
         Debug.LogFormat ("Max link distance: {0}" , maxDistance);
+    }
+
+    static public Node RandomNode () {
+        Node node = Nodes[Random.Range (0 , instance.maxNodes - 1)];
+        Debug.LogFormat ("Returning random node {0}", node.ID);
+        return ( node );
     }
 
     private bool NodeHasNeighbours ( int x , int y ) {
         bool hasNeighbours = false;
 
-        if (x + 1 < size)
+        if (x + 1 < Size)
             if (nodesGrid[x + 1 , y])
                 hasNeighbours = true;
 
-        if (y + 1 < size)
+        if (y + 1 < Size)
             if (nodesGrid[x , y + 1])
                 hasNeighbours = true;
 

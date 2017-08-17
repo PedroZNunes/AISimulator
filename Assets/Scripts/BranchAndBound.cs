@@ -9,7 +9,8 @@ using System.Text;
 /// </summary>
 public class BranchAndBound : SearchAlgorythm {
     
-    public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+    public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.LogFormat ("Searching path using Branch and Bound algorythm");
         bool hasPath = false;
 
@@ -42,16 +43,9 @@ public class BranchAndBound : SearchAlgorythm {
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
 
-                if (trackVisitedNodes) {
-                    if (!visited[(int) neighbour.pos.x, (int) neighbour.pos.y]) {
-                        visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
+                if (!visited[(int) neighbour.pos.x, (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
 
-                        cameFrom[neighbour] = current;
-                        frontier.Add (new NodeDist (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
                     cameFrom[neighbour] = current;
                     frontier.Add (new NodeDist (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
                     UIIncrementEnqueuings ();
@@ -59,9 +53,9 @@ public class BranchAndBound : SearchAlgorythm {
 
                 frontier.Sort ();
             }
-
-
         }
+
+        IsSearching = false;
 
         if (!hasPath) {
             Debug.Log ("No path exists.");
@@ -72,6 +66,5 @@ public class BranchAndBound : SearchAlgorythm {
             yield break;
         }
     }
-
 
 }

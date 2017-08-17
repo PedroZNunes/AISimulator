@@ -5,7 +5,8 @@ using System.Text;
 
 public class BFS : SearchAlgorythm {
 
-	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.Log ("Searching path using Breadth First Search algorythm.");
         bool hasPath = false;
 
@@ -16,6 +17,7 @@ public class BFS : SearchAlgorythm {
 
         frontier.Enqueue (start);
         cameFrom[start] = null;
+        visited[(int) start.pos.x, (int) start.pos.y] = true;
 
         while (frontier.Count > 0) {
             current = frontier.Dequeue ();
@@ -33,23 +35,22 @@ public class BFS : SearchAlgorythm {
 
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
-                
-                if (trackVisitedNodes) {
-                    if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
-                        visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
 
-                        cameFrom[neighbour] = current;
-                        frontier.Enqueue (neighbour);
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
+                if (neighbour == current)
+                    Debug.LogErrorFormat ("node {0} has link to itself.", current);
+
+                if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
+
                     cameFrom[neighbour] = current;
                     frontier.Enqueue (neighbour);
                     UIIncrementEnqueuings ();
                 }
+
             }
         }
+
+        IsSearching = false;
 
         if (!hasPath) {
             Debug.Log ("No path exists.");
@@ -60,6 +61,5 @@ public class BFS : SearchAlgorythm {
             yield break;
         }
     }
-
 
 }

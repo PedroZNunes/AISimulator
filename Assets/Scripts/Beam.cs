@@ -11,7 +11,8 @@ public class Beam : SearchAlgorythm {
         this.maxPaths = maxPaths;
     }
 
-	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.LogFormat ("Searching path using Beam algorythm with the maximum number of paths set to {0}", maxPaths);
         bool hasPath = false;
 
@@ -22,8 +23,6 @@ public class Beam : SearchAlgorythm {
 
         frontier.Add (new NodeDist (start , 0));
         cameFrom[start] = null;
-
-        float pathLength = 0;
 
         while (frontier.Count > 0) {
             current = frontier[0].node;
@@ -44,18 +43,11 @@ public class Beam : SearchAlgorythm {
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
 
-                if (trackVisitedNodes) {
-                    if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
-                        visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
+                if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
 
-                        cameFrom[neighbour] = current;
-                        frontier.Add (new NodeDist (neighbour , Vector2.Distance (neighbour.pos , goal.pos)));
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
                     cameFrom[neighbour] = current;
-                    frontier.Add (new NodeDist (neighbour, Vector2.Distance (neighbour.pos, goal.pos)));
+                    frontier.Add (new NodeDist (neighbour , Vector2.Distance (neighbour.pos , goal.pos)));
                     UIIncrementEnqueuings ();
                 }
 
@@ -67,9 +59,9 @@ public class Beam : SearchAlgorythm {
                     }
                 }
             }
-            
-            
         }
+
+        IsSearching = false;
 
         if (!hasPath) {
             Debug.Log ("No path exists.");
@@ -80,6 +72,5 @@ public class Beam : SearchAlgorythm {
             yield break;
         }
     }
-
 
 }

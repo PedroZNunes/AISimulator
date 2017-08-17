@@ -5,7 +5,8 @@ using System.Text;
 
 public class DFS : SearchAlgorythm {
 
-	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.Log ("Searching path using Depth First Search algorythm.");
         bool hasPath = false;
 
@@ -34,22 +35,17 @@ public class DFS : SearchAlgorythm {
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
                 
-                if (trackVisitedNodes) {
-                    if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
-                        visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
+                if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
 
-                        cameFrom[neighbour] = current;
-                        frontier.Push (neighbour);
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
                     cameFrom[neighbour] = current;
                     frontier.Push (neighbour);
                     UIIncrementEnqueuings ();
                 }
             }
         }
+
+        IsSearching = false;
 
         if (!hasPath) {
             Debug.Log ("No path exists.");
@@ -60,6 +56,5 @@ public class DFS : SearchAlgorythm {
             yield break;
         }
     }
-
 
 }

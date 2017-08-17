@@ -24,16 +24,11 @@ public class SearchManager : MonoBehaviour {
     [SerializeField]
     private Sprite exploredNode;
 
-    [SerializeField]
-    private int framesPerSecond = 30;
 
-    [SerializeField]
-    private int beamMaxPaths = 3;
-
-    private static Stack<Link> linksChanged = new Stack<Link> ();
-    private static Stack<Link> allLinksChanged = new Stack<Link> ();
-    private static Stack<Node> nodesChanged = new Stack<Node> ();
-    private static Stack<Node> allNodesChanged = new Stack<Node> ();
+    private static Stack<Link> activeLinks = new Stack<Link> ();
+    private static Stack<Link> exploredLinks = new Stack<Link> ();
+    private static Stack<Node> activeNodes = new Stack<Node> ();
+    private static Stack<Node> exploredNodes = new Stack<Node> ();
 
     static private SearchManager instance;
 
@@ -41,51 +36,59 @@ public class SearchManager : MonoBehaviour {
         instance = FindObjectOfType<SearchManager> ();
     }
 
-    private void Update () {
-        GetInput ();
+    private void OnEnable () {
+        UIManager.SearchEvent += StartPathing;
     }
 
-    private void GetInput () {
-        //setting up algorythm
-        if (Input.GetKeyDown (KeyCode.Alpha1)) {
-            Debug.Log ("Algorythm set to BrittishMuseum");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha2)) {
-            SetAlgorythm (new BFS ());
-            Debug.Log ("Algorythm set to BFS");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha3)) {
-            SetAlgorythm (new DFS ());
-            Debug.Log ("Algorythm set to DFS");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha4)) {
-            SetAlgorythm (new HillClimbing ());
-            Debug.Log ("Algorythm set to HillClimbing");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha5)) {
-            SetAlgorythm (new Beam (beamMaxPaths));
-            Debug.Log ("Algorythm set to Beam");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha6)) {
-            SetAlgorythm (new BranchAndBound ());
-            Debug.Log ("Algorythm set to Branch and Bound");
-        }
-        else if (Input.GetKeyDown (KeyCode.Alpha7)) {
-            SetAlgorythm (new AStar ());
-            Debug.Log ("Algorythm set to A*");
-        }
+    private void OnDisable () {
         
-
     }
 
-    public void StartPathing ( int size , Node start , Node goal , bool trackVisitedNodes ) {
-        if (searchAlgorythm != null) {
-            HardResetPathVisualization ();
-            searchAlgorythm.ResetUI ();
-            StartCoroutine (searchAlgorythm.Search (MapGenerator.nodes, size, start, goal, framesPerSecond, trackVisitedNodes));
+    public void StartPathing (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths) {
+        if (algorythm != null) {
+            switch (algorythm) {
+                case ("BFS"):
+                    searchAlgorythm = new BFS ();
+                    break;
+
+                case ("DFS"):
+                    searchAlgorythm = new DFS ();
+                    break;
+
+                case ("Hill Climbing"):
+                    searchAlgorythm = new HillClimbing ();
+                    break;
+
+                case ("Beam"):
+                    searchAlgorythm = new Beam (beamPaths);
+                    break;
+
+                case ("Branch and Bound"):
+                    searchAlgorythm = new BranchAndBound ();
+                    break;
+
+                case ("A*"):
+                    searchAlgorythm = new AStar ();
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (searchAlgorythm != null) {
+                if (!SearchAlgorythm.IsSearching) {
+                    HardResetPathVisualization ();
+                    searchAlgorythm.ResetUI ();
+                    Debug.LogFormat ("Building a path using {0}.", algorythm);
+                    StartCoroutine (searchAlgorythm.Search (MapGenerator.Nodes, MapGenerator.Size, start, goal, framesPerSecond));
+                }
+                else {
+                    Debug.LogWarning ("Another search in progress.");
+                }
+            }
         }
         else
-            Debug.LogError ("Algorythm not set. Search canceled.");
+            Debug.LogWarning ("Algorythm not set. Search canceled.");
     }
 
     public void SetAlgorythm ( SearchAlgorythm algorythm ) {
@@ -107,8 +110,9 @@ public class SearchManager : MonoBehaviour {
             renderer = current.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
                 renderer.sprite = activeNode;
-                nodesChanged.Push (current);
-                allNodesChanged.Push (current);
+                activeNodes.Push (current);
+                if (!exploredNodes.Contains (current))
+                    exploredNodes.Push (current);
             }
 
             previous = current;
@@ -128,8 +132,9 @@ public class SearchManager : MonoBehaviour {
                 renderer = link.GO.GetComponent<SpriteRenderer> ();
                 if (renderer != null) {
                     renderer.sprite = activeLink;
-                    linksChanged.Push (link);
-                    allLinksChanged.Push (link);
+                    activeLinks.Push (link);
+                    if (!exploredLinks.Contains (link))
+                        exploredLinks.Push (link);
                 }
             }
 
@@ -138,7 +143,7 @@ public class SearchManager : MonoBehaviour {
         renderer = current.GO.GetComponent<SpriteRenderer> ();
         if (renderer != null) {
             renderer.sprite = activeNode;
-            nodesChanged.Push (current);
+            activeNodes.Push (current);
         }
 
     }
@@ -147,8 +152,8 @@ public class SearchManager : MonoBehaviour {
         Sprite exploredLink = instance.exploredLink;
         Sprite exploredNode = instance.exploredNode;
 
-        while (linksChanged.Count > 0) {
-            Link link = linksChanged.Pop ();
+        while (activeLinks.Count > 0) {
+            Link link = activeLinks.Pop ();
 
             SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
@@ -156,8 +161,8 @@ public class SearchManager : MonoBehaviour {
             }
         }
 
-        while (nodesChanged.Count > 0) {
-            Node node = nodesChanged.Pop ();
+        while (activeNodes.Count > 0) {
+            Node node = activeNodes.Pop ();
 
             SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
@@ -173,8 +178,8 @@ public class SearchManager : MonoBehaviour {
         Sprite inactiveLink = instance.inactiveLink;
         Sprite inactiveNode = instance.inactiveNode;
 
-        while (allLinksChanged.Count > 0) {
-            Link link = allLinksChanged.Pop ();
+        while (exploredLinks.Count > 0) {
+            Link link = exploredLinks.Pop ();
 
             SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
@@ -182,8 +187,8 @@ public class SearchManager : MonoBehaviour {
             }
         }
 
-        while (allNodesChanged.Count > 0) {
-            Node node = allNodesChanged.Pop ();
+        while (exploredNodes.Count > 0) {
+            Node node = exploredNodes.Pop ();
 
             SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {

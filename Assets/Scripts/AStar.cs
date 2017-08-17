@@ -9,7 +9,8 @@ using System.Text;
 /// </summary>
 public class AStar : SearchAlgorythm {
     
-    public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond, bool trackVisitedNodes) {
+    public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
+        IsSearching = true;
         Debug.LogFormat ("Searching path using A* algorythm");
         bool hasPath = false;
 
@@ -42,17 +43,9 @@ public class AStar : SearchAlgorythm {
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
 
-                if (trackVisitedNodes) {
-                    if (!visited[(int) neighbour.pos.x, (int) neighbour.pos.y]) {
-                        visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
+                if (!visited[(int) neighbour.pos.x, (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
 
-                        cameFrom[neighbour] = current;
-                        float totalDistance = pathLength + Mathf.Abs (Vector2.Distance (neighbour.pos, current.pos)) + Mathf.Abs (Vector2.Distance (neighbour.pos, goal.pos));
-                        frontier.Add (new NodeDist (neighbour, totalDistance));
-                        UIIncrementEnqueuings ();
-                    }
-                }
-                else {
                     cameFrom[neighbour] = current;
                     float totalDistance = pathLength + Mathf.Abs (Vector2.Distance (neighbour.pos, current.pos)) + Mathf.Abs (Vector2.Distance (neighbour.pos, goal.pos));
                     frontier.Add (new NodeDist (neighbour, totalDistance));
@@ -65,6 +58,8 @@ public class AStar : SearchAlgorythm {
 
         }
 
+        IsSearching = false;
+
         if (!hasPath) {
             Debug.Log ("No path exists.");
             yield break;
@@ -74,6 +69,5 @@ public class AStar : SearchAlgorythm {
             yield break;
         }
     }
-
 
 }
