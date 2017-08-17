@@ -14,7 +14,7 @@ public class BranchAndBound : SearchAlgorythm {
         bool hasPath = false;
 
         bool[,] visited = new bool[size, size];
-        Dictionary<Node, Node> cameFrom = new Dictionary<Node, Node> ();
+        cameFrom = new Dictionary<Node, Node> ();
         List<NodeDist> frontier = new List<NodeDist> ();
         Node current = new Node ();
         float pathLength = 0;
@@ -26,6 +26,9 @@ public class BranchAndBound : SearchAlgorythm {
             current = frontier[0].node;
             pathLength = frontier[0].distance;
             frontier.RemoveAt (0);
+
+            UIUpdatePathLength (pathLength);
+            UIUpdateQueueSize (frontier.Count);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current, start);
@@ -45,12 +48,14 @@ public class BranchAndBound : SearchAlgorythm {
                         visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
 
                         cameFrom[neighbour] = current;
-                        frontier.Add (new NodeDist (neighbour, pathLength + Vector2.Distance (neighbour.pos, current.pos)));
+                        frontier.Add (new NodeDist (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
+                        UIIncrementEnqueuings ();
                     }
                 }
                 else {
                     cameFrom[neighbour] = current;
-                    frontier.Add (new NodeDist (neighbour, pathLength + Vector2.Distance (neighbour.pos, current.pos)));
+                    frontier.Add (new NodeDist (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
+                    UIIncrementEnqueuings ();
                 }
 
                 frontier.Sort ();

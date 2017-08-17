@@ -16,16 +16,21 @@ public class Beam : SearchAlgorythm {
         bool hasPath = false;
 
         bool[,] visited = new bool[size , size];
-        Dictionary<Node , Node> cameFrom = new Dictionary<Node , Node> ();
+        cameFrom = new Dictionary<Node , Node> ();
         List<NodeDist> frontier = new List<NodeDist> ();
         Node current = new Node();
 
         frontier.Add (new NodeDist (start , 0));
         cameFrom[start] = null;
 
+        float pathLength = 0;
+
         while (frontier.Count > 0) {
             current = frontier[0].node;
             frontier.RemoveAt (0);
+
+            UIUpdatePathLength (CalculatePathLength (start, current));
+            UIUpdateQueueSize (frontier.Count);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);
@@ -46,11 +51,13 @@ public class Beam : SearchAlgorythm {
 
                         cameFrom[neighbour] = current;
                         frontier.Add (new NodeDist (neighbour , Vector2.Distance (neighbour.pos , goal.pos)));
+                        UIIncrementEnqueuings ();
                     }
                 }
                 else {
                     cameFrom[neighbour] = current;
                     frontier.Add (new NodeDist (neighbour, Vector2.Distance (neighbour.pos, goal.pos)));
+                    UIIncrementEnqueuings ();
                 }
 
                 frontier.Sort ();

@@ -10,7 +10,7 @@ public class HillClimbing : SearchAlgorythm {
         bool hasPath = false;
 
         bool[,] visited = new bool[size , size];
-        Dictionary<Node , Node> cameFrom = new Dictionary<Node , Node> ();
+        cameFrom = new Dictionary<Node , Node> ();
         Stack<Node> frontier = new Stack<Node> ();
         Node current = new Node();
 
@@ -19,6 +19,9 @@ public class HillClimbing : SearchAlgorythm {
 
         while (frontier.Count > 0) {
             current = frontier.Pop ();
+
+            UIUpdatePathLength (CalculatePathLength (start, current));
+            UIUpdateQueueSize (frontier.Count);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);
@@ -50,11 +53,13 @@ public class HillClimbing : SearchAlgorythm {
 
                         cameFrom[closestNeighbour] = current;
                         frontier.Push (closestNeighbour);
+                        UIIncrementEnqueuings ();
                     }
                 }
                 else {
                     cameFrom[closestNeighbour] = current;
                     frontier.Push (closestNeighbour);
+                    UIIncrementEnqueuings ();
                 }
             }
             else {

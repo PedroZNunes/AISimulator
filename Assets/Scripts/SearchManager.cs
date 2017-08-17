@@ -81,6 +81,7 @@ public class SearchManager : MonoBehaviour {
     public void StartPathing ( int size , Node start , Node goal , bool trackVisitedNodes ) {
         if (searchAlgorythm != null) {
             HardResetPathVisualization ();
+            searchAlgorythm.ResetUI ();
             StartCoroutine (searchAlgorythm.Search (MapGenerator.nodes, size, start, goal, framesPerSecond, trackVisitedNodes));
         }
         else

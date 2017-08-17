@@ -14,18 +14,21 @@ public class AStar : SearchAlgorythm {
         bool hasPath = false;
 
         bool[,] visited = new bool[size, size];
-        Dictionary<Node, Node> cameFrom = new Dictionary<Node, Node> ();
+        cameFrom = new Dictionary<Node, Node> ();
         List<NodeDist> frontier = new List<NodeDist> ();
         Node current = new Node ();
         float pathLength = 0;
 
-        frontier.Add (new NodeDist (start, 0));
+        frontier.Add (new NodeDist (start, 0 + Mathf.Abs (Vector2.Distance (start.pos, goal.pos))));
         cameFrom[start] = null;
 
         while (frontier.Count > 0) {
             current = frontier[0].node;
-            pathLength = frontier[0].distance - Vector2.Distance (current.pos, goal.pos);
+            pathLength = frontier[0].distance - Mathf.Abs(Vector2.Distance (current.pos, goal.pos));
             frontier.RemoveAt (0);
+
+            UIUpdateQueueSize (frontier.Count);
+            UIUpdatePathLength (pathLength);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current, start);
@@ -45,14 +48,16 @@ public class AStar : SearchAlgorythm {
                         visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
 
                         cameFrom[neighbour] = current;
-                        float totalDistance = pathLength + Vector2.Distance (neighbour.pos, current.pos) + Vector2.Distance (neighbour.pos, goal.pos);
+                        float totalDistance = pathLength + Mathf.Abs (Vector2.Distance (neighbour.pos, current.pos)) + Mathf.Abs (Vector2.Distance (neighbour.pos, goal.pos));
                         frontier.Add (new NodeDist (neighbour, totalDistance));
+                        UIIncrementEnqueuings ();
                     }
                 }
                 else {
                     cameFrom[neighbour] = current;
-                    float totalDistance = pathLength + Vector2.Distance (neighbour.pos, current.pos) + Vector2.Distance (neighbour.pos, goal.pos);
+                    float totalDistance = pathLength + Mathf.Abs (Vector2.Distance (neighbour.pos, current.pos)) + Mathf.Abs (Vector2.Distance (neighbour.pos, goal.pos));
                     frontier.Add (new NodeDist (neighbour, totalDistance));
+                    UIIncrementEnqueuings ();
                 }
 
                 frontier.Sort ();

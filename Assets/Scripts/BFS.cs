@@ -10,7 +10,7 @@ public class BFS : SearchAlgorythm {
         bool hasPath = false;
 
         bool[,] visited = new bool[size , size];
-        Dictionary<Node , Node> cameFrom = new Dictionary<Node , Node> ();
+        cameFrom = new Dictionary<Node , Node> ();
         Queue<Node> frontier = new Queue<Node> ();
         Node current = new Node();
 
@@ -19,6 +19,9 @@ public class BFS : SearchAlgorythm {
 
         while (frontier.Count > 0) {
             current = frontier.Dequeue ();
+
+            UIUpdatePathLength (CalculatePathLength (start, current));
+            UIUpdateQueueSize (frontier.Count);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);
@@ -38,11 +41,13 @@ public class BFS : SearchAlgorythm {
 
                         cameFrom[neighbour] = current;
                         frontier.Enqueue (neighbour);
+                        UIIncrementEnqueuings ();
                     }
                 }
                 else {
                     cameFrom[neighbour] = current;
                     frontier.Enqueue (neighbour);
+                    UIIncrementEnqueuings ();
                 }
             }
         }
