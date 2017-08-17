@@ -20,8 +20,7 @@ public class BFS : SearchAlgorythm {
         while (frontier.Count > 0) {
             current = frontier.Dequeue ();
 
-            UIUpdatePathLength (CalculatePathLength (start, current));
-            UIUpdateQueueSize (frontier.Count);
+            UIUpdate (frontier.Count, CalculatePathLength (start, current));
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);

@@ -294,6 +294,8 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void ClearPreviousMap () {
+        SearchManager.HardResetPathVisualization ();
+
         foreach (Transform child in transform) {
             GameObject.Destroy (child.gameObject);
         }

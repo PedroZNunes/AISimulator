@@ -29,8 +29,7 @@ public class Beam : SearchAlgorythm {
             current = frontier[0].node;
             frontier.RemoveAt (0);
 
-            UIUpdatePathLength (CalculatePathLength (start, current));
-            UIUpdateQueueSize (frontier.Count);
+            UIUpdate (frontier.Count, CalculatePathLength (start, current));
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current , start);

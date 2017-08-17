@@ -167,7 +167,7 @@ public class SearchManager : MonoBehaviour {
 
     }
 
-    static private void HardResetPathVisualization () {
+    static public void HardResetPathVisualization () {
         SoftResetPathVisualization ();
 
         Sprite inactiveLink = instance.inactiveLink;

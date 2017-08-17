@@ -27,8 +27,7 @@ public class AStar : SearchAlgorythm {
             pathLength = frontier[0].distance - Mathf.Abs(Vector2.Distance (current.pos, goal.pos));
             frontier.RemoveAt (0);
 
-            UIUpdateQueueSize (frontier.Count);
-            UIUpdatePathLength (pathLength);
+            UIUpdate (frontier.Count, pathLength);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current, start);

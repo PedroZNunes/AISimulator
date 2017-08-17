@@ -27,8 +27,7 @@ public class BranchAndBound : SearchAlgorythm {
             pathLength = frontier[0].distance;
             frontier.RemoveAt (0);
 
-            UIUpdatePathLength (pathLength);
-            UIUpdateQueueSize (frontier.Count);
+            UIUpdate (frontier.Count, pathLength);
 
             //visualize path to current
             SearchManager.VisualizePath (cameFrom, current, start);

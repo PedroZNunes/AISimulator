@@ -5,11 +5,8 @@ using System;
 
 public class SearchAlgorythm {
 
-    public delegate void UpdateQueueHandler (int queueSize);
-    public static event UpdateQueueHandler UpdateQueueEvent;
-
-    public delegate void UpdatePathLangthHandler (float pathLangth);
-    public static event UpdatePathLangthHandler UpdatePathLength;
+    public delegate void UpdateQueueHandler (int queueSize, float  length);
+    public static event UpdateQueueHandler UpdateUIEvent;
 
     public static event Action IncrementEnqueueEvent;
 
@@ -40,15 +37,9 @@ public class SearchAlgorythm {
             IncrementEnqueueEvent ();
     }
 
-    protected void UIUpdateQueueSize (int size) {
-        if (UpdateQueueEvent != null)
-            UpdateQueueEvent (size);
-    }
-
-    protected void UIUpdatePathLength (float pathLength) {
-        if (UpdatePathLength != null)
-            UpdatePathLength (pathLength);
-
+    protected void UIUpdate (int queueSize, float pathLength) {
+        if (UpdateUIEvent != null)
+            UpdateUIEvent (queueSize, pathLength);
     }
 
 }
