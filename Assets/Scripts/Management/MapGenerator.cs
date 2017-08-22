@@ -54,7 +54,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     public void Generate (int size, int nodeCount, int maxLinks, int grain) {
-        if (SearchAlgorythm.IsSearching)
+        if (PathfindingAlgorythm.IsSearching)
             return ;
 
         Initialize (size, nodeCount, maxLinks, grain);

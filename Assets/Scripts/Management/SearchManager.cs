@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SearchManager : MonoBehaviour {
 
-    private SearchAlgorythm searchAlgorythm;
+    private PathfindingAlgorythm searchAlgorythm;
 
     [SerializeField]
     private Sprite inactiveLink;
@@ -76,7 +76,7 @@ public class SearchManager : MonoBehaviour {
             }
 
             if (searchAlgorythm != null) {
-                if (!SearchAlgorythm.IsSearching) {
+                if (!PathfindingAlgorythm.IsSearching) {
                     HardResetPathVisualization ();
                     searchAlgorythm.ResetUI ();
                     Debug.LogFormat ("Building a path using {0}.", algorythm);
@@ -91,7 +91,7 @@ public class SearchManager : MonoBehaviour {
             Debug.LogWarning ("Algorythm not set. Search canceled.");
     }
 
-    public void SetAlgorythm ( SearchAlgorythm algorythm ) {
+    public void SetAlgorythm ( PathfindingAlgorythm algorythm ) {
         searchAlgorythm = algorythm;
     }
 

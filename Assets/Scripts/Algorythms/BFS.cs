@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-public class HillClimbing : SearchAlgorythm {
+public class BFS : PathfindingAlgorythm {
 
 	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
         IsSearching = true;
-        Debug.Log ("Searching path using Hill Climbing algorythm.");
+        Debug.Log ("Searching path using Breadth First Search algorythm.");
         bool hasPath = false;
 
         bool[,] visited = new bool[size , size];
         cameFrom = new Dictionary<Node , Node> ();
-        Stack<Node> frontier = new Stack<Node> ();
+        Queue<Node> frontier = new Queue<Node> ();
         Node current = new Node();
 
-        frontier.Push (start);
+        frontier.Enqueue (start);
         cameFrom[start] = null;
+        visited[(int) start.pos.x, (int) start.pos.y] = true;
 
         while (frontier.Count > 0) {
-            current = frontier.Pop ();
+            current = frontier.Dequeue ();
 
             UIUpdate (frontier.Count, CalculatePathLength (start, current));
 
@@ -32,31 +33,20 @@ public class HillClimbing : SearchAlgorythm {
                 break;
             }
 
-            float closestDistance = Vector2.Distance (current.pos , goal.pos);
-            Node closestNeighbour = null;
             for (int i = 0 ; i < current.links.Count ; i++) {
                 Node neighbour = current.links[i];
 
-                // test shortest path
-                float neighbourDist = Vector2.Distance (neighbour.pos , goal.pos);
-                if (neighbourDist < closestDistance || closestDistance == float.MaxValue) {
-                    closestNeighbour = neighbour;
-                    closestDistance = neighbourDist;
-                }
-            }
+                if (neighbour == current)
+                    Debug.LogErrorFormat ("node {0} has link to itself.", current);
 
-            // extend path
-            if (closestNeighbour != null) {
-                if (!visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y]) {
-                    visited[(int) closestNeighbour.pos.x , (int) closestNeighbour.pos.y] = true;
+                if (!visited[(int) neighbour.pos.x , (int) neighbour.pos.y]) {
+                    visited[(int) neighbour.pos.x , (int) neighbour.pos.y] = true;
 
-                    cameFrom[closestNeighbour] = current;
-                    frontier.Push (closestNeighbour);
+                    cameFrom[neighbour] = current;
+                    frontier.Enqueue (neighbour);
                     UIIncrementEnqueuings ();
                 }
-            }
-            else {
-                Debug.LogFormat ("Stuck in local maxima. node {0}" , current.ID);
+
             }
         }
 

@@ -77,16 +77,16 @@ public class UIManager : MonoBehaviour {
 
     //events
     private void OnEnable () {
-        SearchAlgorythm.UpdateUIEvent += UpdateUI;
-        SearchAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
-        SearchAlgorythm.ResetUIEvent += ResetUI;
+        PathfindingAlgorythm.UpdateUIEvent += UpdateUI;
+        PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
+        PathfindingAlgorythm.ResetUIEvent += ResetOutput;
 
         UINode.NodeSelectedEvent += NodeSelected;
     }
     private void OnDisable () {
-        SearchAlgorythm.UpdateUIEvent -= UpdateUI;
-        SearchAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
-        SearchAlgorythm.ResetUIEvent -= ResetUI;
+        PathfindingAlgorythm.UpdateUIEvent -= UpdateUI;
+        PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
+        PathfindingAlgorythm.ResetUIEvent -= ResetOutput;
 
         UINode.NodeSelectedEvent -= NodeSelected;
     }
@@ -94,11 +94,12 @@ public class UIManager : MonoBehaviour {
     private void Awake () {
         if (instance == null)
             instance = this;
+        else
+            Destroy (this.gameObject);
 
         Initialize ();
-
         InitializeUI ();
-        ResetUI ();       
+        ResetOutput ();       
     }
 
     private void Start () {
@@ -118,25 +119,6 @@ public class UIManager : MonoBehaviour {
         sFpsInput = instance.fpsInput;
     }
 
-    private void UpdateUI (int queueSize, float length) {
-        //update queue info
-        if (queueSize > (Int32.Parse (maxQueueSizeValue.text))) {
-            maxQueueSizeValue.text = queueSize.ToString();
-        }
-
-        queueSizeValue.text = queueSize.ToString();
-
-        //assign path length
-        pathLengthValue.text = String.Format ("{0:0.00}", length);
-
-        //increment nodes expanded
-        nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
-    }
-
-    private void IncrementEnqueue () {
-        enqueuingsValue.text = (Int32.Parse (enqueuingsValue.text) + 1).ToString();
-    }
-    
     private void InitializeUI () {
         //map generation panel
         List<string> sizes = new List<string> ();
@@ -172,8 +154,8 @@ public class UIManager : MonoBehaviour {
         beamPathsInput.text = "2";
         fpsInput.text = "3";
     }
-
-    private void ResetUI () {
+    
+    private void ResetOutput () {
         enqueuingsValue.text = "0"; 
         maxQueueSizeValue.text = "0";
         queueSizeValue.text = "0";
@@ -181,27 +163,25 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = "0";
     }
 
-    public void GenerateMap () {
-        if (GenerateMapEvent != null)
-            GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
+    private void IncrementEnqueue () {
+        int enqueuings = Int32.Parse (enqueuingsValue.text);
+
+        enqueuingsValue.text = (++enqueuings).ToString ();
     }
 
-    public void Search () {
-        if (!SearchAlgorythm.IsSearching) {
-            string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
-
-            int beams = Int32.Parse (sBeamPathsInput.text);
-            int fps = Int32.Parse (sFpsInput.text);
-
-            Node start = startNode ?? MapGenerator.RandomNode ();
-            Node goal = goalNode ?? MapGenerator.RandomNode ();
-
-            SetStartSprite (start);
-            SetGoalSprite (goal);
-
-            if (SearchEvent != null)
-                SearchEvent (algorythmString, start, goal, fps, beams);
+    private void UpdateUI (int queueSize, float length) {
+        //update queue info
+        if (queueSize > (Int32.Parse (maxQueueSizeValue.text))) {
+            maxQueueSizeValue.text = queueSize.ToString();
         }
+
+        queueSizeValue.text = queueSize.ToString();
+
+        //assign path length
+        pathLengthValue.text = String.Format ("{0:0.00}", length);
+
+        //increment nodes expanded
+        nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
     }
 
     public void SetNodeCount () {
@@ -220,6 +200,29 @@ public class UIManager : MonoBehaviour {
         Size = Int32.Parse (sizeString);
 
         SetNodeCount ();
+    }
+
+    public void GenerateMap () {
+            if (GenerateMapEvent != null)
+            GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
+    }
+
+    public void Search () {
+        if (!PathfindingAlgorythm.IsSearching) {
+            string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
+
+            int beams = Int32.Parse (sBeamPathsInput.text);
+            int fps = Int32.Parse (sFpsInput.text);
+
+            Node start = startNode ?? MapGenerator.RandomNode ();
+            Node goal = goalNode ?? MapGenerator.RandomNode ();
+
+            SetStartSprite (start);
+            SetGoalSprite (goal);
+
+            if (SearchEvent != null)
+                SearchEvent (algorythmString, start, goal, fps, beams);
+        }
     }
 
     public void SetStart () {

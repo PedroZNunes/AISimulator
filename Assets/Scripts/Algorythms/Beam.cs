@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-public class Beam : SearchAlgorythm {
+public class Beam : PathfindingAlgorythm {
 
     private int maxPaths = 2;
 
