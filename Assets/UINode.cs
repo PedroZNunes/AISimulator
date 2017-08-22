@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent (typeof (BoxCollider2D))]
+[RequireComponent (typeof (BoxCollider2D), typeof (SpriteRenderer))]
 public class UINode : MonoBehaviour {
 
     public delegate void NodeSelectedHandler (Node node);
@@ -10,11 +10,17 @@ public class UINode : MonoBehaviour {
 
     public Node node;
 
+    [SerializeField]
+    private Sprite inactiveNode;
+
     private BoxCollider2D col;
+    private SpriteRenderer renderer;
 
     private void Awake () {
         col = GetComponent<BoxCollider2D> ();
         col.enabled = false;
+
+        renderer = GetComponent<SpriteRenderer> ();
     }
 
     private void OnEnable () {
@@ -47,6 +53,10 @@ public class UINode : MonoBehaviour {
     public void NodeSelected () {
         if (NodeSelectedEvent != null)
             NodeSelectedEvent (node);
+    }
+
+    public void ResetSprite () {
+        renderer.sprite = inactiveNode;
     }
 
 }

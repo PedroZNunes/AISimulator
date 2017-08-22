@@ -55,11 +55,22 @@ public class UIManager : MonoBehaviour {
 
     static private UIManager instance;
 
+    [HideInInspector]
     public bool settingStartNode = false;
+    [SerializeField]
+    private GameObject startPrefab;
+
+    [HideInInspector]
     public bool settingGoalNode = false;
+    [SerializeField]
+    private GameObject goalPrefab;
 
     private Node startNode;
     private Node goalNode;
+
+    private GameObject startNodeGO;
+    private GameObject goalNodeGO;
+
 
     //events
     private void OnEnable () {
@@ -177,16 +188,21 @@ public class UIManager : MonoBehaviour {
     }
 
     public void Search () {
-        string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
+        if (!SearchAlgorythm.IsSearching) {
+            string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
 
-        int beams = Int32.Parse (sBeamPathsInput.text);
-        int fps = Int32.Parse (sFpsInput.text);
+            int beams = Int32.Parse (sBeamPathsInput.text);
+            int fps = Int32.Parse (sFpsInput.text);
 
-        Node start = startNode ?? MapGenerator.RandomNode ();
-        Node goal = goalNode ?? MapGenerator.RandomNode ();
+            Node start = startNode ?? MapGenerator.RandomNode ();
+            Node goal = goalNode ?? MapGenerator.RandomNode ();
 
-        if (SearchEvent != null)
-            SearchEvent (algorythmString, start, goal, fps, beams);
+            SetStartSprite (start);
+            SetGoalSprite (goal);
+
+            if (SearchEvent != null)
+                SearchEvent (algorythmString, start, goal, fps, beams);
+        }
     }
 
     public void SetStart () {
@@ -208,6 +224,8 @@ public class UIManager : MonoBehaviour {
             settingStartNode = false;
 
             startNode = node;
+            SetStartSprite (startNode);
+
             if (DisableNodesEvent != null) {
                 DisableNodesEvent ();
             }
@@ -216,9 +234,24 @@ public class UIManager : MonoBehaviour {
             settingGoalNode = false;
 
             goalNode = node;
+            SetGoalSprite (goalNode);
+
             if (DisableNodesEvent != null) {
                 DisableNodesEvent ();
             }
         }
     }
+
+    private void SetStartSprite (Node node) {
+        Destroy (startNodeGO);
+
+        startNodeGO = Instantiate (startPrefab, node.GO.transform);
+    }
+
+    private void SetGoalSprite (Node node) {
+        Destroy (goalNodeGO);
+
+        goalNodeGO = Instantiate (goalPrefab, node.GO.transform);
+    }
+    
 }

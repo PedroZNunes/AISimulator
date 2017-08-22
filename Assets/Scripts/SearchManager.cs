@@ -41,7 +41,7 @@ public class SearchManager : MonoBehaviour {
     }
 
     private void OnDisable () {
-        
+        UIManager.SearchEvent -= StartPathing;
     }
 
     public void StartPathing (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths) {
@@ -197,6 +197,5 @@ public class SearchManager : MonoBehaviour {
         }
 
     }
-
 
 }
