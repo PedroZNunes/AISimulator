@@ -11,6 +11,10 @@ public class UIManager : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler SearchEvent;
 
+    static public event Action EnableNodesEvent;
+    static public event Action DisableNodesEvent;
+
+
     //output
     [SerializeField]
     private Text enqueuingsValue;
@@ -51,16 +55,26 @@ public class UIManager : MonoBehaviour {
 
     static private UIManager instance;
 
+    public bool settingStartNode = false;
+    public bool settingGoalNode = false;
+
+    private Node startNode;
+    private Node goalNode;
+
     //events
     private void OnEnable () {
         SearchAlgorythm.UpdateUIEvent += UpdateUI;
         SearchAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
         SearchAlgorythm.ResetUIEvent += ResetUI;
+
+        UINode.NodeSelectedEvent += NodeSelected;
     }
     private void OnDisable () {
         SearchAlgorythm.UpdateUIEvent -= UpdateUI;
         SearchAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
         SearchAlgorythm.ResetUIEvent -= ResetUI;
+
+        UINode.NodeSelectedEvent -= NodeSelected;
     }
 
     private void Awake () {
@@ -70,8 +84,10 @@ public class UIManager : MonoBehaviour {
         Initialize ();
 
         InitializeUI ();
-        ResetUI ();
+        ResetUI ();       
+    }
 
+    private void Start () {
         GenerateMap ();
     }
 
@@ -166,7 +182,43 @@ public class UIManager : MonoBehaviour {
         int beams = Int32.Parse (sBeamPathsInput.text);
         int fps = Int32.Parse (sFpsInput.text);
 
+        Node start = startNode ?? MapGenerator.RandomNode ();
+        Node goal = goalNode ?? MapGenerator.RandomNode ();
+
         if (SearchEvent != null)
-            SearchEvent (algorythmString, MapGenerator.RandomNode (), MapGenerator.RandomNode (), fps, beams);
+            SearchEvent (algorythmString, start, goal, fps, beams);
+    }
+
+    public void SetStart () {
+        if (EnableNodesEvent != null)
+            EnableNodesEvent ();
+
+        settingStartNode = true;
+    }
+
+    public void SetGoal () {
+        if (EnableNodesEvent != null)
+            EnableNodesEvent ();
+
+        settingGoalNode = true;
+    }
+
+    public void NodeSelected (Node node) {
+        if (settingStartNode) {
+            settingStartNode = false;
+
+            startNode = node;
+            if (DisableNodesEvent != null) {
+                DisableNodesEvent ();
+            }
+        }
+        else if (settingGoalNode) {
+            settingGoalNode = false;
+
+            goalNode = node;
+            if (DisableNodesEvent != null) {
+                DisableNodesEvent ();
+            }
+        }
     }
 }

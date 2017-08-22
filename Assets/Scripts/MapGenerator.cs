@@ -312,6 +312,10 @@ public class MapGenerator : MonoBehaviour {
 
             GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
             nodeGO.name = "node " + node.ID;
+            UINode uiNode = nodeGO.GetComponent<UINode> ();
+            if (uiNode != null) {
+                uiNode.node = node;
+            }
 
             Nodes[i].GO = nodeGO;
 
