@@ -31,6 +31,8 @@ public class UIManager : MonoBehaviour {
     [SerializeField]
     private Dropdown sizeDropdownInput;
     static private Dropdown sSizeDropdownInput;
+    static public int Size { get; private set; }
+
     [SerializeField]
     private InputField nodeCountInput;
     static private InputField sNodeCountInput;
@@ -55,13 +57,14 @@ public class UIManager : MonoBehaviour {
 
     static private UIManager instance;
 
+    //start and goal setting
     [HideInInspector]
     public bool settingStartNode = false;
-    [SerializeField]
-    private GameObject startPrefab;
-
     [HideInInspector]
     public bool settingGoalNode = false;
+
+    [SerializeField]
+    private GameObject startPrefab;
     [SerializeField]
     private GameObject goalPrefab;
 
@@ -179,12 +182,8 @@ public class UIManager : MonoBehaviour {
     }
 
     public void GenerateMap () {
-        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
-        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
-        int size = Int32.Parse (sizeString);
-
         if (GenerateMapEvent != null)
-            GenerateMapEvent (size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
+            GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
     }
 
     public void Search () {
@@ -205,6 +204,24 @@ public class UIManager : MonoBehaviour {
         }
     }
 
+    public void SetNodeCount () {
+        if (nodeCountInput.text == "")
+            nodeCountInput.text = "0";
+        int count = Int32.Parse (nodeCountInput.text);
+        int maxNodeCount = ((Size * Size) / 3);
+        if (count > maxNodeCount) {
+            nodeCountInput.text = (maxNodeCount).ToString ();
+        }
+    }
+
+    public void SetSize () {
+        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
+        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
+        Size = Int32.Parse (sizeString);
+
+        SetNodeCount ();
+    }
+
     public void SetStart () {
         if (EnableNodesEvent != null)
             EnableNodesEvent ();
@@ -217,6 +234,17 @@ public class UIManager : MonoBehaviour {
             EnableNodesEvent ();
 
         settingGoalNode = true;
+    }
+
+    public void ResetStartAndGoal () {
+        settingGoalNode = false;
+        settingStartNode = false;
+
+        Destroy (startNodeGO);
+        Destroy (goalNodeGO);
+
+        startNode = null;
+        goalNode = null;
     }
 
     public void NodeSelected (Node node) {
