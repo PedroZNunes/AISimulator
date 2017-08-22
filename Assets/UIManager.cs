@@ -11,6 +11,10 @@ public class UIManager : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler SearchEvent;
 
+    static public event Action EnableNodesEvent;
+    static public event Action DisableNodesEvent;
+
+
     //output
     [SerializeField]
     private Text enqueuingsValue;
@@ -51,16 +55,37 @@ public class UIManager : MonoBehaviour {
 
     static private UIManager instance;
 
+    [HideInInspector]
+    public bool settingStartNode = false;
+    [SerializeField]
+    private GameObject startPrefab;
+
+    [HideInInspector]
+    public bool settingGoalNode = false;
+    [SerializeField]
+    private GameObject goalPrefab;
+
+    private Node startNode;
+    private Node goalNode;
+
+    private GameObject startNodeGO;
+    private GameObject goalNodeGO;
+
+
     //events
     private void OnEnable () {
         SearchAlgorythm.UpdateUIEvent += UpdateUI;
         SearchAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
         SearchAlgorythm.ResetUIEvent += ResetUI;
+
+        UINode.NodeSelectedEvent += NodeSelected;
     }
     private void OnDisable () {
         SearchAlgorythm.UpdateUIEvent -= UpdateUI;
         SearchAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
         SearchAlgorythm.ResetUIEvent -= ResetUI;
+
+        UINode.NodeSelectedEvent -= NodeSelected;
     }
 
     private void Awake () {
@@ -70,8 +95,10 @@ public class UIManager : MonoBehaviour {
         Initialize ();
 
         InitializeUI ();
-        ResetUI ();
+        ResetUI ();       
+    }
 
+    private void Start () {
         GenerateMap ();
     }
 
@@ -161,12 +188,70 @@ public class UIManager : MonoBehaviour {
     }
 
     public void Search () {
-        string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
+        if (!SearchAlgorythm.IsSearching) {
+            string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
 
-        int beams = Int32.Parse (sBeamPathsInput.text);
-        int fps = Int32.Parse (sFpsInput.text);
+            int beams = Int32.Parse (sBeamPathsInput.text);
+            int fps = Int32.Parse (sFpsInput.text);
 
-        if (SearchEvent != null)
-            SearchEvent (algorythmString, MapGenerator.RandomNode (), MapGenerator.RandomNode (), fps, beams);
+            Node start = startNode ?? MapGenerator.RandomNode ();
+            Node goal = goalNode ?? MapGenerator.RandomNode ();
+
+            SetStartSprite (start);
+            SetGoalSprite (goal);
+
+            if (SearchEvent != null)
+                SearchEvent (algorythmString, start, goal, fps, beams);
+        }
     }
+
+    public void SetStart () {
+        if (EnableNodesEvent != null)
+            EnableNodesEvent ();
+
+        settingStartNode = true;
+    }
+
+    public void SetGoal () {
+        if (EnableNodesEvent != null)
+            EnableNodesEvent ();
+
+        settingGoalNode = true;
+    }
+
+    public void NodeSelected (Node node) {
+        if (settingStartNode) {
+            settingStartNode = false;
+
+            startNode = node;
+            SetStartSprite (startNode);
+
+            if (DisableNodesEvent != null) {
+                DisableNodesEvent ();
+            }
+        }
+        else if (settingGoalNode) {
+            settingGoalNode = false;
+
+            goalNode = node;
+            SetGoalSprite (goalNode);
+
+            if (DisableNodesEvent != null) {
+                DisableNodesEvent ();
+            }
+        }
+    }
+
+    private void SetStartSprite (Node node) {
+        Destroy (startNodeGO);
+
+        startNodeGO = Instantiate (startPrefab, node.GO.transform);
+    }
+
+    private void SetGoalSprite (Node node) {
+        Destroy (goalNodeGO);
+
+        goalNodeGO = Instantiate (goalPrefab, node.GO.transform);
+    }
+    
 }

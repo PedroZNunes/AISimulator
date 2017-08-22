@@ -1,12 +1,12 @@
 fileFormatVersion: 2
 guid: a03408ccae7b735419338e44c4d2a0bf
-timeCreated: 1502893283
+timeCreated: 1503412214
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: Link_0
-    21300002: Link_1
-    21300004: Link_2
+    21300000: Link_inactive
+    21300002: Link_active
+    21300004: Link_explored
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Link_0
+      name: Link_inactive
       rect:
         serializedVersion: 2
         x: 0
@@ -110,7 +110,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: Link_1
+      name: Link_active
       rect:
         serializedVersion: 2
         x: 32
@@ -123,7 +123,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: Link_2
+      name: Link_explored
       rect:
         serializedVersion: 2
         x: 0
@@ -131,7 +131,7 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
