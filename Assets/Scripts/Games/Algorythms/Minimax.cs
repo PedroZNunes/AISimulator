@@ -29,7 +29,7 @@ public class Minimax : GamesAlgorythm {
         for (int i = 0 ; i < node.links.Length ; i++) {
            
             //look at the next children, pass its alpha and beta to it.
-            int value = CheckNode (node.links[i].GetOther (node), node.alpha, node.beta);
+            int value = CheckNode (node.GetOther (i), node.alpha, node.beta);
             //if the children is a maximizer or a minimizer, the the loop will go on.
             //if the children is a leaf, the leaf passes the value back up to the parent
 

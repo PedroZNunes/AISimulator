@@ -23,7 +23,7 @@ public class TreeGenerator : MonoBehaviour {
     private float stepY;
 
     private int branching;
-    private int treeDepth;
+    static public int treeDepth { get; private set; }
 
     static public GamesNode Root { get; private set; }
 
@@ -39,11 +39,11 @@ public class TreeGenerator : MonoBehaviour {
         Debug.Log ("Generating map.");
         grain = 0;
         this.branching = branching;
-        this.treeDepth = depth;
+        treeDepth = depth;
 
         NodeType nodeType = NodeType.Max;
 
-        Root = new GamesNode (branching, depth, 0, nodeType, null);
+        Root = new GamesNode (branching, 0, nodeType, null);
 
         VisualizeTree ();
     }
@@ -67,7 +67,7 @@ public class TreeGenerator : MonoBehaviour {
 
         //spawn node with position relative to parent.
         for (int i = 0 ; i < branching ; i++) {
-            GamesNode toSpawn = parentNode.links[i].GetOther (parentNode);
+            GamesNode toSpawn = parentNode.GetOther (i);
             //calculate position
             Vector2 step = new Vector2 ();
             step.x = Mathf.Pow (branching, treeDepth - toSpawn.depth);

@@ -24,6 +24,9 @@ public class TreeSearcher : MonoBehaviour {
     [SerializeField]
     private Sprite exploredNode;
 
+    [SerializeField]
+    private Sprite prunedNode;
+
 
     private static Stack<Link> activeLinks = new Stack<Link> ();
     private static Stack<Link> exploredLinks = new Stack<Link> ();
@@ -77,5 +80,10 @@ public class TreeSearcher : MonoBehaviour {
 
     public void SetAlgorythm (GamesAlgorythm algorythm) {
         this.algorythm = algorythm;
+    }
+
+    static public void VisualizePath () {
+        
+
     }
 }
