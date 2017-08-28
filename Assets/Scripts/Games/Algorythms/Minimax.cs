@@ -2,57 +2,71 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Minimax : GamesAlgorythm {
 
-
-    public override IEnumerator Search (GamesNode root, int branching, int depth, int framesPerSecond) {
+    public override void Search (GamesNode root, int branching, int depth, int framesPerSecond) {
         IsSearching = true;
+        fps = framesPerSecond;
 
-        int output = CheckNode (root);
+        CheckNode (root);
 
-        Debug.LogFormat ("The output is {0}.", output);
+        CalculateSkippedNodes ();
 
-        yield return 0;
+        if (root.leafID != null)
+            NodeAnalyzed (GamesNode.GetByID ((int) root.leafID));
+
+        Debug.LogFormat ("The output is {0}, from leaf {1}", root.value, root.leafID);
 
         IsSearching = false;
     }
 
-    private int CheckNode (GamesNode node) {
-        return CheckNode (node, int.MinValue, int.MaxValue);
+    private void CheckNode (GamesNode node) {
+        CheckNode (node, int.MinValue, int.MaxValue);
     }
 
-    private int CheckNode (GamesNode node, int alpha, int beta) {
+    /// <summary>
+    /// Checks node passing current alpha and beta to it
+    /// </summary>
+    /// <param name="node">node to be checked</param>
+    /// <param name="alpha">best value in the path to the root for the maximizer</param>
+    /// <param name="beta">best value in the path to the root for the minimizer</param>
+    /// <param name="leafID">The ID of the leaf that holds the value being returned by the function</param>
+    /// <returns>the value of the node</returns>
+    private void CheckNode (GamesNode node, int alpha, int beta) {
         //initialize the node
         node.alpha = alpha;
         node.beta = beta;
 
         for (int i = 0 ; i < node.links.Length ; i++) {
-           
             //look at the next children, pass its alpha and beta to it.
-            int value = CheckNode (node.GetOther (i), node.alpha, node.beta);
+            GamesNode other = node.GetOther (i);
+            CheckNode (other, node.alpha, node.beta);
             //if the children is a maximizer or a minimizer, the the loop will go on.
             //if the children is a leaf, the leaf passes the value back up to the parent
 
             //if (minimizer) new value < value - assign and update beta
             if (node.nodeType == NodeType.Min) {
-                if (value < node.value) {
-                    node.value = value;
-                    node.beta = value;
+                if (other.value < node.value) {
+                    node.value = other.value;
+                    node.leafID = other.leafID;
+                    node.beta = other.value;
                 }
             }
             //if (maximizer) new value > value - assign and update alpha
             else {
-                if (value > node.value) {
-                    node.value = value;
-                    node.alpha = value;
+                if (other.value > node.value) {
+                    node.value = other.value;
+                    node.leafID = other.leafID;
+                    node.alpha = other.value;
                 }
             }
         }
 
-        if (node.links.Length == 0)
+        if (node.links.Length == 0) {
             NodeAnalyzed (node);
+        }
 
-        return node.value;
     }
 
 }

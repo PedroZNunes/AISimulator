@@ -185,7 +185,7 @@ public class UIGames : MonoBehaviour {
 
         while (path.Count > 0) {
             GamesLink link = path.Dequeue ();
-            sr = link.go.GetComponent<SpriteRenderer> ();
+            sr = link.GO.GetComponent<SpriteRenderer> ();
             switch (leaf.nodeState) {
                 case NodeState.Active:
                     sr.sprite = activeLink;
@@ -210,7 +210,6 @@ public class UIGames : MonoBehaviour {
         ResetOutput ();
 
         if (!GamesAlgorythm.IsSearching) {
-
             if (SearchEvent != null)
                 SearchEvent (algorythm, branching, depth, fps);
         }

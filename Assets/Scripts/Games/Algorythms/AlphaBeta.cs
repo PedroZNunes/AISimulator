@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class AlphaBeta : GamesAlgorythm {
 
 
-    public override IEnumerator Search (GamesNode root, int branching, int depth, int framesPerSecond) {
+    public override void Search (GamesNode root, int branching, int depth, int framesPerSecond) {
         IsSearching = true;
+        fps = framesPerSecond;
 
         CheckNode (root);
 
@@ -17,7 +19,6 @@ public class AlphaBeta : GamesAlgorythm {
 
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.value, root.leafID);
 
-        yield return 0;
         IsSearching = false;
     }
 

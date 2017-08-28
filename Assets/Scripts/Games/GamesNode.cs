@@ -33,7 +33,7 @@ public class GamesNode {
     static private List<GamesNode> nodes = new List<GamesNode> ();
     static public List<GamesNode> Nodes { get { return nodes; } }
 
-    static private List<GamesNode> leafs= new List<GamesNode> ();
+    static private List<GamesNode> leafs = new List<GamesNode> ();
     static public List<GamesNode> Leafs { get { return leafs; } }
 
 
@@ -73,6 +73,12 @@ public class GamesNode {
 
     public void SetState (NodeState nodeState) {
         this.nodeState = nodeState;
+    }
+
+    static public void Reset () {
+        nodes = new List<GamesNode> ();
+        leafs = new List<GamesNode> ();
+        Count = 0;
     }
 
     static public GamesNode GetByID (int id) {

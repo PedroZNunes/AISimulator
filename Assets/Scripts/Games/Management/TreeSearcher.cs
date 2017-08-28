@@ -10,11 +10,6 @@ public class TreeSearcher : MonoBehaviour {
 
     private GamesAlgorythm algorythm;
 
-    private static Stack<Link> activeLinks = new Stack<Link> ();
-    private static Stack<Link> exploredLinks = new Stack<Link> ();
-    private static Stack<Node> activeNodes = new Stack<Node> ();
-    private static Stack<Node> exploredNodes = new Stack<Node> ();
-
     static private TreeSearcher instance;
 
     private void Awake () {
@@ -49,7 +44,7 @@ public class TreeSearcher : MonoBehaviour {
             if (this.algorythm != null) {
                 if (!GamesAlgorythm.IsSearching) {
                     Debug.LogFormat ("Reading Tree using {0}.", algorythm);
-                    StartCoroutine (this.algorythm.Search (TreeGenerator.Root, branching, depth, framesPerSecond));
+                    this.algorythm.Search (TreeGenerator.Root, branching, depth, framesPerSecond);
                 }
                 else {
                     Debug.LogWarning ("Another search in progress.");

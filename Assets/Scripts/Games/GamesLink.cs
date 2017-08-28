@@ -7,7 +7,7 @@ public class GamesLink {
     public GamesNode a { get; private set; }
     public GamesNode b { get; private set; }
 
-    public GameObject go;
+    public GameObject GO;
 
     static private List<GamesLink> links = new List<GamesLink> ();
     static public List<GamesLink> Links { get { return links; } }
@@ -17,6 +17,10 @@ public class GamesLink {
         this.b = b;
 
         links.Add (this);
+    }
+
+    static public void Reset () {
+        links = new List<GamesLink> ();
     }
 
     public bool Contains (GamesNode node) {

@@ -1,12 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using System;
+using Object = UnityEngine.Object;
 
 public class TreeGenerator : MonoBehaviour {
 
     public delegate void SetCameraHandler (int depth, int branch, float stepY);
     static public event SetCameraHandler SetCameraEvent;
+
+    static public event Action ResetTreeEvent;
 
     [SerializeField]
     private GameObject minPrefab;
@@ -35,6 +37,18 @@ public class TreeGenerator : MonoBehaviour {
         UIGames.GenerateMapEvent -= Generate;
     }
 
+    private void ResetTree () {
+        for (int i = 0 ; i < GamesNode.Nodes.Count ; i++) {
+            Destroy (GamesNode.Nodes[i].GO);
+        }
+        GamesNode.Reset ();
+
+        for (int i = 0 ; i < GamesLink.Links.Count ; i++) {
+            Destroy (GamesLink.Links[i].GO);
+        }
+        GamesLink.Reset ();
+    }
+
     private void Generate (int branching, int depth, int grain) {
         Debug.Log ("Generating map.");
         grain = 0;
@@ -42,6 +56,9 @@ public class TreeGenerator : MonoBehaviour {
         treeDepth = depth;
 
         NodeType nodeType = NodeType.Max;
+
+        ResetTree ();
+
 
         Root = new GamesNode (branching, 0, nodeType);
 
@@ -109,7 +126,7 @@ public class TreeGenerator : MonoBehaviour {
             go.transform.localScale = new Vector3 (1f, scale * 4, 1f);
             go.transform.eulerAngles = new Vector3 (0f, 0f, (float) angle);
 
-            parentNode.links[i].go = go;
+            parentNode.links[i].GO = go;
 
             //then spawn the nodes linked to each linked node
             SpawnLinksOf (toSpawn);
