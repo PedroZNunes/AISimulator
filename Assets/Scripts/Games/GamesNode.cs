@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public enum NodeType { Min, Max }
@@ -7,36 +6,34 @@ public enum NodeState { Active, Inactive, Explored, Pruned }
 
 public class GamesNode {
 
-    static public int Count { get; private set; }
+    static public int Count { get; private set; } //counter updated at every node spawn
 
-    public int ID { get; private set; }
+    static private List<GamesNode> nodes = new List<GamesNode> (); //list of all nodes
+    static public List<GamesNode> Nodes { get { return nodes; } }
 
-    [HideInInspector]
-    public GameObject GO;
+    static private List<GamesNode> leafs = new List<GamesNode> (); //list of all leafs
+    static public List<GamesNode> Leafs { get { return leafs; } }
 
-    public GamesLink parentLink = null;
+    [HideInInspector] public GameObject GO; //GO spawned for this node
 
-    public NodeState nodeState { get; private set; }
-    public NodeType nodeType { get; private set; }
+    public GamesLink parentLink = null; //link to the parent
+
+    public NodeState nodeState { get; private set; } //active, inactive, explored...? the UI uses this
+    public NodeType nodeType { get; private set; } //min or max node?
+
+    public int ID { get; private set; }//unique identification number
+    public int? leafID; //the ID from the leaf where the value came from. Useful for tracing the path
+    
+    public int alpha; //the best value on the path to the root for the maximizer
+    public int beta; //the best value on the path to the root for the minimizer
+    public int value; //current value of the node
+
     public GamesLink[] links { get; private set; }
-
-    public int? leafID;
-    public int value;
-
-    public int alpha;
-    public int beta;
-
     public int depth { get; private set; }
 
     private float randomSeed;
 
-    static private List<GamesNode> nodes = new List<GamesNode> ();
-    static public List<GamesNode> Nodes { get { return nodes; } }
-
-    static private List<GamesNode> leafs = new List<GamesNode> ();
-    static public List<GamesNode> Leafs { get { return leafs; } }
-
-
+    //recursive constructor that ends up creating all tree by itself
     public GamesNode (int branching, int currentDepth, NodeType type) {
         ID = Count++;
 
@@ -75,12 +72,20 @@ public class GamesNode {
         this.nodeState = nodeState;
     }
 
+    /// <summary>
+    /// Resets all static values
+    /// </summary>
     static public void Reset () {
         nodes = new List<GamesNode> ();
         leafs = new List<GamesNode> ();
         Count = 0;
     }
 
+    /// <summary>
+    /// Searches for a node that matches the requested ID
+    /// </summary>
+    /// <param name="id">node identification number ID</param>
+    /// <returns>the node</returns>
     static public GamesNode GetByID (int id) {
         for (int i = 0 ; i < nodes.Count ; i++) {
             if (nodes[i].ID == id)
@@ -106,6 +111,10 @@ public class GamesNode {
             return null;
     }
 
+    /// <summary>
+    /// returns the node's parent node.
+    /// </summary>
+    /// <returns> the parent node </returns>
     public GamesNode GetParent () {
         if (parentLink == null)
             return null;
@@ -126,7 +135,7 @@ public class GamesNode {
         return (a.GetHashCode () != b.GetHashCode ());
     }
 
-    public bool Equals (GamesNode other) {
+    public bool Equals (GamesNode other) { 
         return Equals (other, this);
     }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -7,7 +6,7 @@ using System;
 public class UIGames : MonoBehaviour {
 
     //events
-    public delegate void GenerateMapHandler (int branching, int depth, int grain);
+    public delegate void GenerateMapHandler (int branching, int depth);
     static public event GenerateMapHandler GenerateMapEvent;
 
     public delegate void SearchHandler (string algorythm, int branching, int depth, int fps);
@@ -15,7 +14,7 @@ public class UIGames : MonoBehaviour {
 
     //output
     [SerializeField] private Text analyzedValue;
-    [SerializeField] private Text skippedValue;
+    [SerializeField] private Text prunedValue;
     [SerializeField] private Text percentValue;
 
     //map generation inputs
@@ -28,6 +27,7 @@ public class UIGames : MonoBehaviour {
     [SerializeField] private Dropdown algorythmDropdownInput;
     [SerializeField] private InputField fpsInput;
 
+    //links and nodes prefabs
     [SerializeField] private Sprite inactiveLink;
     [SerializeField] private Sprite inactiveNode;
     [SerializeField] private Sprite activeLink;
@@ -38,23 +38,21 @@ public class UIGames : MonoBehaviour {
 
     public int branching { get; private set; }
     public int depth { get; private set; }
-    public int grain { get; private set; }
     public string algorythm { get; private set; }
-    public int fps { get; private set; }
-
+    public int fps { get; private set; } //does nothing so far
 
     static private UIGames instance;
 
     //events
     private void OnEnable () {
-        TreeSearcher.TreeUpdated += UpdatePaths;
+        TreeSearcher.TreeUpdatedEvent += UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
-        GamesAlgorythm.SkippedNodesEvent += CalculateSkipped;
+        GamesAlgorythm.PrunedNodesEvent += CountPruned;
     }
     private void OnDisable () {
-        TreeSearcher.TreeUpdated -= UpdatePaths;
+        TreeSearcher.TreeUpdatedEvent -= UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent -= IncrementAnalyzed;
-        GamesAlgorythm.SkippedNodesEvent -= CalculateSkipped;
+        GamesAlgorythm.PrunedNodesEvent -= CountPruned;
     }
 
     private void Awake () {
@@ -72,7 +70,6 @@ public class UIGames : MonoBehaviour {
         //map generation
         SetBranching ();
         SetDepth ();
-        SetGrain ();
 
         //search
         SetFPS ();
@@ -97,47 +94,11 @@ public class UIGames : MonoBehaviour {
         fpsInput.text = "2";
     }
 
-    private void ResetOutput () {
-        analyzedValue.text = "0";
-        skippedValue.text = "0";
-        percentValue.text = "0";
-    }
-
-    public void SetGrain () { grain = Int32.Parse (instance.grainInput.text); }
-
-    public void SetFPS () { fps = Int32.Parse (instance.fpsInput.text); }
-
-    public void SetBranching () { branching = Int32.Parse (instance.branchingInput.text); }
-
-    public void SetDepth () { depth = Int32.Parse (instance.depthInput.text); }
-
-    public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
-
-    private void IncrementAnalyzed (GamesNode node) {
-        int analyzed = Int32.Parse (analyzedValue.text);
-
-        analyzedValue.text = (++analyzed).ToString ();
-    }
-
-    private void CalculateSkipped () {
-        int analyzed = Int32.Parse (analyzedValue.text);
-        float total = Mathf.Pow (branching, depth);
-
-        skippedValue.text = (total - analyzed).ToString ();
-        UpdatePercent ();
-    }
-
-    private void UpdatePercent () {
-        int skipped = Int32.Parse (skippedValue.text);
-        float total = Mathf.Pow (branching, depth);
-        float percent = skipped / total * 100;
-
-        percentValue.text = String.Format ("{0:0.00}%", percent);
-    }
-
+    /// <summary>
+    /// Updates the path sprites
+    /// </summary>
+    /// <param name="leafs">leaf array used as base for the tree's link states</param>
     private void UpdatePaths (GamesNode[] leafs) {
-
-
         SpriteRenderer sr = new SpriteRenderer ();
         GamesNode activeLeaf = null;
         //update everything except for the active leaf
@@ -173,6 +134,10 @@ public class UIGames : MonoBehaviour {
         TracePathToRoot (activeLeaf);
     }
 
+    /// <summary>
+    ///traces the path from the leaf back to the root
+    /// </summary>
+    /// <param name="leaf"></param>
     private void TracePathToRoot(GamesNode leaf) {
         Queue<GamesLink> path = new Queue<GamesLink> ();
         SpriteRenderer sr = new SpriteRenderer ();
@@ -203,16 +168,53 @@ public class UIGames : MonoBehaviour {
         ResetOutput ();
 
         if (GenerateMapEvent != null)
-            GenerateMapEvent (branching, depth, grain);
+            GenerateMapEvent (branching, depth);
     }
 
     public void Search () {
         ResetOutput ();
 
-        if (!GamesAlgorythm.IsSearching) {
-            if (SearchEvent != null)
-                SearchEvent (algorythm, branching, depth, fps);
-        }
+        if (SearchEvent != null)
+            SearchEvent (algorythm, branching, depth, fps);
     }
+
+    private void IncrementAnalyzed (GamesNode node) {
+        int analyzed = Int32.Parse (analyzedValue.text);
+
+        analyzedValue.text = (++analyzed).ToString ();
+    }
+
+    /// <summary>
+    /// Count how many nodes have been cut-off from the process
+    /// </summary>
+    private void CountPruned () {
+        int analyzed = Int32.Parse (analyzedValue.text);
+        float total = Mathf.Pow (branching, depth);
+
+        prunedValue.text = (total - analyzed).ToString ();
+        UpdatePercent ();
+    }
+
+    private void UpdatePercent () {
+        int skipped = Int32.Parse (prunedValue.text);
+        float total = Mathf.Pow (branching, depth);
+        float percent = skipped / total * 100;
+
+        percentValue.text = String.Format ("{0:0.00}%", percent);
+    }
+
+    private void ResetOutput () {
+        analyzedValue.text = "0";
+        prunedValue.text = "0";
+        percentValue.text = "0";
+    }
+
+    //A series of input-related functions
+    public void SetFPS () { fps = Int32.Parse (instance.fpsInput.text); }
+    public void SetBranching () { branching = Int32.Parse (instance.branchingInput.text); }
+    public void SetDepth () { depth = Int32.Parse (instance.depthInput.text); }
+    public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
+
+
 
 }

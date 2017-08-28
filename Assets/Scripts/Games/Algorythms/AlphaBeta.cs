@@ -5,21 +5,15 @@ using UnityEngine;
 
 public class AlphaBeta : GamesAlgorythm {
 
-
-    public override void Search (GamesNode root, int branching, int depth, int framesPerSecond) {
-        IsSearching = true;
-        fps = framesPerSecond;
-
+    public override void Search (GamesNode root, int branching, int depth) {
         CheckNode (root);
 
-        CalculateSkippedNodes ();
+        CalculatePruned ();
 
         if (root.leafID != null)
             NodeAnalyzed (GamesNode.GetByID ((int) root.leafID));
 
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.value, root.leafID);
-
-        IsSearching = false;
     }
 
     private void CheckNode (GamesNode node) {

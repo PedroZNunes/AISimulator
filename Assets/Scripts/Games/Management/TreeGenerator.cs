@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class TreeGenerator : MonoBehaviour {
@@ -8,26 +6,18 @@ public class TreeGenerator : MonoBehaviour {
     public delegate void SetCameraHandler (int depth, int branch, float stepY);
     static public event SetCameraHandler SetCameraEvent;
 
-    static public event Action ResetTreeEvent;
+    //prefabs
+    [SerializeField] private GameObject minPrefab;
+    [SerializeField] private GameObject maxPrefab;
+    [SerializeField] private GameObject leafPrefab;
+    [SerializeField] private GameObject linkPrefab;
 
-    [SerializeField]
-    private GameObject minPrefab;
+    private int branching; //how many branches leave each node
+    static public int treeDepth { get; private set; } // the amount of levels the tree has
+    
+    private float spacingY; //used for placement in the grid, spacing in Y
 
-    [SerializeField]
-    private GameObject maxPrefab;
-
-    [SerializeField]
-    private GameObject leafPrefab;
-
-    [SerializeField]
-    private GameObject linkPrefab;
-
-    private float stepY;
-
-    private int branching;
-    static public int treeDepth { get; private set; }
-
-    static public GamesNode Root { get; private set; }
+    static public GamesNode Root { get; private set; } //the root node
 
     //events
     private void OnEnable () {
@@ -37,21 +27,9 @@ public class TreeGenerator : MonoBehaviour {
         UIGames.GenerateMapEvent -= Generate;
     }
 
-    private void ResetTree () {
-        for (int i = 0 ; i < GamesNode.Nodes.Count ; i++) {
-            Destroy (GamesNode.Nodes[i].GO);
-        }
-        GamesNode.Reset ();
-
-        for (int i = 0 ; i < GamesLink.Links.Count ; i++) {
-            Destroy (GamesLink.Links[i].GO);
-        }
-        GamesLink.Reset ();
-    }
-
-    private void Generate (int branching, int depth, int grain) {
+    //generate the map
+    private void Generate (int branching, int depth) {
         Debug.Log ("Generating map.");
-        grain = 0;
         this.branching = branching;
         treeDepth = depth;
 
@@ -59,12 +37,12 @@ public class TreeGenerator : MonoBehaviour {
 
         ResetTree ();
 
-
         Root = new GamesNode (branching, 0, nodeType);
 
         VisualizeTree ();
     }
 
+    //tree to screen
     private void VisualizeTree () {
         //spawn the first node
         GameObject go = (GameObject) Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
@@ -74,10 +52,11 @@ public class TreeGenerator : MonoBehaviour {
         SpawnLinksOf (Root);
 
         if (SetCameraEvent != null) {
-            SetCameraEvent (treeDepth, branching, stepY);
+            SetCameraEvent (treeDepth, branching, spacingY);
         }
     }
 
+    //recursive spawning 
     private void SpawnLinksOf (GamesNode parentNode) {
         if (parentNode.depth == treeDepth)
             return;
@@ -88,7 +67,7 @@ public class TreeGenerator : MonoBehaviour {
             //calculate position
             Vector2 step = new Vector2 ();
             step.x = Mathf.Pow (branching, treeDepth - toSpawn.depth);
-            step.y = stepY = branching + (branching * branching / treeDepth) ;
+            step.y = spacingY = branching + (branching * branching / treeDepth) ;
 
             float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2);
             float posY = parentNode.GO.transform.position.y - step.y;
@@ -131,6 +110,19 @@ public class TreeGenerator : MonoBehaviour {
             //then spawn the nodes linked to each linked node
             SpawnLinksOf (toSpawn);
         }
+    }
+
+    //reset the tree for generating another one
+    private void ResetTree () {
+        for (int i = 0 ; i < GamesNode.Nodes.Count ; i++) {
+            Destroy (GamesNode.Nodes[i].GO);
+        }
+        GamesNode.Reset ();
+
+        for (int i = 0 ; i < GamesLink.Links.Count ; i++) {
+            Destroy (GamesLink.Links[i].GO);
+        }
+        GamesLink.Reset ();
     }
 
 }

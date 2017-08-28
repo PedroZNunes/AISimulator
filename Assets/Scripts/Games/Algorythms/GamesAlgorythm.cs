@@ -8,24 +8,25 @@ public class GamesAlgorythm {
     public delegate void NodeAnalyzedHandler (GamesNode node);
     static public event NodeAnalyzedHandler NodeAnalyzedEvent;
 
-    static public event Action SkippedNodesEvent;
+    static public event Action PrunedNodesEvent;
 
-    static public event Action ResetUIEvent;
+    public virtual void Search (GamesNode root, int branching, int depth) { }
 
-    protected int fps;
-
-    static public bool IsSearching { get; protected set; }
-
-    public virtual void Search (GamesNode root, int branching, int depth, int framesPerSecond) { }
-
+    /// <summary>
+    /// function to proc the event warning that a node has been analyzed.
+    /// </summary>
+    /// <param name="node"> the node that has been analyzed </param>
     protected void NodeAnalyzed (GamesNode node) {
         if (NodeAnalyzedEvent != null)
             NodeAnalyzedEvent (node);
     }
 
-    protected void CalculateSkippedNodes () {
-        if (SkippedNodesEvent != null)
-            SkippedNodesEvent ();
+    /// <summary>
+    /// function to proc the event warning that the UI should calculate the nodes that were pruned.
+    /// </summary>
+    protected void CalculatePruned () {
+        if (PrunedNodesEvent != null)
+            PrunedNodesEvent ();
     }
 
 }

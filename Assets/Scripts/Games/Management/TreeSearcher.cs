@@ -1,20 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using UnityEngine;
 
 public class TreeSearcher : MonoBehaviour {
 
     public delegate void TreeUpdatedHandler (GamesNode[] leafs);
-    static public event TreeUpdatedHandler TreeUpdated;
+    static public event TreeUpdatedHandler TreeUpdatedEvent;
 
     private GamesAlgorythm algorythm;
 
     static private TreeSearcher instance;
-
-    private void Awake () {
-        instance = FindObjectOfType<TreeSearcher> ();
-    }
 
     private void OnEnable () {
         UIGames.SearchEvent += StartSearching;
@@ -23,6 +16,10 @@ public class TreeSearcher : MonoBehaviour {
     private void OnDisable () {
         UIGames.SearchEvent -= StartSearching;
         GamesAlgorythm.NodeAnalyzedEvent -= SetLeafStates;
+    }
+
+    private void Awake () {
+        instance = FindObjectOfType<TreeSearcher> ();
     }
 
     public void StartSearching (string algorythm, int branching, int depth, int framesPerSecond) {
@@ -42,13 +39,8 @@ public class TreeSearcher : MonoBehaviour {
             }
 
             if (this.algorythm != null) {
-                if (!GamesAlgorythm.IsSearching) {
-                    Debug.LogFormat ("Reading Tree using {0}.", algorythm);
-                    this.algorythm.Search (TreeGenerator.Root, branching, depth, framesPerSecond);
-                }
-                else {
-                    Debug.LogWarning ("Another search in progress.");
-                }
+                Debug.LogFormat ("Reading Tree using {0}.", algorythm);
+                this.algorythm.Search (TreeGenerator.Root, branching, depth);
             }
         }
         else
@@ -80,8 +72,8 @@ public class TreeSearcher : MonoBehaviour {
             }
         }
 
-        if (TreeUpdated != null) {
-            TreeUpdated (leafs);
+        if (TreeUpdatedEvent != null) {
+            TreeUpdatedEvent (leafs);
         }
 
     }
