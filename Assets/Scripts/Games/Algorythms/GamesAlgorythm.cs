@@ -5,7 +5,9 @@ using System;
 
 public class GamesAlgorythm  {
 
-    static public event Action NodeAnalyzedEvent;
+    public delegate void NodeAnalyzedHandler (GamesNode node);
+    static public event NodeAnalyzedHandler NodeAnalyzedEvent;
+
     static public event Action SkippedNodesEvent;
 
     static public event Action ResetUIEvent;
@@ -14,9 +16,9 @@ public class GamesAlgorythm  {
 
     public virtual IEnumerator Search (GamesNode root, int branching, int depth, int framesPerSecond) { return null; }
 
-    protected void NodeAnalyzed () {
+    protected void NodeAnalyzed (GamesNode node) {
         if (NodeAnalyzedEvent != null)
-            NodeAnalyzedEvent ();
+            NodeAnalyzedEvent (node);
     }
 
     protected void CalculateSkippedNodes () {

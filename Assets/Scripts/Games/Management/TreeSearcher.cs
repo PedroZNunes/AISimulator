@@ -1,32 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TreeSearcher : MonoBehaviour {
 
+    public delegate void TreeUpdatedHandler (GamesNode[] leafs);
+    static public event TreeUpdatedHandler TreeUpdated;
+
     private GamesAlgorythm algorythm;
-
-    [SerializeField]
-    private Sprite inactiveLink;
-
-    [SerializeField]
-    private Sprite inactiveNode;
-
-    [SerializeField]
-    private Sprite activeLink;
-
-    [SerializeField]
-    private Sprite activeNode;
-
-    [SerializeField]
-    private Sprite exploredLink;
-
-    [SerializeField]
-    private Sprite exploredNode;
-
-    [SerializeField]
-    private Sprite prunedNode;
-
 
     private static Stack<Link> activeLinks = new Stack<Link> ();
     private static Stack<Link> exploredLinks = new Stack<Link> ();
@@ -41,9 +23,11 @@ public class TreeSearcher : MonoBehaviour {
 
     private void OnEnable () {
         UIGames.SearchEvent += StartSearching;
+        GamesAlgorythm.NodeAnalyzedEvent += SetLeafStates;
     }
     private void OnDisable () {
         UIGames.SearchEvent -= StartSearching;
+        GamesAlgorythm.NodeAnalyzedEvent -= SetLeafStates;
     }
 
     public void StartSearching (string algorythm, int branching, int depth, int framesPerSecond) {
@@ -64,8 +48,6 @@ public class TreeSearcher : MonoBehaviour {
 
             if (this.algorythm != null) {
                 if (!GamesAlgorythm.IsSearching) {
-                    //HardResetPathVisualization ();
-                    //this.algorythm.ResetUI ();
                     Debug.LogFormat ("Reading Tree using {0}.", algorythm);
                     StartCoroutine (this.algorythm.Search (TreeGenerator.Root, branching, depth, framesPerSecond));
                 }
@@ -82,8 +64,31 @@ public class TreeSearcher : MonoBehaviour {
         this.algorythm = algorythm;
     }
 
-    static public void VisualizePath () {
-        
+    private void SetLeafStates (GamesNode node) {
+        GamesNode[] leafs = GamesNode.Leafs.ToArray ();
+        for (int i = 0 ; i < leafs.Length ; i++) {
+
+            if (leafs[i].ID == node.ID) {
+                leafs[i].SetState (NodeState.Active);
+            }
+            else if (leafs[i].nodeState == NodeState.Explored) {
+                continue;
+            }
+            else if (leafs[i].nodeState == NodeState.Active) {
+                leafs[i].SetState (NodeState.Explored);
+            }
+            else if (leafs[i].ID < node.ID) {
+                leafs[i].SetState (NodeState.Pruned);
+            }
+            else {
+                leafs[i].SetState (NodeState.Inactive);
+            }
+        }
+
+        if (TreeUpdated != null) {
+            TreeUpdated (leafs);
+        }
 
     }
+
 }

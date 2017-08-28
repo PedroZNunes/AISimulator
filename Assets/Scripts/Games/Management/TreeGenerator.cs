@@ -43,7 +43,7 @@ public class TreeGenerator : MonoBehaviour {
 
         NodeType nodeType = NodeType.Max;
 
-        Root = new GamesNode (branching, 0, nodeType, null);
+        Root = new GamesNode (branching, 0, nodeType);
 
         VisualizeTree ();
     }

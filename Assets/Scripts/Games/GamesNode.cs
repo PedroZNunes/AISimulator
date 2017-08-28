@@ -14,7 +14,7 @@ public class GamesNode {
     [HideInInspector]
     public GameObject GO;
 
-    public GamesLink parentLink;
+    public GamesLink parentLink = null;
 
     public NodeState nodeState { get; private set; }
     public NodeType nodeType { get; private set; }
@@ -31,16 +31,19 @@ public class GamesNode {
     private float randomSeed;
 
     static private List<GamesNode> nodes = new List<GamesNode> ();
+    static public List<GamesNode> Nodes { get { return nodes; } }
 
-    public GamesNode (int branching, int currentDepth, NodeType type, GamesLink parentLink) {
+    static private List<GamesNode> leafs= new List<GamesNode> ();
+    static public List<GamesNode> Leafs { get { return leafs; } }
+
+
+    public GamesNode (int branching, int currentDepth, NodeType type) {
         ID = Count++;
 
         nodeType = type;
         nodeState = NodeState.Inactive;
 
         value = (nodeType == NodeType.Max) ? int.MinValue : int.MaxValue;
-
-        this.parentLink = parentLink;
 
         alpha = int.MinValue;
         beta = int.MaxValue;
@@ -53,7 +56,8 @@ public class GamesNode {
             links = new GamesLink[branching];
             for (int i = 0 ; i < links.Length ; i++) {
                 NodeType newType = ((currentDepth + 1) % 2 == 0) ? NodeType.Max : NodeType.Min;
-                links[i] = new GamesLink (this, new GamesNode (branching, currentDepth + 1, newType, links[i]));
+                links[i] = new GamesLink (this, new GamesNode (branching, currentDepth + 1, newType));
+                links[i].b.parentLink = links[i];
             }
             leafID = null;
         }
@@ -61,20 +65,23 @@ public class GamesNode {
             links = new GamesLink[0];
             value = Random.Range (0, 20);
             leafID = ID;
+            leafs.Add (this);
         }
 
         nodes.Add (this);
     }
 
-    public GamesNode GetByID (int id) {
+    public void SetState (NodeState nodeState) {
+        this.nodeState = nodeState;
+    }
+
+    static public GamesNode GetByID (int id) {
         for (int i = 0 ; i < nodes.Count ; i++) {
             if (nodes[i].ID == id)
                 return nodes[i];
         }
         return null;
     }
-
-
 
     /// <summary>
     /// gets the other node connected to a link
@@ -93,6 +100,17 @@ public class GamesNode {
             return null;
     }
 
+    public GamesNode GetParent () {
+        if (parentLink == null)
+            return null;
+
+        if (this == parentLink.a)
+            return parentLink.b;
+        else if (this == parentLink.b)
+            return parentLink.a;
+        else
+            return null;
+    }
 
     public static bool operator == (GamesNode a, GamesNode b) {
         return (a.GetHashCode () == b.GetHashCode ());

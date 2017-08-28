@@ -50,7 +50,7 @@ public class Minimax : GamesAlgorythm {
         }
 
         if (node.links.Length == 0)
-            NodeAnalyzed ();
+            NodeAnalyzed (node);
 
         return node.value;
     }

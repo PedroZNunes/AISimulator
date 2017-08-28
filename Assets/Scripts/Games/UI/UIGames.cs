@@ -14,27 +14,27 @@ public class UIGames : MonoBehaviour {
     static public event SearchHandler SearchEvent;
 
     //output
-    [SerializeField]
-    private Text analyzedValue;
-    [SerializeField]
-    private Text skippedValue;
-    [SerializeField]
-    private Text percentValue;
+    [SerializeField] private Text analyzedValue;
+    [SerializeField] private Text skippedValue;
+    [SerializeField] private Text percentValue;
 
     //map generation inputs
-    [SerializeField]
-    private InputField branchingInput;
+    [SerializeField] private InputField branchingInput;
 
-    [SerializeField]
-    private InputField depthInput;
-    [SerializeField]
-    private InputField grainInput;
+    [SerializeField] private InputField depthInput;
+    [SerializeField] private InputField grainInput;
 
     //search inputs
-    [SerializeField]
-    private Dropdown algorythmDropdownInput;
-    [SerializeField]
-    private InputField fpsInput;
+    [SerializeField] private Dropdown algorythmDropdownInput;
+    [SerializeField] private InputField fpsInput;
+
+    [SerializeField] private Sprite inactiveLink;
+    [SerializeField] private Sprite inactiveNode;
+    [SerializeField] private Sprite activeLink;
+    [SerializeField] private Sprite activeNode;
+    [SerializeField] private Sprite exploredLink;
+    [SerializeField] private Sprite exploredNode;
+    [SerializeField] private Sprite prunedNode;
 
     public int branching { get; private set; }
     public int depth { get; private set; }
@@ -47,10 +47,12 @@ public class UIGames : MonoBehaviour {
 
     //events
     private void OnEnable () {
+        TreeSearcher.TreeUpdated += UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
         GamesAlgorythm.SkippedNodesEvent += CalculateSkipped;
     }
     private void OnDisable () {
+        TreeSearcher.TreeUpdated -= UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent -= IncrementAnalyzed;
         GamesAlgorythm.SkippedNodesEvent -= CalculateSkipped;
     }
@@ -111,7 +113,7 @@ public class UIGames : MonoBehaviour {
 
     public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
-    private void IncrementAnalyzed () {
+    private void IncrementAnalyzed (GamesNode node) {
         int analyzed = Int32.Parse (analyzedValue.text);
 
         analyzedValue.text = (++analyzed).ToString ();
@@ -131,6 +133,70 @@ public class UIGames : MonoBehaviour {
         float percent = skipped / total * 100;
 
         percentValue.text = String.Format ("{0:0.00}%", percent);
+    }
+
+    private void UpdatePaths (GamesNode[] leafs) {
+
+
+        SpriteRenderer sr = new SpriteRenderer ();
+        GamesNode activeLeaf = null;
+        //update everything except for the active leaf
+        for (int i = 0 ; i < leafs.Length ; i++) {
+            GamesNode leaf = leafs[i];
+            sr = leaf.GO.GetComponent<SpriteRenderer> ();
+            switch (leaf.nodeState) {
+                case NodeState.Active:
+                    sr.sprite = activeNode;
+                    break;
+                case NodeState.Inactive:
+                    sr.sprite = inactiveNode;
+                    break;
+                case NodeState.Explored:
+                    sr.sprite = exploredNode;
+                    break;
+                case NodeState.Pruned:
+                    sr.sprite = prunedNode;
+                    break;
+                default:
+                    sr.sprite = inactiveNode;
+                    break;
+            }
+
+            if (leaf.nodeState == NodeState.Active) {
+                activeLeaf = leaf;
+                continue;
+            }
+
+            TracePathToRoot (leaf);
+        }
+
+        TracePathToRoot (activeLeaf);
+    }
+
+    private void TracePathToRoot(GamesNode leaf) {
+        Queue<GamesLink> path = new Queue<GamesLink> ();
+        SpriteRenderer sr = new SpriteRenderer ();
+
+        GamesNode parent = leaf;
+        while (parent != TreeGenerator.Root) {
+            path.Enqueue (parent.parentLink);
+            parent = parent.GetParent ();
+        }
+
+        while (path.Count > 0) {
+            GamesLink link = path.Dequeue ();
+            sr = link.go.GetComponent<SpriteRenderer> ();
+            switch (leaf.nodeState) {
+                case NodeState.Active:
+                    sr.sprite = activeLink;
+                    break;
+                case NodeState.Explored:
+                    sr.sprite = exploredLink;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public void GenerateMap () {

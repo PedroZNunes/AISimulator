@@ -16,57 +16,41 @@ public class UIManager : MonoBehaviour {
 
 
     //output
-    [SerializeField]
-    private Text enqueuingsValue;
-    [SerializeField]
-    private Text maxQueueSizeValue;
-    [SerializeField]
-    private Text queueSizeValue;
-    [SerializeField]
-    private Text pathLengthValue;
-    [SerializeField]
-    private Text nodesExpandedValue;
+    [SerializeField] private Text enqueuingsValue;
+    [SerializeField] private Text maxQueueSizeValue;
+    [SerializeField] private Text queueSizeValue;
+    [SerializeField] private Text pathLengthValue;
+    [SerializeField] private Text nodesExpandedValue;
 
     //map generation inputs
-    [SerializeField]
-    private Dropdown sizeDropdownInput;
+    [SerializeField] private Dropdown sizeDropdownInput;
     static private Dropdown sSizeDropdownInput;
     static public int Size { get; private set; }
 
-    [SerializeField]
-    private InputField nodeCountInput;
+    [SerializeField] private InputField nodeCountInput;
     static private InputField sNodeCountInput;
 
-    [SerializeField]
-    private InputField maxLinksInput;
+    [SerializeField] private InputField maxLinksInput;
     static private InputField sMaxLinksInput;
-    [SerializeField]
-    private InputField grainInput;
+    [SerializeField] private InputField grainInput;
     static private InputField sGrainInput;
 
     //search inputs
-    [SerializeField]
-    private Dropdown algorythmDropdownInput;
+    [SerializeField] private Dropdown algorythmDropdownInput;
     static private Dropdown sAlgorythmDropdownInput;
-    [SerializeField]
-    private InputField beamPathsInput;
+    [SerializeField] private InputField beamPathsInput;
     static private InputField sBeamPathsInput;
-    [SerializeField]
-    private InputField fpsInput;
+    [SerializeField] private InputField fpsInput;
     static private InputField sFpsInput;
 
     static private UIManager instance;
 
     //start and goal setting
-    [HideInInspector]
-    public bool settingStartNode = false;
-    [HideInInspector]
-    public bool settingGoalNode = false;
+    [HideInInspector] public bool settingStartNode = false;
+    [HideInInspector] public bool settingGoalNode = false;
 
-    [SerializeField]
-    private GameObject startPrefab;
-    [SerializeField]
-    private GameObject goalPrefab;
+    [SerializeField] private GameObject startPrefab;
+    [SerializeField] private GameObject goalPrefab;
 
     private Node startNode;
     private Node goalNode;

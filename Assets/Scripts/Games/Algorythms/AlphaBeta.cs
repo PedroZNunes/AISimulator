@@ -12,6 +12,9 @@ public class AlphaBeta : GamesAlgorythm {
 
         CalculateSkippedNodes ();
 
+        if (root.leafID != null)
+            NodeAnalyzed (GamesNode.GetByID ((int) root.leafID));
+
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.value, root.leafID);
 
         yield return 0;
@@ -77,9 +80,11 @@ public class AlphaBeta : GamesAlgorythm {
                 }
             }
         }
-         
-        if (node.links.Length == 0)
-            NodeAnalyzed ();
+
+        if (node.links.Length == 0) {
+            NodeAnalyzed (node);
+        }
+
     }
 
 }
