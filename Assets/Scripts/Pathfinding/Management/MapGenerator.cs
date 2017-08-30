@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System;
 using System.Text;
 using Random = UnityEngine.Random;
 
@@ -47,10 +45,10 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void Awake () {
-        if (instance == null)
-            instance = this;
-        else
-            Debug.LogError ("Multiple map generator instances found.");
+        if (instance == null) 
+            instance = FindObjectOfType<MapGenerator> ();
+        if (instance != this)
+            Destroy (this.gameObject);
     }
 
     public void Generate (int size, int nodeCount, int maxLinks, int grain) {

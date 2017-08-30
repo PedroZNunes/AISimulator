@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text;
 
+/// <summary>
+/// goes straight to the goal by expanding only a certain number of paths. is not optimal, but gives a path and is pretty fast. sometimes gets stuck
+/// </summary>
 public class Beam : PathfindingAlgorythm {
 
     private int maxPaths = 2;

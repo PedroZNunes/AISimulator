@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Pathfinder : MonoBehaviour {
@@ -32,15 +31,18 @@ public class Pathfinder : MonoBehaviour {
 
     static private Pathfinder instance;
 
-    private void Awake () {
-        instance = FindObjectOfType<Pathfinder> ();
-    }
-
     private void OnEnable () {
         UIManager.SearchEvent += StartPathing;
     }
     private void OnDisable () {
         UIManager.SearchEvent -= StartPathing;
+    }
+
+    private void Awake () {
+        if (instance == null) 
+            instance = FindObjectOfType<Pathfinder> ();
+        if (instance != this)
+            Destroy (this.gameObject);
     }
 
     public void StartPathing (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths) {

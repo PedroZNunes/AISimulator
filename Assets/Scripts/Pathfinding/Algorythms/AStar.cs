@@ -1,11 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text;
-
 
 /// <summary>
-/// Expands the shortest path so far
+/// Expands the path with the sortest (distance so far + distance to the goal) 
 /// </summary>
 public class AStar : PathfindingAlgorythm {
     

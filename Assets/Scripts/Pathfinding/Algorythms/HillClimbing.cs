@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text;
 
+/// <summary>
+/// goes straight to the goal by expanding only 1 path. is not optimal, but gives a path and is pretty fast. gets stuck often
+/// </summary>
 public class HillClimbing : PathfindingAlgorythm {
 
 	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {

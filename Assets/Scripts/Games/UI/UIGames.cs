@@ -57,8 +57,8 @@ public class UIGames : MonoBehaviour {
 
     private void Awake () {
         if (instance == null)
-            instance = this;
-        else
+            instance = FindObjectOfType<UIGames> ();
+        if (instance != this)
             Destroy (this.gameObject);
 
         InitializeUI ();

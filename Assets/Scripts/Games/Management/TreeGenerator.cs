@@ -19,12 +19,21 @@ public class TreeGenerator : MonoBehaviour {
 
     static public GamesNode Root { get; private set; } //the root node
 
+    static private TreeGenerator instance;
+
     //events
     private void OnEnable () {
         UIGames.GenerateMapEvent += Generate;
     }
     private void OnDisable () {
         UIGames.GenerateMapEvent -= Generate;
+    }
+
+    private void Awake () {
+        if (instance == null) 
+            instance = FindObjectOfType<TreeGenerator> ();
+        if (instance != this)
+            Destroy (this.gameObject);
     }
 
     //generate the map

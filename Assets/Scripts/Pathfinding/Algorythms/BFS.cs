@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text;
 
+/// <summary>
+/// expands by visiting each branch in order. it is very slow
+/// </summary>
 public class BFS : PathfindingAlgorythm {
 
 	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {

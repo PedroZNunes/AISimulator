@@ -8,7 +8,14 @@ public class CameraController : MonoBehaviour {
 
     private Camera cam;
 
+    static private CameraController instance;
+
     private void Awake () {
+        if (instance == null)
+            instance = FindObjectOfType<CameraController> ();
+        if (instance != this)
+            Destroy (this.gameObject);
+
         cam = GetComponent<Camera> ();
     }
 

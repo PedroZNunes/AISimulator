@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent (typeof (BoxCollider2D), typeof (SpriteRenderer))]
 public class UINode : MonoBehaviour {
@@ -16,13 +14,6 @@ public class UINode : MonoBehaviour {
     private BoxCollider2D col;
     private SpriteRenderer spriteRenderer;
 
-    private void Awake () {
-        col = GetComponent<BoxCollider2D> ();
-        col.enabled = false;
-
-        spriteRenderer = GetComponent<SpriteRenderer> ();
-    }
-
     private void OnEnable () {
         UIManager.EnableNodesEvent += EnableArea;
         UIManager.DisableNodesEvent += DisableArea;
@@ -30,6 +21,13 @@ public class UINode : MonoBehaviour {
     private void OnDisable () {
         UIManager.EnableNodesEvent -= EnableArea;
         UIManager.DisableNodesEvent -= DisableArea;
+    }
+
+    private void Awake () {
+        col = GetComponent<BoxCollider2D> ();
+        col.enabled = false;
+
+        spriteRenderer = GetComponent<SpriteRenderer> ();
     }
 
     private void OnMouseDown () {

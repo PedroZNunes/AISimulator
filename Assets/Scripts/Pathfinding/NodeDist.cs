@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
 
+/// <summary>
+/// node-distance pair
+/// </summary>
 public class NodeDist : IComparable {
     public float distance;
     public Node node;

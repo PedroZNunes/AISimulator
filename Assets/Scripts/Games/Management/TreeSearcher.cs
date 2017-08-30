@@ -19,7 +19,10 @@ public class TreeSearcher : MonoBehaviour {
     }
 
     private void Awake () {
-        instance = FindObjectOfType<TreeSearcher> ();
+        if (instance == null)
+            instance = FindObjectOfType<TreeSearcher> ();
+        if (instance != this)
+            Destroy (this.gameObject);
     }
 
     public void StartSearching (string algorythm, int branching, int depth, int framesPerSecond) {

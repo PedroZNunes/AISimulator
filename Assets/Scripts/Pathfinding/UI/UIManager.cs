@@ -77,8 +77,8 @@ public class UIManager : MonoBehaviour {
 
     private void Awake () {
         if (instance == null)
-            instance = this;
-        else
+            instance = FindObjectOfType<UIManager> ();
+        if (instance != this)
             Destroy (this.gameObject);
 
         Initialize ();
