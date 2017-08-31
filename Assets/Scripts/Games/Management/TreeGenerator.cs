@@ -12,6 +12,9 @@ public class TreeGenerator : MonoBehaviour {
     [SerializeField] private GameObject leafPrefab;
     [SerializeField] private GameObject linkPrefab;
 
+    private const float hwRatio = 0.5f;
+    //private const float hwRatio = 0.736196319018404f;
+
     private int branching; //how many branches leave each node
     static public int treeDepth { get; private set; } // the amount of levels the tree has
     
@@ -56,6 +59,8 @@ public class TreeGenerator : MonoBehaviour {
         //spawn the first node
         GameObject go = (GameObject) Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
         go.name = Root.nodeType.ToString () + " " + Root.ID;
+        //go.transform.localScale *= Mathf.Clamp ((treeDepth - Root.depth) * (branching - 1), 1f, float.MaxValue);
+        go.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, treeDepth-2) / 2, 1f, float.MaxValue);
         Root.GO = go;
         //spawn the nodes linked to it
         SpawnLinksOf (Root);
@@ -76,11 +81,12 @@ public class TreeGenerator : MonoBehaviour {
             //calculate position
             Vector2 step = new Vector2 ();
             step.x = Mathf.Pow (branching, treeDepth - toSpawn.depth);
-            step.y = spacingY = branching + (branching * branching / treeDepth) ;
+            step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
 
-            float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2);
-            float posY = parentNode.GO.transform.position.y - step.y;
-            Vector2 pos = new Vector2 (initialPosX + (step.x * i) , posY) ;
+            Vector2 pos = new Vector2 ();
+            float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
+            pos.x = initialPosX + (step.x * i);
+            pos.y = parentNode.GO.transform.position.y - step.y;
             //Debug.LogFormat ("initialposX: {0}. stepX: {1}. pos{2}", initialPosX, step.x, pos);
 
             //assign prefab according to node type (leaf, min or max)
@@ -95,6 +101,8 @@ public class TreeGenerator : MonoBehaviour {
             //instantiate the node
             GameObject go = (GameObject) Instantiate (prefab, pos, Quaternion.identity, this.transform);
             go.name = toSpawn.nodeType.ToString () + " " + toSpawn.ID;
+            go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
+            //go.transform.localScale *= Mathf.Clamp((treeDepth - toSpawn.depth + 1) * branching / 2, 1f, float.MaxValue);
             toSpawn.GO = go;
 
             if (prefab == leafPrefab) {

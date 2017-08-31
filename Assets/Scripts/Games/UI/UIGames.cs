@@ -21,7 +21,6 @@ public class UIGames : MonoBehaviour {
     [SerializeField] private InputField branchingInput;
 
     [SerializeField] private InputField depthInput;
-    [SerializeField] private InputField grainInput;
 
     //search inputs
     [SerializeField] private Dropdown algorythmDropdownInput;
@@ -80,7 +79,6 @@ public class UIGames : MonoBehaviour {
         //map generation panel
         branchingInput.text = "2";
         depthInput.text = "4";
-        grainInput.text = "0";
 
         //search panel
         List<string> algorythms = new List<string> ();
