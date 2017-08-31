@@ -81,7 +81,7 @@ public class TreeGenerator : MonoBehaviour {
             //calculate position
             Vector2 step = new Vector2 ();
             step.x = Mathf.Pow (branching, treeDepth - toSpawn.depth);
-            step.y = spacingY = step.x * (branching - 1) * hwRatio;
+            step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
 
             Vector2 pos = new Vector2 ();
             float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
@@ -101,7 +101,7 @@ public class TreeGenerator : MonoBehaviour {
             //instantiate the node
             GameObject go = (GameObject) Instantiate (prefab, pos, Quaternion.identity, this.transform);
             go.name = toSpawn.nodeType.ToString () + " " + toSpawn.ID;
-            go.transform.localScale *= Mathf.Clamp (step.x / (2*branching), 1f, float.MaxValue);
+            go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
             //go.transform.localScale *= Mathf.Clamp((treeDepth - toSpawn.depth + 1) * branching / 2, 1f, float.MaxValue);
             toSpawn.GO = go;
 
