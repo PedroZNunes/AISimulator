@@ -268,5 +268,9 @@ public class UIManager : MonoBehaviour {
 
         goalNodeGO = Instantiate (goalPrefab, node.GO.transform);
     }
-    
+
+    public void Quit() {
+        UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+    }
+
 }

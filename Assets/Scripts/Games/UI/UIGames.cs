@@ -213,6 +213,8 @@ public class UIGames : MonoBehaviour {
     public void SetDepth () { depth = Int32.Parse (instance.depthInput.text); }
     public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
-
+    public void Quit () {
+        UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+    }
 
 }
