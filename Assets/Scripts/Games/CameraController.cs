@@ -87,8 +87,8 @@ public class CameraController : MonoBehaviour {
         if (Input.GetMouseButton (2)) {
             if (isPanning) {
                 Vector3 dragMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
-                Vector3 displacement = origCamPos + ((dragMousePos - origMousePos) * panSensitivity);
-                cam.transform.position = ClampMovement (displacement);
+                Vector3 displacement = ((dragMousePos - origMousePos) * panSensitivity) * (cam.orthographicSize / 3f);
+                cam.transform.position = ClampMovement (origCamPos + displacement);
                 origCamPos = cam.transform.position;
             }
         }
