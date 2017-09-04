@@ -116,10 +116,11 @@ public class TreeGenerator : MonoBehaviour {
             double angle = Mathf.Atan2 (toSpawn.GO.transform.position.y - parentNode.GO.transform.position.y, toSpawn.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
             //scale
             float scale = Vector2.Distance (parentNode.GO.transform.position, toSpawn.GO.transform.position);
+            float width = Mathf.Max (treeDepth - toSpawn.depth, 1f) + ((branching - 1) / 2) * (treeDepth - toSpawn.depth);
 
             //spawn the link
             go = Instantiate (linkPrefab, pos, Quaternion.identity, transform);
-            go.transform.localScale = new Vector3 (1f, scale * 4, 1f);
+            go.transform.localScale = new Vector3 (width, scale * 4, 1f);
             go.transform.eulerAngles = new Vector3 (0f, 0f, (float) angle);
 
             parentNode.links[i].GO = go;
