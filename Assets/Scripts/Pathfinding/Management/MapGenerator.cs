@@ -142,7 +142,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void ClearPreviousMap () {
-        Pathfinder.HardResetPathVisualization ();
+        Pathfinder.UIResetAllPaths ();
 
         foreach (Transform child in transform) {
             GameObject.Destroy (child.gameObject);
