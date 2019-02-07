@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler SearchEvent;
 
-    static public event Action EnableNodesEvent;
+    static public event Action SettingUpNodesEvent;
     static public event Action DisableNodesEvent;
 
 
@@ -187,6 +187,8 @@ public class UIManager : MonoBehaviour {
     }
 
     public void GenerateMap () {
+        ResetStartAndGoal();
+
             if (GenerateMapEvent != null)
             GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
     }
@@ -210,15 +212,15 @@ public class UIManager : MonoBehaviour {
     }
 
     public void SetStart () {
-        if (EnableNodesEvent != null)
-            EnableNodesEvent ();
+        if (SettingUpNodesEvent != null)
+            SettingUpNodesEvent ();
 
         settingStartNode = true;
     }
 
     public void SetGoal () {
-        if (EnableNodesEvent != null)
-            EnableNodesEvent ();
+        if (SettingUpNodesEvent != null)
+            SettingUpNodesEvent ();
 
         settingGoalNode = true;
     }
@@ -234,6 +236,7 @@ public class UIManager : MonoBehaviour {
         goalNode = null;
     }
 
+    //called when a node is selected using Start and Goal buttons
     public void NodeSelected (Node node) {
         if (settingStartNode) {
             settingStartNode = false;
