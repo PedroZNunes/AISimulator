@@ -120,8 +120,8 @@ public class Pathfinder : MonoBehaviour {
             current = cameFrom[current];
 
             Link link = null;
-            for (int i = 0 ; i < MapGenerator.allLinks.Count ; i++) {
-                Link currentLink = MapGenerator.allLinks[i];
+            for (int i = 0 ; i < MapGenerator.AllLinks.Count ; i++) {
+                Link currentLink = MapGenerator.AllLinks[i];
                 if (currentLink.HasNodes (current , previous)) {
                     link = currentLink;
                     break;

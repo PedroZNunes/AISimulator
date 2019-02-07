@@ -19,7 +19,7 @@ public class MapGenerator : MonoBehaviour {
 
     private int maxLinksPerNode = 4;
     [SerializeField]
-    private float maxCosAngle = 0.85f;
+    private readonly float maxCosAngle = 0.85f;
 
     private float maxDistance;
 
@@ -27,14 +27,12 @@ public class MapGenerator : MonoBehaviour {
     private bool[,] nodesGrid;
 
     static public List<Node> Nodes { get; private set; }
-    static public List<Link> allLinks { get; private set; }
+    static public List<Link> AllLinks { get; private set; }
 
     static private MapGenerator instance;
 
     private void OnValidate () {
-        if (maxNodes > Size * Size / 2) {
-            maxNodes = Size * Size / 2;
-        }
+        maxNodes = Mathf.Max(Size * Size / 2, maxNodes);
     }
 
     private void OnEnable () {
@@ -314,8 +312,8 @@ public class MapGenerator : MonoBehaviour {
 
                 //if (!links.Contains (  new Link (node , node.links[j])) && !links.Contains (new Link (node.links[j] , node))) {
                 bool contains = false;
-                for (int k = 0 ; k < allLinks.Count ; k++) {
-                    if (allLinks[k].HasNodes (node , link)) {
+                for (int k = 0 ; k < AllLinks.Count ; k++) {
+                    if (AllLinks[k].HasNodes (node , link)) {
                         contains = true;
                         break;
                     }
@@ -334,7 +332,7 @@ public class MapGenerator : MonoBehaviour {
                     go.transform.localScale = new Vector3 (1f , scale * 4 , 1f);
                     go.transform.eulerAngles = new Vector3 (0f , 0f , (float) angle);
 
-                    allLinks.Add (new Link (node , link , go));
+                    AllLinks.Add (new Link (node , link , go));
                 } 
             }
         }
@@ -348,7 +346,7 @@ public class MapGenerator : MonoBehaviour {
         nodesGrid = new bool[Size , Size];
 
         Nodes = new List<Node> ();
-        allLinks = new List<Link> ();
+        AllLinks = new List<Link> ();
 
         maxDistance = ( Size * Size ) / ( 1.5f * maxNodes );
         Debug.LogFormat ("Max link distance: {0}" , maxDistance);
