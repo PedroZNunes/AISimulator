@@ -99,9 +99,6 @@ public class Pathfinder : MonoBehaviour {
     static public void VisualizePath ( Dictionary<Node , Node> cameFrom , Node current , Node start ) {
         UIResetActivePath ();
 
-        Sprite activeLink = instance.activeLinkSprite;
-        Sprite activeNode = instance.activeNodeSprite;
-        
         Node previous = null;
 
         SpriteRenderer renderer;
@@ -110,7 +107,7 @@ public class Pathfinder : MonoBehaviour {
 
             renderer = current.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
-                renderer.sprite = activeNode;
+                renderer.sprite = instance.activeNodeSprite;
                 activeNodes.Push (current);
                 if (!exploredNodes.Contains (current))
                     exploredNodes.Push (current);
@@ -132,7 +129,7 @@ public class Pathfinder : MonoBehaviour {
                 //change sprite on the link GO
                 renderer = link.GO.GetComponent<SpriteRenderer> ();
                 if (renderer != null) {
-                    renderer.sprite = activeLink;
+                    renderer.sprite = instance.activeLinkSprite;
                     activeLinks.Push (link);
                     if (!exploredLinks.Contains (link))
                         exploredLinks.Push (link);
@@ -145,7 +142,7 @@ public class Pathfinder : MonoBehaviour {
 
         renderer = current.GO.GetComponent<SpriteRenderer> ();
         if (renderer != null) {
-            renderer.sprite = activeNode;
+            renderer.sprite = instance.activeNodeSprite;
             activeNodes.Push (current);
         }
 
