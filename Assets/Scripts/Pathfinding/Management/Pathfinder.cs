@@ -6,22 +6,22 @@ public class Pathfinder : MonoBehaviour {
     private PathfindingAlgorythm searchAlgorythm;
 
     [SerializeField]
-    private Sprite inactiveLink;
+    private Sprite inactiveLinkSprite;
 
     [SerializeField]
-    private Sprite inactiveNode;
+    private Sprite inactiveNodeSprite;
 
     [SerializeField]
-    private Sprite activeLink;
+    private Sprite activeLinkSprite;
 
     [SerializeField]
-    private Sprite activeNode;
+    private Sprite activeNodeSprite;
 
     [SerializeField]
-    private Sprite exploredLink;
+    private Sprite exploredLinkSprite;
 
     [SerializeField]
-    private Sprite exploredNode;
+    private Sprite exploredNodeSprite;
 
 
     private static Stack<Link> activeLinks = new Stack<Link> ();
@@ -78,7 +78,7 @@ public class Pathfinder : MonoBehaviour {
 
             if (searchAlgorythm != null) {
                 if (!PathfindingAlgorythm.IsSearching) {
-                    HardResetPathVisualization ();
+                    UIResetAllPaths ();
                     searchAlgorythm.ResetUI ();
                     Debug.LogFormat ("Building a path using {0}.", algorythm);
                     StartCoroutine (searchAlgorythm.Search (MapGenerator.Nodes, MapGenerator.Size, start, goal, framesPerSecond));
@@ -97,10 +97,10 @@ public class Pathfinder : MonoBehaviour {
     }
 
     static public void VisualizePath ( Dictionary<Node , Node> cameFrom , Node current , Node start ) {
-        SoftResetPathVisualization ();
+        UIResetActivePath ();
 
-        Sprite activeLink = instance.activeLink;
-        Sprite activeNode = instance.activeNode;
+        Sprite activeLink = instance.activeLinkSprite;
+        Sprite activeNode = instance.activeNodeSprite;
         
         Node previous = null;
 
@@ -140,6 +140,8 @@ public class Pathfinder : MonoBehaviour {
             }
 
         }
+        //add start to explored nodes so it can be properly cleaned up afterwards (UI)
+        exploredNodes.Push(start);
 
         renderer = current.GO.GetComponent<SpriteRenderer> ();
         if (renderer != null) {
@@ -149,16 +151,14 @@ public class Pathfinder : MonoBehaviour {
 
     }
 
-    static private void SoftResetPathVisualization () {
-        Sprite exploredLink = instance.exploredLink;
-        Sprite exploredNode = instance.exploredNode;
+    static private void UIResetActivePath () {
 
         while (activeLinks.Count > 0) {
             Link link = activeLinks.Pop ();
 
             SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
-                renderer.sprite = exploredLink;
+                renderer.sprite = instance.exploredLinkSprite;
             }
         }
 
@@ -167,24 +167,21 @@ public class Pathfinder : MonoBehaviour {
 
             SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
-                renderer.sprite = exploredNode;
+                renderer.sprite = instance.exploredNodeSprite;
             }
         }
 
     }
 
-    static public void HardResetPathVisualization () {
-        SoftResetPathVisualization ();
-
-        Sprite inactiveLink = instance.inactiveLink;
-        Sprite inactiveNode = instance.inactiveNode;
+    static public void UIResetAllPaths () {
+        UIResetActivePath ();
 
         while (exploredLinks.Count > 0) {
             Link link = exploredLinks.Pop ();
 
             SpriteRenderer renderer = link.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
-                renderer.sprite = inactiveLink;
+                renderer.sprite = instance.inactiveLinkSprite;
             }
         }
 
@@ -193,7 +190,7 @@ public class Pathfinder : MonoBehaviour {
 
             SpriteRenderer renderer = node.GO.GetComponent<SpriteRenderer> ();
             if (renderer != null) {
-                renderer.sprite = inactiveNode;
+                renderer.sprite = instance.inactiveNodeSprite;
             }
         }
 
