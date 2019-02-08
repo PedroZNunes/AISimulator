@@ -1,10 +1,26 @@
 fileFormatVersion: 2
 guid: 69b83886a06468e40aaa47e8aa92e0e8
-timeCreated: 1502929526
-licenseType: Free
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - enqueuingsValue: {instanceID: 0}
+  - maxQueueSizeValue: {instanceID: 0}
+  - queueSizeValue: {instanceID: 0}
+  - pathLengthValue: {instanceID: 0}
+  - nodesExpandedValue: {instanceID: 0}
+  - sizeDropdownInput: {instanceID: 0}
+  - nodeCountInput: {instanceID: 0}
+  - maxLinksInput: {instanceID: 0}
+  - grainInput: {instanceID: 0}
+  - algorythmDropdownInput: {instanceID: 0}
+  - beamPathsInput: {instanceID: 0}
+  - fpsInput: {instanceID: 0}
+  - startPrefab: {fileID: 1677323903578862, guid: 1268377ff0b9ece48aa1312be5445fad,
+      type: 3}
+  - goalPrefab: {fileID: 1847891699695034, guid: 45c019468f22d3a4da4afec4d36a90ca,
+      type: 3}
+  - searchText: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -29,13 +29,19 @@ public class Pathfinder : MonoBehaviour {
     private static Stack<Node> activeNodes = new Stack<Node> ();
     private static Stack<Node> exploredNodes = new Stack<Node> ();
 
+    private Coroutine pathingCoroutine;
+
     static private Pathfinder instance;
 
     private void OnEnable () {
         UIManager.SearchEvent += StartPathing;
+        UIManager.CancelSearchEvent += StopPathing;
+
     }
     private void OnDisable () {
         UIManager.SearchEvent -= StartPathing;
+        UIManager.CancelSearchEvent -= StopPathing;
+
     }
 
     private void Awake () {
@@ -46,50 +52,59 @@ public class Pathfinder : MonoBehaviour {
     }
 
     public void StartPathing (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths) {
-        if (algorythm != null) {
-            switch (algorythm) {
+        if (algorythm != null)
+        {
+            switch (algorythm)
+            {
                 case ("BFS"):
-                    searchAlgorythm = new BFS ();
+                    searchAlgorythm = new BFS();
                     break;
 
                 case ("DFS"):
-                    searchAlgorythm = new DFS ();
+                    searchAlgorythm = new DFS();
                     break;
 
                 case ("Hill Climbing"):
-                    searchAlgorythm = new HillClimbing ();
+                    searchAlgorythm = new HillClimbing();
                     break;
 
                 case ("Beam"):
-                    searchAlgorythm = new Beam (beamPaths);
+                    searchAlgorythm = new Beam(beamPaths);
                     break;
 
                 case ("Branch and Bound"):
-                    searchAlgorythm = new BranchAndBound ();
+                    searchAlgorythm = new BranchAndBound();
                     break;
 
                 case ("A*"):
-                    searchAlgorythm = new AStar ();
+                    searchAlgorythm = new AStar();
                     break;
 
                 default:
+                    searchAlgorythm = null;
                     break;
             }
 
-            if (searchAlgorythm != null) {
-                if (!PathfindingAlgorythm.IsSearching) {
-                    UIResetAllPaths ();
-                    searchAlgorythm.ResetUI ();
-                    Debug.LogFormat ("Building a path using {0}.", algorythm);
-                    StartCoroutine (searchAlgorythm.Search (MapGenerator.Nodes, MapGenerator.Size, start, goal, framesPerSecond));
-                }
-                else {
-                    Debug.LogWarning ("Another search in progress.");
-                }
+            if (searchAlgorythm != null)
+            {
+                UIResetAllPaths();
+                searchAlgorythm.ResetUI();
+                Debug.LogFormat("Building a path using {0}.", algorythm);
+                pathingCoroutine = StartCoroutine(searchAlgorythm.Search(MapGenerator.Nodes, MapGenerator.Size, start, goal, framesPerSecond));
             }
+            else
+                Debug.LogWarning("Invalid algorythm. Search canceled.");
         }
         else
-            Debug.LogWarning ("Algorythm not set. Search canceled.");
+            Debug.LogWarning("Algorythm not set. Search canceled.");
+    }
+
+    public void StopPathing()
+    {
+        Debug.LogFormat("Process aborted by user.");
+
+        searchAlgorythm.StopSearch();
+        StopCoroutine(pathingCoroutine);
     }
 
     public void SetAlgorythm ( PathfindingAlgorythm algorythm ) {

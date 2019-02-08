@@ -63,16 +63,8 @@ public class Beam : PathfindingAlgorythm {
             }
         }
 
-        IsSearching = false;
-
-        if (!hasPath) {
-            Debug.Log ("No path exists.");
-            yield break;
-        }
-        else {
-            Debug.Log ("Path complete.");
-            yield break;
-        }
+        SearchComplete(hasPath);
+        yield break;
     }
 
 }

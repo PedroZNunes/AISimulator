@@ -8,9 +8,13 @@ public class UIManager : MonoBehaviour {
     public delegate void GenerateMapHandler (int size, int nodeCount, int maxLinks, int grain);
     static public event GenerateMapHandler GenerateMapEvent;
 
+
+    //Search related events
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler SearchEvent;
-
+    static public event Action CancelSearchEvent;
+    
+    //node setup related events
     static public event Action SettingUpNodesEvent;
     static public event Action DisableNodesEvent;
 
@@ -52,6 +56,8 @@ public class UIManager : MonoBehaviour {
     [SerializeField] private GameObject startPrefab;
     [SerializeField] private GameObject goalPrefab;
 
+    [SerializeField] private Text searchText;
+
     private Node startNode;
     private Node goalNode;
 
@@ -59,11 +65,12 @@ public class UIManager : MonoBehaviour {
     private GameObject goalNodeGO;
 
 
-    //events
+
     private void OnEnable () {
         PathfindingAlgorythm.UpdateUIEvent += UpdateUI;
         PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
         PathfindingAlgorythm.ResetUIEvent += ResetOutput;
+        PathfindingAlgorythm.SearchCompletedEvent += SearchCompleted;
 
         UINode.NodeSelectedEvent += NodeSelected;
     }
@@ -71,6 +78,7 @@ public class UIManager : MonoBehaviour {
         PathfindingAlgorythm.UpdateUIEvent -= UpdateUI;
         PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
         PathfindingAlgorythm.ResetUIEvent -= ResetOutput;
+        PathfindingAlgorythm.SearchCompletedEvent -= SearchCompleted;
 
         UINode.NodeSelectedEvent -= NodeSelected;
     }
@@ -193,6 +201,7 @@ public class UIManager : MonoBehaviour {
             GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
     }
 
+    //Called by the Search button
     public void Search () {
         if (!PathfindingAlgorythm.IsSearching) {
             string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
@@ -205,10 +214,26 @@ public class UIManager : MonoBehaviour {
 
             SetStartSprite (start);
             SetGoalSprite (goal);
+            
+            //change button text
+            searchText.text = "Cancel";
 
             if (SearchEvent != null)
                 SearchEvent (algorythmString, start, goal, fps, beams);
         }
+        //if already searching
+        else {
+            if (CancelSearchEvent != null)
+                CancelSearchEvent();
+            else
+                Debug.Log("CancelSearchEvent is empty");
+
+            searchText.text = "Search";
+        }
+    }
+
+    private void SearchCompleted () {
+        searchText.text = "Search";
     }
 
     public void SetStart () {
