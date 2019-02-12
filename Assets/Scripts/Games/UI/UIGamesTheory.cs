@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class UIGames : MonoBehaviour {
+public class UIGamesTheory : MonoBehaviour {
 
     //events
     public delegate void GenerateMapHandler (int branching, int depth);
@@ -40,9 +40,13 @@ public class UIGames : MonoBehaviour {
     public string algorythm { get; private set; }
     public int fps { get; private set; } //does nothing so far
 
-    static private UIGames instance;
+    private int maxLeafCount = 81;
+    private int minDepth = 2;
+    private int maxDepth = 4;
 
-    //events
+    static private UIGamesTheory instance;
+
+    //initializations
     private void OnEnable () {
         TreeSearcher.TreeUpdatedEvent += UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
@@ -56,23 +60,13 @@ public class UIGames : MonoBehaviour {
 
     private void Awake () {
         if (instance == null)
-            instance = FindObjectOfType<UIGames> ();
+            instance = FindObjectOfType<UIGamesTheory> ();
         if (instance != this)
             Destroy (this.gameObject);
 
         InitializeUI ();
         Initialize ();
         ResetOutput ();
-    }
-
-    private void Initialize () {
-        //map generation
-        SetBranching ();
-        SetDepth ();
-
-        //search
-        SetFPS ();
-        SetAlgorythm ();
     }
 
     private void InitializeUI () {
@@ -89,8 +83,20 @@ public class UIGames : MonoBehaviour {
         algorythmDropdownInput.AddOptions (algorythms);
         algorythmDropdownInput.value = 0;
 
-        fpsInput.text = "2";
+        fpsInput.text = "3";
     }
+
+    private void Initialize () {
+        //map generation
+        SetBranchingAndDepth ();
+
+        //search
+        SetFPS ();
+        SetAlgorythm ();
+    }
+
+
+
 
     /// <summary>
     /// Updates the path sprites
@@ -209,8 +215,21 @@ public class UIGames : MonoBehaviour {
 
     //A series of input-related functions
     public void SetFPS () { fps = Int32.Parse (instance.fpsInput.text); }
-    public void SetBranching () { branching = Int32.Parse (instance.branchingInput.text); }
-    public void SetDepth () { depth = Int32.Parse (instance.depthInput.text); }
+    public void SetBranchingAndDepth ()
+    {
+        depth = Mathf.Clamp (Int32.Parse (instance.depthInput.text), minDepth, maxDepth);
+        instance.depthInput.text = depth.ToString ();
+        
+        branching = Int32.Parse (instance.branchingInput.text);
+        int totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
+        while (totalLeafCount > maxLeafCount) {
+            branching--;
+            totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
+        }
+
+        instance.branchingInput.text = branching.ToString();
+    }
+
     public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
     public void Quit () {

@@ -10,11 +10,11 @@ public class TreeSearcher : MonoBehaviour {
     static private TreeSearcher instance;
 
     private void OnEnable () {
-        UIGames.SearchEvent += StartSearching;
+        UIGamesTheory.SearchEvent += StartSearching;
         GamesAlgorythm.NodeAnalyzedEvent += SetLeafStates;
     }
     private void OnDisable () {
-        UIGames.SearchEvent -= StartSearching;
+        UIGamesTheory.SearchEvent -= StartSearching;
         GamesAlgorythm.NodeAnalyzedEvent -= SetLeafStates;
     }
 

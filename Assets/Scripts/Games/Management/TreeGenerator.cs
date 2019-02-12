@@ -26,10 +26,10 @@ public class TreeGenerator : MonoBehaviour {
 
     //events
     private void OnEnable () {
-        UIGames.GenerateMapEvent += Generate;
+        UIGamesTheory.GenerateMapEvent += Generate;
     }
     private void OnDisable () {
-        UIGames.GenerateMapEvent -= Generate;
+        UIGamesTheory.GenerateMapEvent -= Generate;
     }
 
     private void Awake () {
