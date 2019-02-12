@@ -21,7 +21,7 @@ To get the program running:
 .Open Unity;
 .Select Open; 
 .Find the AISimulator folder;
-.In the folder tree, find the "&lowbar=;Scenes"  folder;
+.In the folder tree, find the "Scenes"  folder;
 .Open the Start file;
 .Click play.
 
