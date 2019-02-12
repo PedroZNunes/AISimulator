@@ -12,6 +12,8 @@ public class UIGamesTheory : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, int branching, int depth, int fps);
     static public event SearchHandler SearchEvent;
 
+    static public event Action ResetGameTreeEvent;
+
     //output
     [SerializeField] private Text analyzedValue;
     [SerializeField] private Text prunedValue;
@@ -42,7 +44,7 @@ public class UIGamesTheory : MonoBehaviour {
 
     private int maxLeafCount = 81;
     private int minDepth = 2;
-    private int maxDepth = 4;
+    private int maxDepth = 5;
 
     static private UIGamesTheory instance;
 
@@ -51,11 +53,13 @@ public class UIGamesTheory : MonoBehaviour {
         TreeSearcher.TreeUpdatedEvent += UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
         GamesAlgorythm.PrunedNodesEvent += CountPruned;
+        ResetGameTreeEvent += ResetOutput;
     }
     private void OnDisable () {
         TreeSearcher.TreeUpdatedEvent -= UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent -= IncrementAnalyzed;
         GamesAlgorythm.PrunedNodesEvent -= CountPruned;
+        ResetGameTreeEvent -= ResetOutput;
     }
 
     private void Awake () {
@@ -67,6 +71,11 @@ public class UIGamesTheory : MonoBehaviour {
         InitializeUI ();
         Initialize ();
         ResetOutput ();
+    }
+
+    private void Start ()
+    {
+        GenerateMap ();
     }
 
     private void InitializeUI () {
@@ -175,7 +184,7 @@ public class UIGamesTheory : MonoBehaviour {
             GenerateMapEvent (branching, depth);
     }
 
-    public void Search () {
+    public void OnPressSearch () {
         ResetOutput ();
 
         if (SearchEvent != null)
@@ -228,11 +237,18 @@ public class UIGamesTheory : MonoBehaviour {
         }
 
         instance.branchingInput.text = branching.ToString();
+        Debug.LogFormat ("Branches: {0}, Depth: {1}", branching, depth);
     }
 
     public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
-    public void Quit () {
+    public void OnPressReset ()
+    {
+        if (ResetGameTreeEvent != null)
+            ResetGameTreeEvent ();
+    }
+
+    public void OnPressQuit () {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
 

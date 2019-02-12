@@ -40,14 +40,14 @@ public class CameraController : MonoBehaviour {
 
         float sizeY = ((stepY * depth) + 1) / 2;
 
-        float sizeX = ((totalLeafs + 1) / 4 * 3) / 2;
+        float sizeX = ((totalLeafs + 1) / 16 * 9) / 2;
 
         cam.orthographicSize = Mathf.Max (sizeX, sizeY) + border;
         
         float posY = GamesNode.Leafs[0].GO.transform.position.y / 2;
         cam.transform.position = new Vector3 (0f, posY, cam.transform.position.z);
 
-        area = new Bounds (cam.transform.position, new Vector3 (2 * cam.orthographicSize / 3 * 4, 2 * cam.orthographicSize));
+        area = new Bounds (cam.transform.position, new Vector3 (2 * cam.orthographicSize / 9 * 16, 2 * cam.orthographicSize));
 
     }
 

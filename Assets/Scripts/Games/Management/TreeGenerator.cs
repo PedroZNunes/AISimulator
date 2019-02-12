@@ -12,11 +12,11 @@ public class TreeGenerator : MonoBehaviour {
     [SerializeField] private GameObject leafPrefab;
     [SerializeField] private GameObject linkPrefab;
 
-    private const float hwRatio = 0.5f;
+    private const float hwRatio = 0.4f;
     //private const float hwRatio = 0.736196319018404f;
 
     private int branching; //how many branches leave each node
-    static public int treeDepth { get; private set; } // the amount of levels the tree has
+    static public int depth { get; private set; } // the amount of levels the tree has
     
     private float spacingY; //used for placement in the grid, spacing in Y
 
@@ -27,9 +27,11 @@ public class TreeGenerator : MonoBehaviour {
     //events
     private void OnEnable () {
         UIGamesTheory.GenerateMapEvent += Generate;
+        UIGamesTheory.ResetGameTreeEvent += ResetTree;
     }
     private void OnDisable () {
         UIGamesTheory.GenerateMapEvent -= Generate;
+        UIGamesTheory.ResetGameTreeEvent -= ResetTree;
     }
 
     private void Awake () {
@@ -40,16 +42,16 @@ public class TreeGenerator : MonoBehaviour {
     }
 
     //generate the map
-    private void Generate (int branching, int depth) {
+    private void Generate (int b, int d) {
         Debug.Log ("Generating map.");
-        this.branching = branching;
-        treeDepth = depth;
+        branching = b;
+        depth = d;
 
         NodeType nodeType = NodeType.Max;
 
         ResetTree ();
 
-        Root = new GamesNode (branching, 0, nodeType);
+        Root = new GamesNode (b, 0, nodeType);
 
         VisualizeTree ();
     }
@@ -57,30 +59,34 @@ public class TreeGenerator : MonoBehaviour {
     //tree to screen
     private void VisualizeTree () {
         //spawn the first node
-        GameObject go = (GameObject) Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
-        go.name = Root.nodeType.ToString () + " " + Root.ID;
-        //go.transform.localScale *= Mathf.Clamp ((treeDepth - Root.depth) * (branching - 1), 1f, float.MaxValue);
-        go.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, treeDepth-2) / 2, 1f, float.MaxValue);
-        Root.GO = go;
+        GameObject rootGO = (GameObject) Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
+
+        rootGO.name = Root.nodeType.ToString () + " " + Root.ID;
+        rootGO.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, depth-2) / 2, 1f, float.MaxValue);
+
+        Root.GO = rootGO;
+        
         //spawn the nodes linked to it
-        SpawnLinksOf (Root);
+        SpawnBranchesOf (Root);
 
         if (SetCameraEvent != null) {
-            SetCameraEvent (treeDepth, branching, spacingY);
+            SetCameraEvent (depth, branching, spacingY);
         }
     }
 
     //recursive spawning 
-    private void SpawnLinksOf (GamesNode parentNode) {
-        if (parentNode.depth == treeDepth)
+    private void SpawnBranchesOf (GamesNode parentNode)
+    {
+
+        if (parentNode.depth == depth)
             return;
 
         //spawn node with position relative to parent.
-        for (int i = 0 ; i < branching ; i++) {
+        for (int i = 0; i < branching; i++) {
             GamesNode toSpawn = parentNode.GetOther (i);
             //calculate position
             Vector2 step = new Vector2 ();
-            step.x = Mathf.Pow (branching, treeDepth - toSpawn.depth);
+            step.x = Mathf.Pow (branching, depth - toSpawn.depth);
             step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
 
             Vector2 pos = new Vector2 ();
@@ -91,15 +97,15 @@ public class TreeGenerator : MonoBehaviour {
 
             //assign prefab according to node type (leaf, min or max)
             Object prefab;
-            if (treeDepth == toSpawn.depth)
+            if (depth == toSpawn.depth)
                 prefab = leafPrefab;
             else if (toSpawn.nodeType == NodeType.Max)
                 prefab = maxPrefab;
-            else 
+            else
                 prefab = minPrefab;
 
             //instantiate the node
-            GameObject go = (GameObject) Instantiate (prefab, pos, Quaternion.identity, this.transform);
+            GameObject go = (GameObject)Instantiate (prefab, pos, Quaternion.identity, this.transform);
             go.name = toSpawn.nodeType.ToString () + " " + toSpawn.ID;
             go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
             //go.transform.localScale *= Mathf.Clamp((treeDepth - toSpawn.depth + 1) * branching / 2, 1f, float.MaxValue);
@@ -116,17 +122,17 @@ public class TreeGenerator : MonoBehaviour {
             double angle = Mathf.Atan2 (toSpawn.GO.transform.position.y - parentNode.GO.transform.position.y, toSpawn.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
             //scale
             float scale = Vector2.Distance (parentNode.GO.transform.position, toSpawn.GO.transform.position);
-            float width = Mathf.Max (treeDepth - toSpawn.depth, 1f) + ((branching - 1) / 2) * (treeDepth - toSpawn.depth);
+            //float width = Mathf.Max (depth - toSpawn.depth, 1f) + ((branching - 1) / 2) * (depth - toSpawn.depth);
 
             //spawn the link
             go = Instantiate (linkPrefab, pos, Quaternion.identity, transform);
-            go.transform.localScale = new Vector3 (width, scale * 4, 1f);
-            go.transform.eulerAngles = new Vector3 (0f, 0f, (float) angle);
+            go.transform.localScale = new Vector3 (1f, scale * 4, 1f);
+            go.transform.eulerAngles = new Vector3 (0f, 0f, (float)angle);
 
             parentNode.links[i].GO = go;
 
             //then spawn the nodes linked to each linked node
-            SpawnLinksOf (toSpawn);
+            SpawnBranchesOf (toSpawn);
         }
     }
 
@@ -141,6 +147,14 @@ public class TreeGenerator : MonoBehaviour {
             Destroy (GamesLink.Links[i].GO);
         }
         GamesLink.Reset ();
+    }
+
+    //Resets path
+    private void ResetPath ()
+    {
+        for (int i = 0; i < GamesLink.Links.Count; i++) {
+
+        }
     }
 
 }

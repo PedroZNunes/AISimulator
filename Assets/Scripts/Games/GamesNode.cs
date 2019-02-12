@@ -49,7 +49,7 @@ public class GamesNode {
 
         this.depth = currentDepth;
 
-        if (currentDepth < TreeGenerator.treeDepth) {
+        if (currentDepth < TreeGenerator.depth) {
             links = new GamesLink[branching];
             for (int i = 0 ; i < links.Length ; i++) {
                 NodeType newType = ((currentDepth + 1) % 2 == 0) ? NodeType.Max : NodeType.Min;
