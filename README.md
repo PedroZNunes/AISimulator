@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+# AISimulator
+Map generation and search algorithms
+
+This is a Unity-based software that simulates pathfinding and tree-searching algorythms for education purposes.
+=======
 # AI Simulator
 
 This software aims to simulate pathfinding and tree-search algorythms for educational purposes. 
@@ -51,3 +57,4 @@ Copyright 2019 Pedro Zgierski Nunes
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+>>>>>>> master

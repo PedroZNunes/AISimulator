@@ -50,9 +50,6 @@ public class MapGenerator : MonoBehaviour {
     }
 
     public void Generate (int size, int nodeCount, int maxLinks, int grain) {
-        if (PathfindingAlgorythm.IsSearching)
-            return ;
-
         Initialize (size, nodeCount, maxLinks, grain);
 
         ClearPreviousMap ();
@@ -140,7 +137,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void ClearPreviousMap () {
-        Pathfinder.UIResetAllPaths ();
+        Pathfinder.ResetAllPaths ();
 
         foreach (Transform child in transform) {
             GameObject.Destroy (child.gameObject);
@@ -287,17 +284,27 @@ public class MapGenerator : MonoBehaviour {
 
     public void SetCamera () {
         Camera camera = Camera.main;
-        camera.orthographicSize = ( ( Size - 1 ) / 2 ) + 1;
+        camera.orthographicSize = ((Size - 1) / 2) + 1;
+        
         camera.transform.position = new Vector3 (camera.orthographicSize - 1 , camera.orthographicSize - 1 , camera.transform.position.z);
     }
 
     private void ToScreen () {
+
+        float overallScale = 1f;
+        //change node scale case the grid is too big.
+        if (Size > 65)
+            overallScale = (Size - 1) / 64f;
 
         for (int i = 0 ; i < Nodes.Count ; i++) {
             Node node = Nodes[i];
 
             //spawn the node
             GameObject nodeGO = (GameObject) Instantiate (nodePrefab , node.pos , Quaternion.identity , transform);
+
+            //Change Scale
+            nodeGO.transform.localScale = new Vector3(overallScale, overallScale, 1f);
+
             nodeGO.name = "node " + node.ID;
             UINode uiNode = nodeGO.GetComponent<UINode> ();
             if (uiNode != null) {
@@ -310,7 +317,6 @@ public class MapGenerator : MonoBehaviour {
             for (int j = 0 ; j < node.links.Count ; j++) {
                 Node link = node.links[j];
 
-                //if (!links.Contains (  new Link (node , node.links[j])) && !links.Contains (new Link (node.links[j] , node))) {
                 bool contains = false;
                 for (int k = 0 ; k < AllLinks.Count ; k++) {
                     if (AllLinks[k].HasNodes (node , link)) {
@@ -326,13 +332,13 @@ public class MapGenerator : MonoBehaviour {
                     //posição
                     Vector2 pos = ( link.pos + node.pos ) / 2;
                     //scale
-                    float scale = Vector2.Distance (node.pos , link.pos);
+                    float linkLengthScale = Vector2.Distance (node.pos , link.pos);
 
-                    GameObject go = Instantiate (linkPrefab , pos , Quaternion.identity , transform);
-                    go.transform.localScale = new Vector3 (1f , scale * 4 , 1f);
-                    go.transform.eulerAngles = new Vector3 (0f , 0f , (float) angle);
+                    GameObject linkGO = Instantiate (linkPrefab , pos , Quaternion.identity , transform);
+                    linkGO.transform.localScale = new Vector3 (overallScale , linkLengthScale * 4 , 1f);
+                    linkGO.transform.eulerAngles = new Vector3 (0f , 0f , (float) angle);
 
-                    AllLinks.Add (new Link (node , link , go));
+                    AllLinks.Add (new Link (node , link , linkGO));
                 } 
             }
         }

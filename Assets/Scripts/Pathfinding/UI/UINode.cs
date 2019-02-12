@@ -15,12 +15,12 @@ public class UINode : MonoBehaviour {
     private SpriteRenderer spriteRenderer;
 
     private void OnEnable () {
-        UIManager.EnableNodesEvent += EnableArea;
-        UIManager.DisableNodesEvent += DisableArea;
+        UINodeSetup.SettingUpNodesEvent += EnableArea;
+        UINodeSetup.NodeSelectedEvent += DisableArea;
     }
     private void OnDisable () {
-        UIManager.EnableNodesEvent -= EnableArea;
-        UIManager.DisableNodesEvent -= DisableArea;
+        UINodeSetup.SettingUpNodesEvent -= EnableArea;
+        UINodeSetup.NodeSelectedEvent -= DisableArea;
     }
 
     private void Awake () {
@@ -40,7 +40,7 @@ public class UINode : MonoBehaviour {
         }
     }
 
-    public void EnableArea () {
+    public void EnableArea (bool isStart) {
         col.enabled = true;
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -8,12 +9,11 @@ public class UIManager : MonoBehaviour {
     public delegate void GenerateMapHandler (int size, int nodeCount, int maxLinks, int grain);
     static public event GenerateMapHandler GenerateMapEvent;
 
+
+    //Search related events
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
-    static public event SearchHandler SearchEvent;
-
-    static public event Action EnableNodesEvent;
-    static public event Action DisableNodesEvent;
-
+    static public event SearchHandler BeginSearchEvent;
+    static public event Action CancelSearchEvent;
 
     //output
     [SerializeField] private Text enqueuingsValue;
@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour {
     //map generation inputs
     [SerializeField] private Dropdown sizeDropdownInput;
     static private Dropdown sSizeDropdownInput;
+
     static public int Size { get; private set; }
 
     [SerializeField] private InputField nodeCountInput;
@@ -46,40 +47,36 @@ public class UIManager : MonoBehaviour {
     static private UIManager instance;
 
     //start and goal setting
-    [HideInInspector] public bool settingStartNode = false;
-    [HideInInspector] public bool settingGoalNode = false;
+    [SerializeField] private UINodeSetup nodeSetup;
 
-    [SerializeField] private GameObject startPrefab;
-    [SerializeField] private GameObject goalPrefab;
-
-    private Node startNode;
-    private Node goalNode;
-
-    private GameObject startNodeGO;
-    private GameObject goalNodeGO;
+    [SerializeField] private Button generateButton;
+    [SerializeField] private Button searchButton;
+    [SerializeField] private Button quitButton;
 
 
-    //events
+
     private void OnEnable () {
-        PathfindingAlgorythm.UpdateUIEvent += UpdateUI;
+        PathfindingAlgorythm.UpdateUIEvent += UpdateOutputValues;
         PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
-        PathfindingAlgorythm.ResetUIEvent += ResetOutput;
+        PathfindingAlgorythm.AlteredSearchStateEvent += UpdateButtons;
 
-        UINode.NodeSelectedEvent += NodeSelected;
+        Pathfinder.ResettingPathsEvent += ResetOutput;
     }
-    private void OnDisable () {
-        PathfindingAlgorythm.UpdateUIEvent -= UpdateUI;
-        PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
-        PathfindingAlgorythm.ResetUIEvent -= ResetOutput;
 
-        UINode.NodeSelectedEvent -= NodeSelected;
+    private void OnDisable () {
+        PathfindingAlgorythm.UpdateUIEvent -= UpdateOutputValues;
+        PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
+        PathfindingAlgorythm.AlteredSearchStateEvent -= UpdateButtons;
+
+        Pathfinder.ResettingPathsEvent -= ResetOutput;
     }
 
     private void Awake () {
-        if (instance == null)
-            instance = FindObjectOfType<UIManager> ();
+        instance = FindObjectOfType<UIManager> ();
         if (instance != this)
-            Destroy (this.gameObject);
+            Destroy(this.gameObject);
+        else if (instance == null)
+            Debug.LogError("No UIManager found in the scene.");
 
         Initialize ();
         InitializeUI ();
@@ -87,9 +84,10 @@ public class UIManager : MonoBehaviour {
     }
 
     private void Start () {
-        GenerateMap ();
+        OnPressGenerateMap ();
     }
 
+    //UI Preparation Setup
     static private void Initialize () {
         //map generation
         sSizeDropdownInput = instance.sizeDropdownInput;
@@ -116,9 +114,9 @@ public class UIManager : MonoBehaviour {
 
         sizeDropdownInput.ClearOptions ();
         sizeDropdownInput.AddOptions (sizes);
-        sizeDropdownInput.value = 4;
+        sizeDropdownInput.value = 3;
 
-        nodeCountInput.text = "250";
+        nodeCountInput.text = "100";
         maxLinksInput.text = "10";
         grainInput.text = "5";
 
@@ -133,7 +131,7 @@ public class UIManager : MonoBehaviour {
 
         algorythmDropdownInput.ClearOptions ();
         algorythmDropdownInput.AddOptions (algorythms);
-        algorythmDropdownInput.value = 0;
+        algorythmDropdownInput.value = 5;
 
         beamPathsInput.text = "2";
         fpsInput.text = "3";
@@ -147,13 +145,27 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = "0";
     }
 
-    private void IncrementEnqueue () {
-        int enqueuings = Int32.Parse (enqueuingsValue.text);
+    //Changing the size of the map
+    public void OnChangeSize () {
+        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
+        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
+        Size = Int32.Parse (sizeString);
 
-        enqueuingsValue.text = (++enqueuings).ToString ();
+        CapMaxNodeCount ();
     }
 
-    private void UpdateUI (int queueSize, float length) {
+    public void CapMaxNodeCount () {
+        if (nodeCountInput.text == "")
+            nodeCountInput.text = "0";
+        else {
+            int count = Int32.Parse (nodeCountInput.text);
+            int maxNodeCount = ((Size * Size) / 5);
+            nodeCountInput.text = Mathf.Min (count, maxNodeCount).ToString ();
+        }
+    }
+
+    //Updating right panel text, triggered by event
+    private void UpdateOutputValues (int queueSize, float length) {
         //update queue info
         if (queueSize > (Int32.Parse (maxQueueSizeValue.text))) {
             maxQueueSizeValue.text = queueSize.ToString();
@@ -168,109 +180,63 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
     }
 
-    public void SetNodeCount () {
-        if (nodeCountInput.text == "")
-            nodeCountInput.text = "0";
-        int count = Int32.Parse (nodeCountInput.text);
-        int maxNodeCount = ((Size * Size) / 3);
-        if (count > maxNodeCount) {
-            nodeCountInput.text = (maxNodeCount).ToString ();
-        }
-    }
+    public void OnPressGenerateMap () {
+        if (PathfindingAlgorythm.IsSearching)
+            return;
 
-    public void SetSize () {
-        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
-        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
-        Size = Int32.Parse (sizeString);
+        nodeSetup.ResetStartAndGoalNodes();
 
-        SetNodeCount ();
-    }
-
-    public void GenerateMap () {
-            if (GenerateMapEvent != null)
+        if (GenerateMapEvent != null)
             GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
     }
 
-    public void Search () {
+    //Called by the Search button
+    public void OnPressSearch () {
+        //if not searching yet, search
         if (!PathfindingAlgorythm.IsSearching) {
             string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
 
             int beams = Int32.Parse (sBeamPathsInput.text);
             int fps = Int32.Parse (sFpsInput.text);
 
-            Node start = startNode ?? MapGenerator.RandomNode ();
-            Node goal = goalNode ?? MapGenerator.RandomNode ();
+            Node start, goal;
+            nodeSetup.AssignStartAndGoal(out start, out goal);
 
-            SetStartSprite (start);
-            SetGoalSprite (goal);
+            if (BeginSearchEvent != null)
+                BeginSearchEvent (algorythmString, start, goal, fps, beams);
+        }
+        //if already searching, cancel
+        else {
+            if (CancelSearchEvent != null)
+                CancelSearchEvent();
+            else
+                Debug.LogWarning("CancelSearchEvent is empty");
 
-            if (SearchEvent != null)
-                SearchEvent (algorythmString, start, goal, fps, beams);
         }
     }
 
-    public void SetStart () {
-        if (EnableNodesEvent != null)
-            EnableNodesEvent ();
-
-        settingStartNode = true;
-    }
-
-    public void SetGoal () {
-        if (EnableNodesEvent != null)
-            EnableNodesEvent ();
-
-        settingGoalNode = true;
-    }
-
-    public void ResetStartAndGoal () {
-        settingGoalNode = false;
-        settingStartNode = false;
-
-        Destroy (startNodeGO);
-        Destroy (goalNodeGO);
-
-        startNode = null;
-        goalNode = null;
-    }
-
-    public void NodeSelected (Node node) {
-        if (settingStartNode) {
-            settingStartNode = false;
-
-            startNode = node;
-            SetStartSprite (startNode);
-
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent ();
-            }
+    private void UpdateButtons() {
+        if (PathfindingAlgorythm.IsSearching) {
+            generateButton.interactable = false;
+            searchButton.GetComponentInChildren<Text>().text = "Cancel";
+            quitButton.interactable = false;
         }
-        else if (settingGoalNode) {
-            settingGoalNode = false;
-
-            goalNode = node;
-            SetGoalSprite (goalNode);
-
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent ();
-            }
+        else {
+            generateButton.interactable = true;
+            searchButton.GetComponentInChildren<Text>().text = "Search";
+            quitButton.interactable = true;
         }
+
     }
 
-    private void SetStartSprite (Node node) {
-        Destroy (startNodeGO);
+    private void IncrementEnqueue() {
+        int enqueuings = Int32.Parse(enqueuingsValue.text);
 
-        startNodeGO = Instantiate (startPrefab, node.GO.transform);
-    }
-
-    private void SetGoalSprite (Node node) {
-        Destroy (goalNodeGO);
-
-        goalNodeGO = Instantiate (goalPrefab, node.GO.transform);
+        enqueuingsValue.text = (++enqueuings).ToString();
     }
 
     public void Quit() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+        SceneManager.LoadScene (0);
     }
 
 }

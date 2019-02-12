@@ -10,13 +10,40 @@ public class PathfindingAlgorythm {
 
     static public event Action IncrementEnqueueEvent;
 
-    static public event Action ResetUIEvent;
+    static public event Action AlteredSearchStateEvent;
+
 
     public Dictionary<Node, Node> cameFrom { get; protected set; }
 
-    static public bool IsSearching { get; protected set; }
+    static private bool isSearching = false;
+    static public bool IsSearching {
+        get { return isSearching; }
+        protected set {
+            isSearching = value;
+
+            if (AlteredSearchStateEvent != null)
+                AlteredSearchStateEvent();
+        }
+    }
+
 
     public virtual IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) { return null; }
+
+    public void CancelSearch() {
+        IsSearching = false;
+    }
+
+    protected void SearchComplete (bool hasPath) {
+        IsSearching = false;
+
+        if (!hasPath) {
+            Debug.Log("No path exists.");
+        }
+        else {
+            Debug.Log("Path complete.");
+        }
+    }
+
 
     protected float CalculatePathLength (Node start, Node current) {
         float pathLength = 0;
@@ -29,11 +56,6 @@ public class PathfindingAlgorythm {
         return pathLength;
     }
 
-    public void ResetUI () {
-        if (ResetUIEvent != null)
-            ResetUIEvent ();
-    }
-
     protected void UIIncrementEnqueuings () {
         if (IncrementEnqueueEvent != null)
             IncrementEnqueueEvent ();
@@ -43,5 +65,4 @@ public class PathfindingAlgorythm {
         if (UpdateUIEvent != null)
             UpdateUIEvent (queueSize, pathLength);
     }
-
 }
