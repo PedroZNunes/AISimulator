@@ -157,10 +157,10 @@ public class UIManager : MonoBehaviour {
     public void CapMaxNodeCount () {
         if (nodeCountInput.text == "")
             nodeCountInput.text = "0";
-        int count = Int32.Parse (nodeCountInput.text);
-        int maxNodeCount = ((Size * Size) / 5);
-        if (count > maxNodeCount) {
-            nodeCountInput.text = (maxNodeCount).ToString ();
+        else {
+            int count = Int32.Parse (nodeCountInput.text);
+            int maxNodeCount = ((Size * Size) / 5);
+            nodeCountInput.text = Mathf.Min (count, maxNodeCount).ToString ();
         }
     }
 
