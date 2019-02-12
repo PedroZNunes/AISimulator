@@ -12,7 +12,6 @@ public class UIGamesTheory : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, int branching, int depth, int fps);
     static public event SearchHandler SearchEvent;
 
-    static public event Action ResetGameTreeEvent;
 
     //output
     [SerializeField] private Text analyzedValue;
@@ -53,13 +52,11 @@ public class UIGamesTheory : MonoBehaviour {
         TreeSearcher.TreeUpdatedEvent += UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
         GamesAlgorythm.PrunedNodesEvent += CountPruned;
-        ResetGameTreeEvent += ResetOutput;
     }
     private void OnDisable () {
         TreeSearcher.TreeUpdatedEvent -= UpdatePaths;
         GamesAlgorythm.NodeAnalyzedEvent -= IncrementAnalyzed;
         GamesAlgorythm.PrunedNodesEvent -= CountPruned;
-        ResetGameTreeEvent -= ResetOutput;
     }
 
     private void Awake () {
@@ -244,11 +241,34 @@ public class UIGamesTheory : MonoBehaviour {
 
     public void OnPressReset ()
     {
-        if (ResetGameTreeEvent != null)
-            ResetGameTreeEvent ();
+        ResetOutput ();
+
+        foreach (GamesLink link in GamesLink.Links) {
+            link.GO.GetComponent<SpriteRenderer> ().sprite = inactiveLink;
+        }
+
+        foreach (GamesNode leaf in GamesNode.Leafs) {
+            leaf.SetState (NodeState.Inactive);
+            leaf.GO.GetComponent<SpriteRenderer> ().sprite = inactiveNode;
+        }
+
+        foreach (GamesNode node in GamesNode.Nodes) {
+            if (GamesNode.Leafs.Contains (node))
+                continue;
+
+            node.SetState (NodeState.Inactive);
+            node.alpha = int.MinValue;
+            node.beta = int.MaxValue;
+
+            if (node.nodeType == NodeType.Max)
+                node.value = node.alpha;
+            else
+                node.value = node.beta;
+        }
     }
 
-    public void OnPressQuit () {
+    public void OnPressQuit ()
+    {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
 
