@@ -14,6 +14,7 @@ public class PathfindingAlgorythm {
 
     static public event Action SearchCompletedEvent;
 
+
     public Dictionary<Node, Node> cameFrom { get; protected set; }
 
     static public bool IsSearching { get; protected set; }

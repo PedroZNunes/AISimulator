@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -13,11 +14,6 @@ public class UIManager : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler SearchEvent;
     static public event Action CancelSearchEvent;
-    
-    //node setup related events
-    static public event Action SettingUpNodesEvent;
-    static public event Action DisableNodesEvent;
-
 
     //output
     [SerializeField] private Text enqueuingsValue;
@@ -50,19 +46,10 @@ public class UIManager : MonoBehaviour {
     static private UIManager instance;
 
     //start and goal setting
-    [HideInInspector] public bool settingStartNode = false;
-    [HideInInspector] public bool settingGoalNode = false;
-
-    [SerializeField] private GameObject startPrefab;
-    [SerializeField] private GameObject goalPrefab;
+    [SerializeField] private UINodeSetup nodeSetup;
 
     [SerializeField] private Text searchText;
-
-    private Node startNode;
-    private Node goalNode;
-
-    private GameObject startNodeGO;
-    private GameObject goalNodeGO;
+    [SerializeField] private Button quitButton;
 
 
 
@@ -70,17 +57,14 @@ public class UIManager : MonoBehaviour {
         PathfindingAlgorythm.UpdateUIEvent += UpdateUI;
         PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
         PathfindingAlgorythm.ResetUIEvent += ResetOutput;
-        PathfindingAlgorythm.SearchCompletedEvent += SearchCompleted;
-
-        UINode.NodeSelectedEvent += NodeSelected;
+        PathfindingAlgorythm.SearchCompletedEvent += PathingCompleted;
     }
+
     private void OnDisable () {
         PathfindingAlgorythm.UpdateUIEvent -= UpdateUI;
         PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
         PathfindingAlgorythm.ResetUIEvent -= ResetOutput;
-        PathfindingAlgorythm.SearchCompletedEvent -= SearchCompleted;
-
-        UINode.NodeSelectedEvent -= NodeSelected;
+        PathfindingAlgorythm.SearchCompletedEvent -= PathingCompleted;
     }
 
     private void Awake () {
@@ -195,7 +179,7 @@ public class UIManager : MonoBehaviour {
     }
 
     public void GenerateMap () {
-        ResetStartAndGoal();
+        nodeSetup.ResetStartAndGoalNodes();
 
             if (GenerateMapEvent != null)
             GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
@@ -209,12 +193,9 @@ public class UIManager : MonoBehaviour {
             int beams = Int32.Parse (sBeamPathsInput.text);
             int fps = Int32.Parse (sFpsInput.text);
 
-            Node start = startNode ?? MapGenerator.RandomNode ();
-            Node goal = goalNode ?? MapGenerator.RandomNode ();
+            Node start, goal;
+            nodeSetup.AssignStartAndGoal(out start, out goal);
 
-            SetStartSprite (start);
-            SetGoalSprite (goal);
-            
             //change button text
             searchText.text = "Cancel";
 
@@ -229,76 +210,18 @@ public class UIManager : MonoBehaviour {
                 Debug.Log("CancelSearchEvent is empty");
 
             searchText.text = "Search";
+            
         }
     }
 
-    private void SearchCompleted () {
+    private void PathingCompleted () {
         searchText.text = "Search";
+        quitButton.enabled = false;
     }
 
-    public void SetStart () {
-        if (SettingUpNodesEvent != null)
-            SettingUpNodesEvent ();
-
-        settingStartNode = true;
-    }
-
-    public void SetGoal () {
-        if (SettingUpNodesEvent != null)
-            SettingUpNodesEvent ();
-
-        settingGoalNode = true;
-    }
-
-    public void ResetStartAndGoal () {
-        settingGoalNode = false;
-        settingStartNode = false;
-
-        Destroy (startNodeGO);
-        Destroy (goalNodeGO);
-
-        startNode = null;
-        goalNode = null;
-    }
-
-    //called when a node is selected using Start and Goal buttons
-    public void NodeSelected (Node node) {
-        if (settingStartNode) {
-            settingStartNode = false;
-
-            startNode = node;
-            SetStartSprite (startNode);
-
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent ();
-            }
-        }
-        else if (settingGoalNode) {
-            settingGoalNode = false;
-
-            goalNode = node;
-            SetGoalSprite (goalNode);
-
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent ();
-            }
-        }
-    }
-
-    private void SetStartSprite (Node node) {
-        Destroy (startNodeGO);
-
-        startNodeGO = Instantiate (startPrefab, node.GO.transform);
-    }
-
-    private void SetGoalSprite (Node node) {
-        Destroy (goalNodeGO);
-
-        goalNodeGO = Instantiate (goalPrefab, node.GO.transform);
-    }
 
     public void Quit() {
-        UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+        SceneManager.LoadScene (0);
     }
 
 }

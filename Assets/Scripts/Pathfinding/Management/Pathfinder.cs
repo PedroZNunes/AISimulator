@@ -48,7 +48,14 @@ public class Pathfinder : MonoBehaviour {
         if (instance == null) 
             instance = FindObjectOfType<Pathfinder> ();
         if (instance != this)
-            Destroy (this.gameObject);
+            Destroy (instance.gameObject);
+    }
+
+    ~Pathfinder() {
+        activeLinks = new Stack<Link>();
+        exploredLinks = new Stack<Link>();
+        activeNodes = new Stack<Node>();
+        exploredNodes = new Stack<Node>();
     }
 
     public void StartPathing (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths) {
