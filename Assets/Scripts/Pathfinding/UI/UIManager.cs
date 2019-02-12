@@ -12,7 +12,7 @@ public class UIManager : MonoBehaviour {
 
     //Search related events
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
-    static public event SearchHandler SearchEvent;
+    static public event SearchHandler BeginSearchEvent;
     static public event Action CancelSearchEvent;
 
     //output
@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour {
     //map generation inputs
     [SerializeField] private Dropdown sizeDropdownInput;
     static private Dropdown sSizeDropdownInput;
+
     static public int Size { get; private set; }
 
     [SerializeField] private InputField nodeCountInput;
@@ -48,30 +49,34 @@ public class UIManager : MonoBehaviour {
     //start and goal setting
     [SerializeField] private UINodeSetup nodeSetup;
 
-    [SerializeField] private Text searchText;
+    [SerializeField] private Button generateButton;
+    [SerializeField] private Button searchButton;
     [SerializeField] private Button quitButton;
 
 
 
     private void OnEnable () {
-        PathfindingAlgorythm.UpdateUIEvent += UpdateUI;
+        PathfindingAlgorythm.UpdateUIEvent += UpdateOutputValues;
         PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
-        PathfindingAlgorythm.ResetUIEvent += ResetOutput;
-        PathfindingAlgorythm.SearchCompletedEvent += PathingCompleted;
+        PathfindingAlgorythm.AlteredSearchStateEvent += UpdateButtons;
+
+        Pathfinder.ResettingPathsEvent += ResetOutput;
     }
 
     private void OnDisable () {
-        PathfindingAlgorythm.UpdateUIEvent -= UpdateUI;
+        PathfindingAlgorythm.UpdateUIEvent -= UpdateOutputValues;
         PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
-        PathfindingAlgorythm.ResetUIEvent -= ResetOutput;
-        PathfindingAlgorythm.SearchCompletedEvent -= PathingCompleted;
+        PathfindingAlgorythm.AlteredSearchStateEvent -= UpdateButtons;
+
+        Pathfinder.ResettingPathsEvent -= ResetOutput;
     }
 
     private void Awake () {
-        if (instance == null)
-            instance = FindObjectOfType<UIManager> ();
+        instance = FindObjectOfType<UIManager> ();
         if (instance != this)
-            Destroy (this.gameObject);
+            Destroy(this.gameObject);
+        else if (instance == null)
+            Debug.LogError("No UIManager found in the scene.");
 
         Initialize ();
         InitializeUI ();
@@ -79,9 +84,10 @@ public class UIManager : MonoBehaviour {
     }
 
     private void Start () {
-        GenerateMap ();
+        OnPressGenerateMap ();
     }
 
+    //UI Preparation Setup
     static private void Initialize () {
         //map generation
         sSizeDropdownInput = instance.sizeDropdownInput;
@@ -108,9 +114,9 @@ public class UIManager : MonoBehaviour {
 
         sizeDropdownInput.ClearOptions ();
         sizeDropdownInput.AddOptions (sizes);
-        sizeDropdownInput.value = 4;
+        sizeDropdownInput.value = 3;
 
-        nodeCountInput.text = "250";
+        nodeCountInput.text = "100";
         maxLinksInput.text = "10";
         grainInput.text = "5";
 
@@ -125,7 +131,7 @@ public class UIManager : MonoBehaviour {
 
         algorythmDropdownInput.ClearOptions ();
         algorythmDropdownInput.AddOptions (algorythms);
-        algorythmDropdownInput.value = 0;
+        algorythmDropdownInput.value = 5;
 
         beamPathsInput.text = "2";
         fpsInput.text = "3";
@@ -139,13 +145,27 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = "0";
     }
 
-    private void IncrementEnqueue () {
-        int enqueuings = Int32.Parse (enqueuingsValue.text);
+    //Changing the size of the map
+    public void OnChangeSize () {
+        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
+        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
+        Size = Int32.Parse (sizeString);
 
-        enqueuingsValue.text = (++enqueuings).ToString ();
+        CapMaxNodeCount ();
     }
 
-    private void UpdateUI (int queueSize, float length) {
+    public void CapMaxNodeCount () {
+        if (nodeCountInput.text == "")
+            nodeCountInput.text = "0";
+        int count = Int32.Parse (nodeCountInput.text);
+        int maxNodeCount = ((Size * Size) / 5);
+        if (count > maxNodeCount) {
+            nodeCountInput.text = (maxNodeCount).ToString ();
+        }
+    }
+
+    //Updating right panel text, triggered by event
+    private void UpdateOutputValues (int queueSize, float length) {
         //update queue info
         if (queueSize > (Int32.Parse (maxQueueSizeValue.text))) {
             maxQueueSizeValue.text = queueSize.ToString();
@@ -160,33 +180,19 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
     }
 
-    public void SetNodeCount () {
-        if (nodeCountInput.text == "")
-            nodeCountInput.text = "0";
-        int count = Int32.Parse (nodeCountInput.text);
-        int maxNodeCount = ((Size * Size) / 3);
-        if (count > maxNodeCount) {
-            nodeCountInput.text = (maxNodeCount).ToString ();
-        }
-    }
+    public void OnPressGenerateMap () {
+        if (PathfindingAlgorythm.IsSearching)
+            return;
 
-    public void SetSize () {
-        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
-        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
-        Size = Int32.Parse (sizeString);
-
-        SetNodeCount ();
-    }
-
-    public void GenerateMap () {
         nodeSetup.ResetStartAndGoalNodes();
 
-            if (GenerateMapEvent != null)
+        if (GenerateMapEvent != null)
             GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
     }
 
     //Called by the Search button
-    public void Search () {
+    public void OnPressSearch () {
+        //if not searching yet, search
         if (!PathfindingAlgorythm.IsSearching) {
             string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
 
@@ -196,29 +202,38 @@ public class UIManager : MonoBehaviour {
             Node start, goal;
             nodeSetup.AssignStartAndGoal(out start, out goal);
 
-            //change button text
-            searchText.text = "Cancel";
-
-            if (SearchEvent != null)
-                SearchEvent (algorythmString, start, goal, fps, beams);
+            if (BeginSearchEvent != null)
+                BeginSearchEvent (algorythmString, start, goal, fps, beams);
         }
-        //if already searching
+        //if already searching, cancel
         else {
             if (CancelSearchEvent != null)
                 CancelSearchEvent();
             else
-                Debug.Log("CancelSearchEvent is empty");
+                Debug.LogWarning("CancelSearchEvent is empty");
 
-            searchText.text = "Search";
-            
         }
     }
 
-    private void PathingCompleted () {
-        searchText.text = "Search";
-        quitButton.enabled = false;
+    private void UpdateButtons() {
+        if (PathfindingAlgorythm.IsSearching) {
+            generateButton.interactable = false;
+            searchButton.GetComponentInChildren<Text>().text = "Cancel";
+            quitButton.interactable = false;
+        }
+        else {
+            generateButton.interactable = true;
+            searchButton.GetComponentInChildren<Text>().text = "Search";
+            quitButton.interactable = true;
+        }
+
     }
 
+    private void IncrementEnqueue() {
+        int enqueuings = Int32.Parse(enqueuingsValue.text);
+
+        enqueuingsValue.text = (++enqueuings).ToString();
+    }
 
     public void Quit() {
         SceneManager.LoadScene (0);

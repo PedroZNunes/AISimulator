@@ -16,11 +16,11 @@ public class UINode : MonoBehaviour {
 
     private void OnEnable () {
         UINodeSetup.SettingUpNodesEvent += EnableArea;
-        UINodeSetup.DisableNodesEvent += DisableArea;
+        UINodeSetup.NodeSelectedEvent += DisableArea;
     }
     private void OnDisable () {
         UINodeSetup.SettingUpNodesEvent -= EnableArea;
-        UINodeSetup.DisableNodesEvent -= DisableArea;
+        UINodeSetup.NodeSelectedEvent -= DisableArea;
     }
 
     private void Awake () {
@@ -40,7 +40,7 @@ public class UINode : MonoBehaviour {
         }
     }
 
-    public void EnableArea () {
+    public void EnableArea (bool isStart) {
         col.enabled = true;
     }
 

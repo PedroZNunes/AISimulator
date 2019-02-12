@@ -7,14 +7,20 @@ public class UINodeSetup : MonoBehaviour
 
 
     //node setup related events
-    static public event Action SettingUpNodesEvent;
-    static public event Action DisableNodesEvent;
+    public delegate void SettingUpNodesHandler(bool isStart);
+    static public event SettingUpNodesHandler SettingUpNodesEvent;
+    static public event Action ResetNodesEvent;
+    static public event Action NodeSelectedEvent;
 
     [HideInInspector] public bool settingStartNode = false;
     [HideInInspector] public bool settingGoalNode = false;
 
     [SerializeField] private GameObject startPrefab;
     [SerializeField] private GameObject goalPrefab;
+
+    [SerializeField] private Button StartButton;
+    [SerializeField] private Button GoalButton;
+    [SerializeField] private Button ResetButton;
 
     private GameObject startNodeGO;
     private GameObject goalNodeGO;
@@ -23,10 +29,12 @@ public class UINodeSetup : MonoBehaviour
     private Node goalNode;
 
     private void OnEnable() {
+        PathfindingAlgorythm.AlteredSearchStateEvent += UpdateButtons;
         UINode.NodeSelectedEvent += NodeSelected;
     }
 
     private void OnDisable() {
+        PathfindingAlgorythm.AlteredSearchStateEvent -= UpdateButtons;
         UINode.NodeSelectedEvent -= NodeSelected;
     }
 
@@ -38,18 +46,27 @@ public class UINodeSetup : MonoBehaviour
         SetGoalNode(goal);
     }
 
-    public void StartNodeSetup() {
-        if (SettingUpNodesEvent != null)
-            SettingUpNodesEvent();
-
-        settingStartNode = true;
+    private void UpdateButtons()
+    {
+        if (PathfindingAlgorythm.IsSearching) {
+            StartButton.GetComponent<Button>().interactable = false;
+            GoalButton.GetComponent<Button>().interactable = false;
+            ResetButton.GetComponent<Button>().interactable = false;
+        }
+        else {
+            StartButton.GetComponent<Button>().interactable = true;
+            GoalButton.GetComponent<Button>().interactable = true;
+            ResetButton.GetComponent<Button>().interactable = true;
+        }
     }
 
-    public void GoalNodeSetup() {
-        if (SettingUpNodesEvent != null)
-            SettingUpNodesEvent();
+    public void OnPressReset()
+    {
+        ResetStartAndGoalNodes();
 
-        settingGoalNode = true;
+        if (ResetNodesEvent != null) {
+            ResetNodesEvent();
+        }
     }
 
     public void ResetStartAndGoalNodes() {
@@ -61,6 +78,7 @@ public class UINodeSetup : MonoBehaviour
 
         startNode = null;
         goalNode = null;
+
     }
 
     //called when a node is selected using Start and Goal buttons
@@ -71,8 +89,8 @@ public class UINodeSetup : MonoBehaviour
             startNode = node;
             SetStartNode(startNode);
 
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent();
+            if (NodeSelectedEvent != null) {
+                NodeSelectedEvent();
             }
         }
         else if (settingGoalNode) {
@@ -81,10 +99,18 @@ public class UINodeSetup : MonoBehaviour
             goalNode = node;
             SetGoalNode(goalNode);
 
-            if (DisableNodesEvent != null) {
-                DisableNodesEvent();
+            if (NodeSelectedEvent != null) {
+                NodeSelectedEvent();
             }
         }
+    }
+
+    public void StartNodeSetup() {
+        if (SettingUpNodesEvent != null)
+            SettingUpNodesEvent(true);
+
+        settingStartNode = true;
+        settingGoalNode = true;
     }
 
     private void SetStartNode(Node node) {
@@ -93,9 +119,18 @@ public class UINodeSetup : MonoBehaviour
         startNodeGO = Instantiate(startPrefab, node.GO.transform);
     }
 
+    public void GoalNodeSetup() {
+        if (SettingUpNodesEvent != null)
+            SettingUpNodesEvent(false);
+
+        settingStartNode = false;
+        settingGoalNode = true;
+    }
+
     private void SetGoalNode(Node node) {
         Destroy(goalNodeGO);
 
         goalNodeGO = Instantiate(goalPrefab, node.GO.transform);
     }
+
 }

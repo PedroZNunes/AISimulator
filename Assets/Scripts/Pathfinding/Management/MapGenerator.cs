@@ -50,9 +50,6 @@ public class MapGenerator : MonoBehaviour {
     }
 
     public void Generate (int size, int nodeCount, int maxLinks, int grain) {
-        if (PathfindingAlgorythm.IsSearching)
-            return ;
-
         Initialize (size, nodeCount, maxLinks, grain);
 
         ClearPreviousMap ();
@@ -140,7 +137,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void ClearPreviousMap () {
-        Pathfinder.UIResetAllPaths ();
+        Pathfinder.ResetAllPaths ();
 
         foreach (Transform child in transform) {
             GameObject.Destroy (child.gameObject);
