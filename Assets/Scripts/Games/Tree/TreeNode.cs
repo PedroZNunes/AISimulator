@@ -22,6 +22,8 @@ public enum NodeState { Active, Inactive, Explored, Pruned }
 /// </summary>
 public class TreeNode
 {
+    #region Lists
+
     /// <summary>
     /// counter updated at every node spawn
     /// </summary>
@@ -39,9 +41,10 @@ public class TreeNode
     /// </summary>
     static private List<TreeNode> leaves = new List<TreeNode> ();
     static public List<TreeNode> Leaves { get { return leaves; } }
+    #endregion
 
+    #region VariablesThatWontChangeAfterInitialization
 
-    //values that don't change after initialization
     /// <summary>
     /// a list of this nodes' branches
     /// </summary>
@@ -73,7 +76,9 @@ public class TreeNode
     /// random number for equality evaluation
     /// </summary>
     private float randomSeed;
+    #endregion
 
+    #region VariablesThatMightBeChangedBySearchAlgorithms
 
     //values that change.
     /// <summary>
@@ -99,6 +104,7 @@ public class TreeNode
     /// </summary>
     public int Score { get; private set; }
 
+    #endregion
 
 
     /// <summary>
@@ -126,6 +132,7 @@ public class TreeNode
                 branches[i] = new TreeBranch (this, new TreeNode (branching, currentDepth + 1, newType));
                 branches[i].b.parentBranch = branches[i];
             }
+            
             leafID = null;
         }
         else {
@@ -140,6 +147,7 @@ public class TreeNode
     }
 
     #region GetsSetsAndReset
+
     /// <summary>
     /// Sets up variables that will be changed during search
     /// </summary>
@@ -149,7 +157,7 @@ public class TreeNode
         bestScoreMin = int.MaxValue;
         State = NodeState.Inactive;
 
-        //if not a leaf
+        //if not a leaf, change the score and th leafID
         if (depth < TreeGenerator.depth) {
             leafID = null;
             Score = (Type == NodeType.Max) ? bestScoreMax : bestScoreMin;
@@ -161,25 +169,20 @@ public class TreeNode
     /// </summary>
     static public void ResetNodes ()
     {
-        Debug.Log ("printing nodes before reset: \n");
-        foreach (TreeNode node in nodes) {
-            Debug.LogFormat ("name: {0}\t State: {1}\t Score: {2}\t Max: {3}\t Min: {4}", node.GO.name, node.State, node.Score, node.bestScoreMax, node.bestScoreMin);
-        }
-
         foreach (TreeNode node in nodes) {
             node.SetInitialValues ();
         }
-
-        Debug.Log ("printing nodes after reset: \n");
-        foreach (TreeNode node in nodes) {
-            Debug.LogFormat ("name: {0}\t State: {1}\t Score: {2}\t Max: {3}\t Min: {4}", node.GO.name, node.State, node.Score, node.bestScoreMax, node.bestScoreMin);
-        }
     }
 
+    /// <summary>
+    /// This gets triggered when a node (max or min) get a new best value from a child. it stores its ID and Score.
+    /// </summary>
+    /// <param name="node"></param>
     public void SetScore (TreeNode node)
     {
         Score = node.Score;
         leafID = node.leafID;
+
         if (Type == NodeType.Max) {
             bestScoreMax = node.Score;
         }
