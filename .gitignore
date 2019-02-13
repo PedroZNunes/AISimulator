@@ -11,6 +11,7 @@
 /Packages
 /Logs
 /.vs
+/.cr
 
 /*.sln
 /Assembly-CSharp.csproj
