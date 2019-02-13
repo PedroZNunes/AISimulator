@@ -879,6 +879,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 303bc9fcf4bc9c34fa60d7f0f66df219, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inactiveBranch: {fileID: 21300000, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  inactiveNode: {fileID: 21300000, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
+  activeBranch: {fileID: 21300002, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  activeNode: {fileID: 21300002, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
+  exploredBranch: {fileID: 21300004, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  exploredNode: {fileID: 21300004, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
+  prunedNode: {fileID: 21300006, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
 --- !u!1 &314478101
 GameObject:
   m_ObjectHideFlags: 0
@@ -3499,7 +3506,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1328925806}
-        m_MethodName: GenerateMap
+        m_MethodName: OnPressGenerate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3671,13 +3678,6 @@ MonoBehaviour:
   depthInput: {fileID: 353986884}
   algorythmDropdownInput: {fileID: 1833434120}
   fpsInput: {fileID: 835434076}
-  inactiveBranch: {fileID: 21300000, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
-  inactiveNode: {fileID: 21300000, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
-  activeBranch: {fileID: 21300002, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
-  activeNode: {fileID: 21300002, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
-  exploredBranch: {fileID: 21300004, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
-  exploredNode: {fileID: 21300004, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
-  prunedNode: {fileID: 21300006, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
 --- !u!1 &1335068068
 GameObject:
   m_ObjectHideFlags: 0

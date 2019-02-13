@@ -9,7 +9,6 @@ public class TreeBranch
 
     public GameObject GO;
 
-    static private List<TreeBranch> branchesUntouched;
     static private List<TreeBranch> branches = new List<TreeBranch> ();
     static public List<TreeBranch> Branches { get { return branches; } }
 
@@ -19,16 +18,6 @@ public class TreeBranch
         this.b = b;
 
         branches.Add (this);
-    }
-
-    static public void LoadOriginalBranchList ()
-    {
-        branches = branchesUntouched;
-    }
-
-    static public void SaveOriginalBranchList ()
-    {
-        branchesUntouched = branches;
     }
 
     static public void Reset ()

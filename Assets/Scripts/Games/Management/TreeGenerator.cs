@@ -76,7 +76,6 @@ public class TreeGenerator : MonoBehaviour
             SetCameraEvent (depth, branching, spacingY);
         }
 
-        TreeBranch.SaveOriginalBranchList ();
     }
 
     /// <summary>
@@ -101,7 +100,7 @@ public class TreeGenerator : MonoBehaviour
             float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
             position.x = initialPosX + (step.x * i);
             position.y = parentNode.GO.transform.position.y - step.y;
-            //Debug.LogFormat ("initialposX: {0}. stepX: {1}. pos{2}", initialPosX, step.x, pos);
+            //Debug.LogFormat ("initial posX: {0}. stepX: {1}. pos{2}", initialPosX, step.x, pos);
 
             //assign prefab according to node type (leaf, min or max)
             Object prefab;
