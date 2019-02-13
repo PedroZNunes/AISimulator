@@ -45,18 +45,18 @@ public class AlphaBeta : GamesAlgorithm
             }
 
             //look at the next children, pass its alpha and beta to it.
-            TreeNode other = node.GetOther (i);
-            CheckNode (other, node.bestScoreMax, node.bestScoreMin);
+            TreeNode child = node.GetOther (i);
+            CheckNode (child, node.bestScoreMax, node.bestScoreMin);
             //if the children is a maximizer or a minimizer, the the loop will go on.
             //if the children is a leaf, the leaf passes the value back up to the parent
 
             //if (minimizer) new value < value - assign and update bestValue
-            if ((node.Type == NodeType.Min) && (other.Score < node.Score)) {
-                node.SetScore (other);
+            if ((node.Type == NodeType.Min) && (child.Score < node.Score)) {
+                node.SetScore (child);
             }
             //if (maximizer) new value > value - assign and update alpha
-            else if ((node.Type == NodeType.Max) && (other.Score > node.Score)) {
-                node.SetScore (other);
+            else if ((node.Type == NodeType.Max) && (child.Score > node.Score)) {
+                node.SetScore (child);
             }
         }
 

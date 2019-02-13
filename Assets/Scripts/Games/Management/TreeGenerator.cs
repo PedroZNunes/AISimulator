@@ -14,7 +14,6 @@ public class TreeGenerator : MonoBehaviour
     [SerializeField] private GameObject linkPrefab;
 
     private const float hwRatio = 0.4f;
-    //private const float hwRatio = 0.736196319018404f;
 
     private int branching; //how many branches leave each node
     static public int depth { get; private set; } // the amount of levels the tree has
@@ -43,7 +42,11 @@ public class TreeGenerator : MonoBehaviour
             Destroy (this.gameObject);
     }
 
-    //generate the map
+    /// <summary>
+    /// generate the map
+    /// </summary>
+    /// <param name="b">branches per node</param>
+    /// <param name="d">depth: number of floors or levels</param>
     private void Generate (int b, int d)
     {
         //setup
@@ -73,11 +76,13 @@ public class TreeGenerator : MonoBehaviour
             SetCameraEvent (depth, branching, spacingY);
         }
 
-        TreeNode.SaveOriginalNodeList ();
         TreeBranch.SaveOriginalBranchList ();
     }
 
-    //recursive spawning 
+    /// <summary>
+    /// recursive spawning 
+    /// </summary>
+    /// <param name="parentNode"></param>
     private void SpawnBranchesOf (TreeNode parentNode)
     {
 
@@ -92,10 +97,10 @@ public class TreeGenerator : MonoBehaviour
             step.x = Mathf.Pow (branching, depth - toSpawn.depth);
             step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
 
-            Vector2 pos = new Vector2 ();
+            Vector2 position = new Vector2 ();
             float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
-            pos.x = initialPosX + (step.x * i);
-            pos.y = parentNode.GO.transform.position.y - step.y;
+            position.x = initialPosX + (step.x * i);
+            position.y = parentNode.GO.transform.position.y - step.y;
             //Debug.LogFormat ("initialposX: {0}. stepX: {1}. pos{2}", initialPosX, step.x, pos);
 
             //assign prefab according to node type (leaf, min or max)
@@ -108,29 +113,32 @@ public class TreeGenerator : MonoBehaviour
                 prefab = minPrefab;
 
             //instantiate the node
-            GameObject go = (GameObject)Instantiate (prefab, pos, Quaternion.identity, this.transform);
-            go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
+            GameObject go = (GameObject)Instantiate (prefab, position, Quaternion.identity, this.transform);
             go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
-            //go.transform.localScale *= Mathf.Clamp((treeDepth - toSpawn.depth + 1) * branching / 2, 1f, float.MaxValue);
-            toSpawn.GO = go;
 
             if (prefab == leafPrefab) {
                 go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
+                go.name = "Leaf " + toSpawn.ID;
+            }
+            else {
+                go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
             }
 
+            toSpawn.GO = go;
+
+
             //prepare the link
-            //posição
-            pos = (toSpawn.GO.transform.position + parentNode.GO.transform.position) / 2;
+            position = (toSpawn.GO.transform.position + parentNode.GO.transform.position) / 2;
             //angle
-            double angle = Mathf.Atan2 (toSpawn.GO.transform.position.y - parentNode.GO.transform.position.y, toSpawn.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
+            double branchAngle = Mathf.Atan2 (toSpawn.GO.transform.position.y - parentNode.GO.transform.position.y, toSpawn.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
             //scale
-            float scale = Vector2.Distance (parentNode.GO.transform.position, toSpawn.GO.transform.position);
+            float branchScale = Vector2.Distance (parentNode.GO.transform.position, toSpawn.GO.transform.position);
             //float width = Mathf.Max (depth - toSpawn.depth, 1f) + ((branching - 1) / 2) * (depth - toSpawn.depth);
 
             //spawn the link
-            go = Instantiate (linkPrefab, pos, Quaternion.identity, transform);
-            go.transform.localScale = new Vector3 (1f, scale * 4, 1f);
-            go.transform.eulerAngles = new Vector3 (0f, 0f, (float)angle);
+            go = Instantiate (linkPrefab, position, Quaternion.identity, transform);
+            go.transform.localScale = new Vector3 (1f, branchScale * 4, 1f);
+            go.transform.eulerAngles = new Vector3 (0f, 0f, (float)branchAngle);
 
             parentNode.branches[i].GO = go;
 
@@ -139,7 +147,9 @@ public class TreeGenerator : MonoBehaviour
         }
     }
 
-    //reset the tree for generating another one
+    /// <summary>
+    /// reset the tree for generating another one
+    /// </summary>
     private void ResetTree ()
     {
         for (int i = 0; i < TreeNode.Nodes.Count; i++) {

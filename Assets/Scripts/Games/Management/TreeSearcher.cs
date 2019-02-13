@@ -55,9 +55,9 @@ public class TreeSearcher : MonoBehaviour
             Debug.LogWarning ("Algorithm not set. Search canceled.");
     }
 
-    public void SetAlgorithm (GamesAlgorithm algorythm)
+    public void SetAlgorithm (GamesAlgorithm algorithm)
     {
-        this.algorithm = algorythm;
+        this.algorithm = algorithm;
     }
 
     private void SetLeafStates (TreeNode node)

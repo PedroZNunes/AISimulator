@@ -10,6 +10,8 @@ public class UIGamesTheory : MonoBehaviour
     public delegate void GenerateMapHandler (int branching, int depth);
     static public event GenerateMapHandler GenerateMapEvent;
 
+    static public event Action MapGeneratedEvent;
+
     public delegate void SearchHandler (string algorythm, int branching, int depth, int fps);
     static public event SearchHandler SearchEvent;
 
@@ -48,7 +50,8 @@ public class UIGamesTheory : MonoBehaviour
 
     static private UIGamesTheory instance;
 
-    //initializations
+    #region Initialization
+
     private void OnEnable ()
     {
         TreeSearcher.TreeUpdatedEvent += UpdatePaths;
@@ -106,8 +109,7 @@ public class UIGamesTheory : MonoBehaviour
         SetFPS ();
         SetAlgorithm ();
     }
-
-
+    #endregion
 
 
     /// <summary>
@@ -188,15 +190,13 @@ public class UIGamesTheory : MonoBehaviour
 
         if (GenerateMapEvent != null)
             GenerateMapEvent (branching, depth);
+
+        if (MapGeneratedEvent != null)
+            MapGeneratedEvent ();
     }
 
-    public void OnPressSearch ()
-    {
-        ResetOutput ();
+    #region OutputData
 
-        if (SearchEvent != null)
-            SearchEvent (algorithm, branching, depth, fps);
-    }
 
     private void IncrementAnalyzed (TreeNode node)
     {
@@ -232,9 +232,12 @@ public class UIGamesTheory : MonoBehaviour
         prunedValue.text = "0";
         percentValue.text = "0";
     }
+    #endregion
 
-    //A series of input-related functions
+    #region Input Handling
+
     public void SetFPS () { fps = Int32.Parse (instance.fpsInput.text); }
+
     public void SetBranchingAndDepth ()
     {
         depth = Mathf.Clamp (Int32.Parse (instance.depthInput.text), minDepth, maxDepth);
@@ -253,11 +256,20 @@ public class UIGamesTheory : MonoBehaviour
 
     public void SetAlgorithm () { algorithm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
+
+    public void OnPressSearch ()
+    {
+        OnPressReset ();
+
+        if (SearchEvent != null)
+            SearchEvent (algorithm, branching, depth, fps);
+    }
+
     public void OnPressReset ()
     {
         ResetOutput ();
-        TreeNode.LoadOriginalNodeList ();
-        TreeBranch.LoadOriginalBranchList ();
+        TreeNode.ResetNodes ();
+        //TreeBranch.LoadOriginalBranchList ();
 
         foreach (TreeBranch branch in TreeBranch.Branches) {
             branch.GO.GetComponent<SpriteRenderer> ().sprite = inactiveBranch;
@@ -277,5 +289,6 @@ public class UIGamesTheory : MonoBehaviour
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
     }
+    #endregion
 
 }

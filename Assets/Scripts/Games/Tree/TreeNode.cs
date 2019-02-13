@@ -26,22 +26,22 @@ public class TreeNode
     /// counter updated at every node spawn
     /// </summary>
     static public int Count { get; private set; }
-    static private List<TreeNode> nodesUntouched;
-    
-    static private List<TreeNode> nodes = new List<TreeNode> (); 
+
     /// <summary>
     /// list of all nodes, including leaves
     /// </summary>
+    static private List<TreeNode> nodes = new List<TreeNode> ();
     static public List<TreeNode> Nodes { get { return nodes; } }
 
-    static private List<TreeNode> leaves = new List<TreeNode> ();
     /// <summary>
     /// A leaf is a node in the last level of depth in the tree, or at the bottom of it
     /// leafs are also present in the nodes list. 
     /// </summary>
+    static private List<TreeNode> leaves = new List<TreeNode> ();
     static public List<TreeNode> Leaves { get { return leaves; } }
 
-    private TreeBranch[] branchesUntouched;
+
+    //values that don't change after initialization
     /// <summary>
     /// a list of this nodes' branches
     /// </summary>
@@ -58,10 +58,6 @@ public class TreeNode
     public TreeBranch parentBranch { get; private set; }
 
     /// <summary>
-    /// active, inactive, explored...? the UI uses this
-    /// </summary>
-    public NodeState State { get; private set; }
-    /// <summary>
     /// min or max node?
     /// </summary>
     public NodeType Type { get; private set; }
@@ -70,10 +66,16 @@ public class TreeNode
     /// </summary>
     public int ID { get; private set; }
     /// <summary>
-    /// the ID from the leaf where the value came from. Useful for tracing the path
+    ///in which floor is this node located
     /// </summary>
-    public int? leafID; 
+    public int depth { get; private set; }
+    /// <summary>
+    /// random number for equality evaluation
+    /// </summary>
+    private float randomSeed;
 
+
+    //values that change.
     /// <summary>
     /// The highest value that a maximizer got this far
     /// </summary>
@@ -84,21 +86,20 @@ public class TreeNode
     public int bestScoreMin;
 
     /// <summary>
+    /// active, inactive, explored...? the UI uses this
+    /// </summary>
+    public NodeState State { get; private set; }
+
+    /// <summary>
+    /// the ID from the leaf where the value came from. Useful for tracing the path
+    /// </summary>
+    public int? leafID;
+    /// <summary>
     /// The current node Score
     /// </summary>
     public int Score { get; private set; }
 
 
-    /// <summary>
-    ///in which floor is this node located
-    /// </summary>
-    public int depth { get; private set; }
-
-
-    /// <summary>
-    /// random number for equality evaluation
-    /// </summary>
-    private float randomSeed; 
 
     /// <summary>
     /// recursive constructor that ends up creating all tree by itself
@@ -108,21 +109,17 @@ public class TreeNode
     /// <param name="type">Max or Min</param>
     public TreeNode (int branching, int currentDepth, NodeType type)
     {
-        //node gets new ID, type and state
+        //node gets new ID, seed, depth and type
+        randomSeed = Random.value;
         ID = Count++;
         Type = type;
-        State = NodeState.Inactive;
-
-        Score = (Type == NodeType.Max) ? int.MinValue : int.MaxValue;
-
-        bestScoreMax = int.MinValue;
-        bestScoreMin = int.MaxValue;
-
-        randomSeed = Random.value;
-
         this.depth = currentDepth;
 
+        SetInitialValues ();
+
+
         if (currentDepth < TreeGenerator.depth) {
+            //sets up the branches linking to child nodes
             branches = new TreeBranch[branching];
             for (int i = 0; i < branches.Length; i++) {
                 NodeType newType = ((currentDepth + 1) % 2 == 0) ? NodeType.Max : NodeType.Min;
@@ -132,6 +129,7 @@ public class TreeNode
             leafID = null;
         }
         else {
+            //if its the last depth level, it becomes a leaf
             branches = new TreeBranch[0];
             Score = Random.Range (0, 20);
             leafID = ID;
@@ -141,17 +139,43 @@ public class TreeNode
         nodes.Add (this);
     }
 
-    static public void LoadOriginalNodeList ()
+    #region GetsSetsAndReset
+    /// <summary>
+    /// Sets up variables that will be changed during search
+    /// </summary>
+    private void SetInitialValues ()
     {
-        nodes = nodesUntouched;
+        bestScoreMax = int.MinValue;
+        bestScoreMin = int.MaxValue;
+        State = NodeState.Inactive;
+
+        //if not a leaf
+        if (depth < TreeGenerator.depth) {
+            leafID = null;
+            Score = (Type == NodeType.Max) ? bestScoreMax : bestScoreMin;
+        }
     }
 
-    static public void SaveOriginalNodeList ()
+    /// <summary>
+    /// Sets initial values. This is useful for resetting the same tree and re-searching it
+    /// </summary>
+    static public void ResetNodes ()
     {
-        nodesUntouched = nodes;
+        Debug.Log ("printing nodes before reset: \n");
+        foreach (TreeNode node in nodes) {
+            Debug.LogFormat ("name: {0}\t State: {1}\t Score: {2}\t Max: {3}\t Min: {4}", node.GO.name, node.State, node.Score, node.bestScoreMax, node.bestScoreMin);
+        }
+
+        foreach (TreeNode node in nodes) {
+            node.SetInitialValues ();
+        }
+
+        Debug.Log ("printing nodes after reset: \n");
+        foreach (TreeNode node in nodes) {
+            Debug.LogFormat ("name: {0}\t State: {1}\t Score: {2}\t Max: {3}\t Min: {4}", node.GO.name, node.State, node.Score, node.bestScoreMax, node.bestScoreMin);
+        }
     }
 
- 
     public void SetScore (TreeNode node)
     {
         Score = node.Score;
@@ -164,7 +188,6 @@ public class TreeNode
         }
     }
 
-    #region GetsSetsAndReset
 
     /// <summary>
     /// Sets the Node State (Explored, Active, Pruned or Inactive)
