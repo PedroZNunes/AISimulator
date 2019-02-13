@@ -44,7 +44,7 @@ public class CameraController : MonoBehaviour {
 
         cam.orthographicSize = Mathf.Max (sizeX, sizeY) + border;
         
-        float posY = GamesNode.Leafs[0].GO.transform.position.y / 2;
+        float posY = TreeNode.Leaves[0].GO.transform.position.y / 2;
         cam.transform.position = new Vector3 (0f, posY, cam.transform.position.z);
 
         area = new Bounds (cam.transform.position, new Vector3 (2 * cam.orthographicSize / 9 * 16, 2 * cam.orthographicSize));

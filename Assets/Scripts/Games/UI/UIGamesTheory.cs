@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
-public class UIGamesTheory : MonoBehaviour {
+public class UIGamesTheory : MonoBehaviour
+{
 
     //events
     public delegate void GenerateMapHandler (int branching, int depth);
@@ -28,17 +29,17 @@ public class UIGamesTheory : MonoBehaviour {
     [SerializeField] private InputField fpsInput;
 
     //links and nodes prefabs
-    [SerializeField] private Sprite inactiveLink;
+    [SerializeField] private Sprite inactiveBranch;
     [SerializeField] private Sprite inactiveNode;
-    [SerializeField] private Sprite activeLink;
+    [SerializeField] private Sprite activeBranch;
     [SerializeField] private Sprite activeNode;
-    [SerializeField] private Sprite exploredLink;
+    [SerializeField] private Sprite exploredBranch;
     [SerializeField] private Sprite exploredNode;
     [SerializeField] private Sprite prunedNode;
 
     public int branching { get; private set; }
     public int depth { get; private set; }
-    public string algorythm { get; private set; }
+    public string algorithm { get; private set; }
     public int fps { get; private set; } //does nothing so far
 
     private int maxLeafCount = 81;
@@ -48,18 +49,21 @@ public class UIGamesTheory : MonoBehaviour {
     static private UIGamesTheory instance;
 
     //initializations
-    private void OnEnable () {
+    private void OnEnable ()
+    {
         TreeSearcher.TreeUpdatedEvent += UpdatePaths;
-        GamesAlgorythm.NodeAnalyzedEvent += IncrementAnalyzed;
-        GamesAlgorythm.PrunedNodesEvent += CountPruned;
+        GamesAlgorithm.NodeAnalyzedEvent += IncrementAnalyzed;
+        GamesAlgorithm.PrunedNodesEvent += CountPruned;
     }
-    private void OnDisable () {
+    private void OnDisable ()
+    {
         TreeSearcher.TreeUpdatedEvent -= UpdatePaths;
-        GamesAlgorythm.NodeAnalyzedEvent -= IncrementAnalyzed;
-        GamesAlgorythm.PrunedNodesEvent -= CountPruned;
+        GamesAlgorithm.NodeAnalyzedEvent -= IncrementAnalyzed;
+        GamesAlgorithm.PrunedNodesEvent -= CountPruned;
     }
 
-    private void Awake () {
+    private void Awake ()
+    {
         if (instance == null)
             instance = FindObjectOfType<UIGamesTheory> ();
         if (instance != this)
@@ -75,7 +79,8 @@ public class UIGamesTheory : MonoBehaviour {
         GenerateMap ();
     }
 
-    private void InitializeUI () {
+    private void InitializeUI ()
+    {
         //map generation panel
         branchingInput.text = "2";
         depthInput.text = "4";
@@ -92,13 +97,14 @@ public class UIGamesTheory : MonoBehaviour {
         fpsInput.text = "3";
     }
 
-    private void Initialize () {
+    private void Initialize ()
+    {
         //map generation
         SetBranchingAndDepth ();
 
         //search
         SetFPS ();
-        SetAlgorythm ();
+        SetAlgorithm ();
     }
 
 
@@ -108,14 +114,15 @@ public class UIGamesTheory : MonoBehaviour {
     /// Updates the path sprites
     /// </summary>
     /// <param name="leafs">leaf array used as base for the tree's link states</param>
-    private void UpdatePaths (GamesNode[] leafs) {
+    private void UpdatePaths (TreeNode[] leafs)
+    {
         SpriteRenderer sr = new SpriteRenderer ();
-        GamesNode activeLeaf = null;
+        TreeNode activeLeaf = null;
         //update everything except for the active leaf
-        for (int i = 0 ; i < leafs.Length ; i++) {
-            GamesNode leaf = leafs[i];
+        for (int i = 0; i < leafs.Length; i++) {
+            TreeNode leaf = leafs[i];
             sr = leaf.GO.GetComponent<SpriteRenderer> ();
-            switch (leaf.nodeState) {
+            switch (leaf.State) {
                 case NodeState.Active:
                     sr.sprite = activeNode;
                     break;
@@ -133,7 +140,7 @@ public class UIGamesTheory : MonoBehaviour {
                     break;
             }
 
-            if (leaf.nodeState == NodeState.Active) {
+            if (leaf.State == NodeState.Active) {
                 activeLeaf = leaf;
                 continue;
             }
@@ -148,25 +155,26 @@ public class UIGamesTheory : MonoBehaviour {
     ///traces the path from the leaf back to the root
     /// </summary>
     /// <param name="leaf"></param>
-    private void TracePathToRoot(GamesNode leaf) {
-        Queue<GamesLink> path = new Queue<GamesLink> ();
+    private void TracePathToRoot (TreeNode leaf)
+    {
+        Queue<TreeBranch> path = new Queue<TreeBranch> ();
         SpriteRenderer sr = new SpriteRenderer ();
 
-        GamesNode parent = leaf;
+        TreeNode parent = leaf;
         while (parent != TreeGenerator.Root) {
-            path.Enqueue (parent.parentLink);
+            path.Enqueue (parent.parentBranch);
             parent = parent.GetParent ();
         }
 
         while (path.Count > 0) {
-            GamesLink link = path.Dequeue ();
+            TreeBranch link = path.Dequeue ();
             sr = link.GO.GetComponent<SpriteRenderer> ();
-            switch (leaf.nodeState) {
+            switch (leaf.State) {
                 case NodeState.Active:
-                    sr.sprite = activeLink;
+                    sr.sprite = activeBranch;
                     break;
                 case NodeState.Explored:
-                    sr.sprite = exploredLink;
+                    sr.sprite = exploredBranch;
                     break;
                 default:
                     break;
@@ -174,21 +182,24 @@ public class UIGamesTheory : MonoBehaviour {
         }
     }
 
-    public void GenerateMap () {
+    public void GenerateMap ()
+    {
         ResetOutput ();
 
         if (GenerateMapEvent != null)
             GenerateMapEvent (branching, depth);
     }
 
-    public void OnPressSearch () {
+    public void OnPressSearch ()
+    {
         ResetOutput ();
 
         if (SearchEvent != null)
-            SearchEvent (algorythm, branching, depth, fps);
+            SearchEvent (algorithm, branching, depth, fps);
     }
 
-    private void IncrementAnalyzed (GamesNode node) {
+    private void IncrementAnalyzed (TreeNode node)
+    {
         int analyzed = Int32.Parse (analyzedValue.text);
 
         analyzedValue.text = (++analyzed).ToString ();
@@ -197,7 +208,8 @@ public class UIGamesTheory : MonoBehaviour {
     /// <summary>
     /// Count how many nodes have been cut-off from the process
     /// </summary>
-    private void CountPruned () {
+    private void CountPruned ()
+    {
         int analyzed = Int32.Parse (analyzedValue.text);
         float total = Mathf.Pow (branching, depth);
 
@@ -205,7 +217,8 @@ public class UIGamesTheory : MonoBehaviour {
         UpdatePercent ();
     }
 
-    private void UpdatePercent () {
+    private void UpdatePercent ()
+    {
         int skipped = Int32.Parse (prunedValue.text);
         float total = Mathf.Pow (branching, depth);
         float percent = skipped / total * 100;
@@ -213,7 +226,8 @@ public class UIGamesTheory : MonoBehaviour {
         percentValue.text = String.Format ("{0:0.00}%", percent);
     }
 
-    private void ResetOutput () {
+    private void ResetOutput ()
+    {
         analyzedValue.text = "0";
         prunedValue.text = "0";
         percentValue.text = "0";
@@ -225,7 +239,7 @@ public class UIGamesTheory : MonoBehaviour {
     {
         depth = Mathf.Clamp (Int32.Parse (instance.depthInput.text), minDepth, maxDepth);
         instance.depthInput.text = depth.ToString ();
-        
+
         branching = Int32.Parse (instance.branchingInput.text);
         int totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
         while (totalLeafCount > maxLeafCount) {
@@ -233,37 +247,29 @@ public class UIGamesTheory : MonoBehaviour {
             totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
         }
 
-        instance.branchingInput.text = branching.ToString();
+        instance.branchingInput.text = branching.ToString ();
         Debug.LogFormat ("Branches: {0}, Depth: {1}", branching, depth);
     }
 
-    public void SetAlgorythm () { algorythm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
+    public void SetAlgorithm () { algorithm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
     public void OnPressReset ()
     {
         ResetOutput ();
+        TreeNode.LoadOriginalNodeList ();
+        TreeBranch.LoadOriginalBranchList ();
 
-        foreach (GamesLink link in GamesLink.Links) {
-            link.GO.GetComponent<SpriteRenderer> ().sprite = inactiveLink;
+        foreach (TreeBranch branch in TreeBranch.Branches) {
+            branch.GO.GetComponent<SpriteRenderer> ().sprite = inactiveBranch;
         }
 
-        foreach (GamesNode leaf in GamesNode.Leafs) {
-            leaf.SetState (NodeState.Inactive);
+        foreach (TreeNode leaf in TreeNode.Leaves) {
             leaf.GO.GetComponent<SpriteRenderer> ().sprite = inactiveNode;
         }
 
-        foreach (GamesNode node in GamesNode.Nodes) {
-            if (GamesNode.Leafs.Contains (node))
+        foreach (TreeNode node in TreeNode.Nodes) {
+            if (TreeNode.Leaves.Contains (node))
                 continue;
-
-            node.SetState (NodeState.Inactive);
-            node.alpha = int.MinValue;
-            node.beta = int.MaxValue;
-
-            if (node.nodeType == NodeType.Max)
-                node.value = node.alpha;
-            else
-                node.value = node.beta;
         }
     }
 

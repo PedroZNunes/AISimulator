@@ -1,19 +1,19 @@
 ﻿using System;
 
-public class GamesAlgorythm {
+public class GamesAlgorithm {
 
-    public delegate void NodeAnalyzedHandler (GamesNode node);
+    public delegate void NodeAnalyzedHandler (TreeNode node);
     static public event NodeAnalyzedHandler NodeAnalyzedEvent;
 
     static public event Action PrunedNodesEvent;
 
-    public virtual void Search (GamesNode root, int branching, int depth) { }
+    public virtual void Search (TreeNode root, int branching, int depth) { }
 
     /// <summary>
     /// function to proc the event warning that a node has been analyzed.
     /// </summary>
     /// <param name="node"> the node that has been analyzed </param>
-    protected void NodeAnalyzed (GamesNode node) {
+    protected void NodeAnalyzed (TreeNode node) {
         if (NodeAnalyzedEvent != null)
             NodeAnalyzedEvent (node);
     }

@@ -1,70 +1,77 @@
 ﻿using UnityEngine;
 
-public class TreeSearcher : MonoBehaviour {
+public class TreeSearcher : MonoBehaviour
+{
 
-    public delegate void TreeUpdatedHandler (GamesNode[] leafs);
+    public delegate void TreeUpdatedHandler (TreeNode[] leafs);
     static public event TreeUpdatedHandler TreeUpdatedEvent;
 
-    private GamesAlgorythm algorythm;
+    private GamesAlgorithm algorithm;
 
     static private TreeSearcher instance;
 
-    private void OnEnable () {
+    private void OnEnable ()
+    {
         UIGamesTheory.SearchEvent += StartSearching;
-        GamesAlgorythm.NodeAnalyzedEvent += SetLeafStates;
+        GamesAlgorithm.NodeAnalyzedEvent += SetLeafStates;
     }
-    private void OnDisable () {
+    private void OnDisable ()
+    {
         UIGamesTheory.SearchEvent -= StartSearching;
-        GamesAlgorythm.NodeAnalyzedEvent -= SetLeafStates;
+        GamesAlgorithm.NodeAnalyzedEvent -= SetLeafStates;
     }
 
-    private void Awake () {
+    private void Awake ()
+    {
         if (instance == null)
             instance = FindObjectOfType<TreeSearcher> ();
         if (instance != this)
             Destroy (this.gameObject);
     }
 
-    public void StartSearching (string algorythm, int branching, int depth, int framesPerSecond) {
-        if (algorythm != null) {
-            switch (algorythm) {
+    public void StartSearching (string algorithm, int branching, int depth, int framesPerSecond)
+    {
+        if (algorithm != null) {
+            switch (algorithm) {
                 case ("Minimax"):
-                    this.algorythm = new Minimax ();
+                    this.algorithm = new Minimax ();
                     break;
 
                 case ("Alpha - Beta"):
-                    this.algorythm = new AlphaBeta ();
+                    this.algorithm = new AlphaBeta ();
                     break;
 
                 default:
-                    this.algorythm = new AlphaBeta ();
+                    this.algorithm = new AlphaBeta ();
                     break;
             }
 
-            if (this.algorythm != null) {
-                Debug.LogFormat ("Reading Tree using {0}.", algorythm);
-                this.algorythm.Search (TreeGenerator.Root, branching, depth);
+            if (this.algorithm != null) {
+                Debug.LogFormat ("Reading Tree using {0}.", algorithm);
+                this.algorithm.Search (TreeGenerator.Root, branching, depth);
             }
         }
         else
-            Debug.LogWarning ("Algorythm not set. Search canceled.");
+            Debug.LogWarning ("Algorithm not set. Search canceled.");
     }
 
-    public void SetAlgorythm (GamesAlgorythm algorythm) {
-        this.algorythm = algorythm;
+    public void SetAlgorithm (GamesAlgorithm algorythm)
+    {
+        this.algorithm = algorythm;
     }
 
-    private void SetLeafStates (GamesNode node) {
-        GamesNode[] leafs = GamesNode.Leafs.ToArray ();
-        for (int i = 0 ; i < leafs.Length ; i++) {
+    private void SetLeafStates (TreeNode node)
+    {
+        TreeNode[] leafs = TreeNode.Leaves.ToArray ();
+        for (int i = 0; i < leafs.Length; i++) {
 
             if (leafs[i].ID == node.ID) {
                 leafs[i].SetState (NodeState.Active);
             }
-            else if (leafs[i].nodeState == NodeState.Explored) {
+            else if (leafs[i].State == NodeState.Explored) {
                 continue;
             }
-            else if (leafs[i].nodeState == NodeState.Active) {
+            else if (leafs[i].State == NodeState.Active) {
                 leafs[i].SetState (NodeState.Explored);
             }
             else if (leafs[i].ID < node.ID) {

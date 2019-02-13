@@ -3671,11 +3671,11 @@ MonoBehaviour:
   depthInput: {fileID: 353986884}
   algorythmDropdownInput: {fileID: 1833434120}
   fpsInput: {fileID: 835434076}
-  inactiveLink: {fileID: 21300000, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  inactiveBranch: {fileID: 21300000, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
   inactiveNode: {fileID: 21300000, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
-  activeLink: {fileID: 21300002, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  activeBranch: {fileID: 21300002, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
   activeNode: {fileID: 21300002, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
-  exploredLink: {fileID: 21300004, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
+  exploredBranch: {fileID: 21300004, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
   exploredNode: {fileID: 21300004, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
   prunedNode: {fileID: 21300006, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
 --- !u!1 &1335068068
@@ -4527,7 +4527,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1328925806}
-        m_MethodName: SetAlgorythm
+        m_MethodName: SetAlgorithm
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

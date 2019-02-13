@@ -21,7 +21,7 @@ public class TreeGenerator : MonoBehaviour
 
     private float spacingY; //used for placement in the grid, spacing in Y
 
-    static public GamesNode Root { get; private set; } //the root node
+    static public TreeNode Root { get; private set; } //the root node
 
     static private TreeGenerator instance;
 
@@ -46,6 +46,7 @@ public class TreeGenerator : MonoBehaviour
     //generate the map
     private void Generate (int b, int d)
     {
+        //setup
         Debug.Log ("Generating map.");
         branching = b;
         depth = d;
@@ -54,18 +55,13 @@ public class TreeGenerator : MonoBehaviour
 
         ResetTree ();
 
-        Root = new GamesNode (b, 0, nodeType);
+        Root = new TreeNode (b, 0, nodeType);
 
-        VisualizeTree ();
-    }
 
-    //tree to screen
-    private void VisualizeTree ()
-    {
         //spawn the first node
         GameObject rootGO = (GameObject)Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
 
-        rootGO.name = Root.nodeType.ToString () + " " + Root.ID;
+        rootGO.name = Root.Type.ToString () + " " + Root.ID;
         rootGO.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, depth - 2) / 2, 1f, float.MaxValue);
 
         Root.GO = rootGO;
@@ -76,10 +72,13 @@ public class TreeGenerator : MonoBehaviour
         if (SetCameraEvent != null) {
             SetCameraEvent (depth, branching, spacingY);
         }
+
+        TreeNode.SaveOriginalNodeList ();
+        TreeBranch.SaveOriginalBranchList ();
     }
 
     //recursive spawning 
-    private void SpawnBranchesOf (GamesNode parentNode)
+    private void SpawnBranchesOf (TreeNode parentNode)
     {
 
         if (parentNode.depth == depth)
@@ -87,7 +86,7 @@ public class TreeGenerator : MonoBehaviour
 
         //spawn node with position relative to parent.
         for (int i = 0; i < branching; i++) {
-            GamesNode toSpawn = parentNode.GetOther (i);
+            TreeNode toSpawn = parentNode.GetOther (i);
             //calculate position
             Vector2 step = new Vector2 ();
             step.x = Mathf.Pow (branching, depth - toSpawn.depth);
@@ -103,20 +102,20 @@ public class TreeGenerator : MonoBehaviour
             Object prefab;
             if (depth == toSpawn.depth)
                 prefab = leafPrefab;
-            else if (toSpawn.nodeType == NodeType.Max)
+            else if (toSpawn.Type == NodeType.Max)
                 prefab = maxPrefab;
             else
                 prefab = minPrefab;
 
             //instantiate the node
             GameObject go = (GameObject)Instantiate (prefab, pos, Quaternion.identity, this.transform);
-            go.name = toSpawn.nodeType.ToString () + " " + toSpawn.ID;
+            go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
             go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
             //go.transform.localScale *= Mathf.Clamp((treeDepth - toSpawn.depth + 1) * branching / 2, 1f, float.MaxValue);
             toSpawn.GO = go;
 
             if (prefab == leafPrefab) {
-                go.GetComponent<UITreeNode> ().AssignValue (toSpawn.value);
+                go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
             }
 
             //prepare the link
@@ -133,7 +132,7 @@ public class TreeGenerator : MonoBehaviour
             go.transform.localScale = new Vector3 (1f, scale * 4, 1f);
             go.transform.eulerAngles = new Vector3 (0f, 0f, (float)angle);
 
-            parentNode.links[i].GO = go;
+            parentNode.branches[i].GO = go;
 
             //then spawn the nodes linked to each linked node
             SpawnBranchesOf (toSpawn);
@@ -143,15 +142,15 @@ public class TreeGenerator : MonoBehaviour
     //reset the tree for generating another one
     private void ResetTree ()
     {
-        for (int i = 0; i < GamesNode.Nodes.Count; i++) {
-            Destroy (GamesNode.Nodes[i].GO);
+        for (int i = 0; i < TreeNode.Nodes.Count; i++) {
+            Destroy (TreeNode.Nodes[i].GO);
         }
-        GamesNode.Reset ();
+        TreeNode.Reset ();
 
-        for (int i = 0; i < GamesLink.Links.Count; i++) {
-            Destroy (GamesLink.Links[i].GO);
+        for (int i = 0; i < TreeBranch.Branches.Count; i++) {
+            Destroy (TreeBranch.Branches[i].GO);
         }
-        GamesLink.Reset ();
+        TreeBranch.Reset ();
     }
 
 }
