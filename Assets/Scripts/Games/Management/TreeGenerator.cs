@@ -149,7 +149,7 @@ public class TreeGenerator : MonoBehaviour
         go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
 
         if (prefab == leafPrefab) {
-            go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
+            go.GetComponent<UITreeNode> ().AssignScore (toSpawn.Score);
         }
         go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
 

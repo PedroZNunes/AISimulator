@@ -11,9 +11,14 @@ public class UITreeNode : MonoBehaviour {
         label = GetComponentInChildren<Text> ();       
     }
 
-    public void AssignValue (int value) {
-        Value = value;
-        label.text = Value.ToString ();
+    public void AssignScore (int? value) {
+        string text;
+        if (value.HasValue)
+            text = value.Value.ToString ();
+        else
+            text = "";
+
+        label.text = text;
     }
 
 }

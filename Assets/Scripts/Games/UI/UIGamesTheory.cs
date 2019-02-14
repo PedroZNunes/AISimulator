@@ -162,6 +162,7 @@ public class UIGamesTheory : MonoBehaviour
     {
         ResetOutput ();
         TreeNode.ResetNodes ();
+        TreeBranch.ResetBranches ();
 
         OnResetClicked ();
     }

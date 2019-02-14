@@ -7,14 +7,12 @@ public class AlphaBeta : GamesAlgorithm
 
     public override void Search (TreeNode root, int branching, int depth)
     {
-        IsSearching = true;
         CheckNode (root);
 
         if (root.leafID.HasValue)
             OnLeafActivated (TreeNode.GetByID (root.leafID.Value));
 
         OnSearchEnded ();
-        IsSearching = false;
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
 
@@ -62,11 +60,15 @@ public class AlphaBeta : GamesAlgorithm
             else if ((node.Type == NodeType.Max) && (childNode.Score > node.Score)) {
                 node.SetScore (childNode);
             }
+            
+            node.SetState (NodeState.Explored);
+            if (node != TreeGenerator.Root)
+                node.parentBranch.SetState (NodeState.Explored);
         }
 
         if (node.branches.Length == 0) {
             node.SetState (NodeState.Explored);
-            OnLeafActivated (node);
+            node.parentBranch.SetState (NodeState.Explored);
         }
 
     }
@@ -74,15 +76,20 @@ public class AlphaBeta : GamesAlgorithm
     private void Prune (TreeNode parentNode)
     {
         parentNode.SetState (NodeState.Pruned);
+
         //go from the node to the children recursively until get a leaf. 
         for (int i = 0; i < parentNode.branches.Length; i++) {
             TreeNode child = parentNode.GetOtherNodeFromBranchByIndex (i);
 
-
             if (child.Type != NodeType.Leaf)
                 Prune (child);
-            else
+
+
+            if (child.State != NodeState.Explored)
                 child.SetState (NodeState.Pruned);
+
+            if (child.parentBranch.State != NodeState.Explored)
+            child.parentBranch.SetState (NodeState.Pruned);
         }
     }
 

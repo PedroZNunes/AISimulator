@@ -9,19 +9,7 @@ public class GamesAlgorithm
 
     static public event Action searchEnded;
 
-    private bool isSearching;
-
-    public bool IsSearching
-    {
-        get {
-            return isSearching;
-        }
-
-        protected set {
-            isSearching = value;
-        }
-    }
-
+    
     public virtual void Search (TreeNode root, int branching, int depth) {}
 
     /// <summary>

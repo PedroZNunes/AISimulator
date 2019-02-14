@@ -22,14 +22,12 @@ public class TreeSearcher : MonoBehaviour
     {
         UIGamesTheory.resetClicked += ResetSprites;
         UIGamesTheory.searchClicked += StartSearching;
-        GamesAlgorithm.leafActivated += UpdateLeaves;
     }
 
     private void OnDisable ()
     {
         UIGamesTheory.resetClicked -= ResetSprites;
         UIGamesTheory.searchClicked -= StartSearching;
-        GamesAlgorithm.leafActivated -= UpdateLeaves;
     }
 
     private void Awake ()
@@ -62,8 +60,8 @@ public class TreeSearcher : MonoBehaviour
                 this.algorithm.Search (TreeGenerator.Root, branching, depth);
 
                 if (TreeGenerator.Root.leafID.HasValue) {
-                    int leafID = TreeGenerator.Root.leafID.Value;
-                    UpdateLeaves (TreeNode.GetByID (leafID));
+                    TreeNode.GetByID (TreeGenerator.Root.leafID.Value).SetState (NodeState.Active);
+                    UpdateSprites ();
                 }
             }
         }
@@ -71,49 +69,41 @@ public class TreeSearcher : MonoBehaviour
             Debug.LogWarning ("Algorithm not set. Search canceled.");
     }
 
-    /// <summary>
-    /// updates the leaves states. this happens one each frame
-    /// </summary>
-    /// <param name="activeLeaf"></param>
-    private void UpdateLeaves (TreeNode activeLeaf)
-    {
-        TreeNode[] leaves = TreeNode.Leaves.ToArray ();
-        for (int i = 0; i < leaves.Length; i++) {
-            if (leaves[i].ID == activeLeaf.ID && activeLeaf.State != NodeState.Pruned) {
-                leaves[i].SetState (NodeState.Explored);
-            }
-            else if (TreeGenerator.Root.leafID.HasValue) {
-                if (leaves[i].ID == TreeGenerator.Root.leafID)
-                    leaves[i].SetState (NodeState.Active);
-            }
-            
-            //else if (leaves[i].State == NodeState.Explored) {
-            //    continue;
-            //}
-            //else if (leaves[i].State == NodeState.Active) {
-            //    leaves[i].SetState (NodeState.Explored);
-            //}
-        }
-
-        UpdatePaths(leaves);
-    }
-
 
     /// <summary>
     /// Updates the path sprites
     /// </summary>
     /// <param name="leafs">leaf array used as base for the tree's link states</param>
-    private void UpdatePaths (TreeNode[] leafs)
+    private void UpdateSprites ()
     {
         SpriteRenderer sr = new SpriteRenderer ();
-        TreeNode activeLeaf = null;
+        
+        foreach (TreeBranch branch in TreeBranch.Branches) {
+            sr = branch.GO.GetComponent<SpriteRenderer> ();
+            switch (branch.State) {
+                case NodeState.Active:
+                    sr.sprite = activeBranch;
+                    continue;
+                case NodeState.Inactive:
+                    sr.sprite = inactiveBranch;
+                    break;
+                case NodeState.Explored:
+                    sr.sprite = exploredBranch;
+                    break;
+                case NodeState.Pruned:
+                    sr.sprite = prunedBranch;
+                    break;
+                default:
+                    Debug.LogErrorFormat ("Stateless branch: {0}", branch.GO.name);
+                    break;
+            }
+        }
 
-        foreach (TreeNode leaf in leafs) {
+        foreach (TreeNode leaf in TreeNode.Leaves) {
             sr = leaf.GO.GetComponent<SpriteRenderer> ();
             switch (leaf.State) {
                 case NodeState.Active:
                     sr.sprite = activeNode;
-                    activeLeaf = leaf;
                     continue;
                 case NodeState.Inactive:
                     sr.sprite = inactiveNode;
@@ -129,10 +119,12 @@ public class TreeSearcher : MonoBehaviour
                     break;
             }
 
-            TracePathToRoot (leaf);
+//            TracePathToRoot (leaf);
         }
-
-        TracePathToRoot (activeLeaf);
+        if (TreeGenerator.Root.leafID.HasValue) {
+            TreeNode activeLeaf = TreeNode.GetByID (TreeGenerator.Root.leafID);
+            TracePathToRoot (activeLeaf);
+        }
     }
 
     /// <summary>
@@ -154,24 +146,25 @@ public class TreeSearcher : MonoBehaviour
         while (path.Count > 0) {
             TreeBranch branch = path.Dequeue ();
             sr = branch.GO.GetComponent<SpriteRenderer> ();
-            switch (leaf.State) {
-                case NodeState.Active:
-                    sr.sprite = activeBranch;
-                    break;
-                case NodeState.Explored:
-                    sr.sprite = exploredBranch;
-                    break;
-                case NodeState.Inactive:
-                    sr.sprite = inactiveBranch;
-                    break;
-                case NodeState.Pruned:
-                    sr.sprite = prunedBranch;
-                    if (branch.a.State != NodeState.Pruned)
-                        return;
-                    break;
-                default:
-                    break;
-            }
+            sr.sprite = activeBranch;
+            //switch (leaf.State) {
+            //    case NodeState.Active:
+            //        sr.sprite = activeBranch;
+            //        break;
+            //    case NodeState.Explored:
+            //        sr.sprite = exploredBranch;
+            //        break;
+            //    case NodeState.Inactive:
+            //        sr.sprite = inactiveBranch;
+            //        break;
+            //    case NodeState.Pruned:
+            //        sr.sprite = prunedBranch;
+            //        if (branch.a.State != NodeState.Pruned)
+            //            return;
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
     }
     /// <summary>

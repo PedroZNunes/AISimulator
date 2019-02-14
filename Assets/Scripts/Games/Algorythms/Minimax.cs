@@ -7,8 +7,6 @@ public class Minimax : GamesAlgorithm
 
     public override void Search (TreeNode root, int branching, int depth)
     {
-        IsSearching = true;
-
         CheckNode (root);
 
         OnSearchEnded ();
@@ -16,7 +14,6 @@ public class Minimax : GamesAlgorithm
         if (root.leafID != null)
             OnLeafActivated (TreeNode.GetByID ((int)root.leafID));
 
-        IsSearching = false;
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
 
@@ -43,11 +40,15 @@ public class Minimax : GamesAlgorithm
             else if ((node.Type == NodeType.Max) && (other.Score > node.Score)) {
                 node.SetScore (other);
             }
+
+            node.SetState (NodeState.Explored);
+            if (node != TreeGenerator.Root)
+                node.parentBranch.SetState (NodeState.Explored);
         }
 
         if (node.branches.Length == 0) {
-            OnLeafActivated (node);
-
+            node.SetState (NodeState.Explored);
+            node.parentBranch.SetState (NodeState.Explored);
         }
     }
 

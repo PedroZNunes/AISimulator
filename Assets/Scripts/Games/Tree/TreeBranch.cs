@@ -7,6 +7,7 @@ public class TreeBranch
     public TreeNode a { get; private set; }
     public TreeNode b { get; private set; }
 
+    public NodeState State { get; private set; }
     public GameObject GO;
 
     static private List<TreeBranch> branches = new List<TreeBranch> ();
@@ -17,7 +18,25 @@ public class TreeBranch
         this.a = a;
         this.b = b;
 
+        State = NodeState.Inactive;
+
         branches.Add (this);
+    }
+
+    /// <summary>
+    /// Sets the Branch State (Explored, Active, Pruned or Inactive)
+    /// </summary>
+    /// <param name="nodeState"></param>
+    public void SetState (NodeState branchState)
+    {
+        this.State = branchState;
+    }
+
+    static public void ResetBranches ()
+    {
+        foreach(TreeBranch branch in Branches) {
+            branch.SetState (NodeState.Inactive);
+        }
     }
 
     static public void Reset ()

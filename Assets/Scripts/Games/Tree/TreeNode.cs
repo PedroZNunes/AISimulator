@@ -172,6 +172,11 @@ public class TreeNode
     {
         foreach (TreeNode node in nodes) {
             node.SetInitialValues ();
+            if (TreeNode.Leaves.Contains (node)) {
+                continue;
+            }
+
+            node.GO.GetComponent<UITreeNode> ().AssignScore (null);
         }
     }
 
@@ -191,7 +196,7 @@ public class TreeNode
             bestScoreMin = node.Score;
         }
 
-        GO.GetComponent<UITreeNode> ().AssignValue (Score);
+        GO.GetComponent<UITreeNode> ().AssignScore (Score);
     }
 
 
@@ -219,8 +224,12 @@ public class TreeNode
     /// </summary>
     /// <param name="id">node identification number ID</param>
     /// <returns>the node</returns>
-    static public TreeNode GetByID (int id)
+    static public TreeNode GetByID (int? id)
     {
+        if (id == null) {
+            return null;
+        }
+
         for (int i = 0; i < nodes.Count; i++) {
             if (nodes[i].ID == id)
                 return nodes[i];
