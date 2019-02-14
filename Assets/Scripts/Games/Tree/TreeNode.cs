@@ -5,7 +5,7 @@ using UnityEngine;
 /// The Min node tests a new value against it's own and keeps the lowest.
 /// The Max node does the same, but it keeps the higher one.
 /// </summary>
-public enum NodeType { Min, Max }
+public enum NodeType { Min, Max, Leaf }
 
 /// <summary>
 /// Inactive have not been explored yet,
@@ -137,6 +137,7 @@ public class TreeNode
         }
         else {
             //if its the last depth level, it becomes a leaf
+            Type = NodeType.Leaf;
             branches = new TreeBranch[0];
             Score = Random.Range (0, 20);
             leafID = ID;
@@ -226,11 +227,11 @@ public class TreeNode
     }
 
     /// <summary>
-    /// gets the other node connected to a link
+    /// gets the other node connected to a branch
     /// </summary>
-    /// <param name="i">link index</param>
+    /// <param name="i"> branch index </param>
     /// <returns> node linked to this one </returns>
-    public TreeNode GetOther (int i)
+    public TreeNode GetOtherNodeFromBranchByIndex (int i)
     {
         if (i >= branches.Length || i < 0)
             return null;

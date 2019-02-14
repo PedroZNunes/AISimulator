@@ -25,7 +25,7 @@ public class Minimax : GamesAlgorithm
     {
         for (int i = 0; i < node.branches.Length; i++) {
             //look at the next children, pass its alpha and beta to it.
-            TreeNode other = node.GetOther (i);
+            TreeNode other = node.GetOtherNodeFromBranchByIndex (i);
             CheckNode (other);
             //if the children is a maximizer or a minimizer, the the loop will go on.
             //if the children is a leaf, the leaf passes the value back up to the parent

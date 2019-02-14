@@ -886,6 +886,7 @@ MonoBehaviour:
   exploredBranch: {fileID: 21300004, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
   exploredNode: {fileID: 21300004, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
   prunedNode: {fileID: 21300006, guid: 8b9e606f6ad43014e8fc1a3ab7059b3c, type: 3}
+  prunedBranch: {fileID: 21300006, guid: a03408ccae7b735419338e44c4d2a0bf, type: 3}
 --- !u!1 &314478101
 GameObject:
   m_ObjectHideFlags: 0
@@ -4427,10 +4428,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b40a680004f528f4893eca4bc2c1c0bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minPrefab: {fileID: 1745010221049188, guid: 042715ce57c549643bf1d2cc621f15d5, type: 3}
-  maxPrefab: {fileID: 1903849250285970, guid: f7506720817d37f41af4df3f233869bf, type: 3}
   leafPrefab: {fileID: 1356555047011596, guid: 5456a68aeea835b43a6eb071e6b6333f, type: 3}
   linkPrefab: {fileID: 1770739289247986, guid: 4e8e7e0bb66fdf143a7ae29cb4e8943a, type: 3}
+  maxPrefab: {fileID: 1903849250285970, guid: f7506720817d37f41af4df3f233869bf, type: 3}
+  minPrefab: {fileID: 1745010221049188, guid: 042715ce57c549643bf1d2cc621f15d5, type: 3}
 --- !u!1 &1833434118
 GameObject:
   m_ObjectHideFlags: 0

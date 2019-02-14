@@ -90,7 +90,7 @@ public class TreeGenerator : MonoBehaviour
 
         //spawn node with position relative to parent.
         for (int i = 0; i < branching; i++) {
-            TreeNode childNode = parentNode.GetOther (i);
+            TreeNode childNode = parentNode.GetOtherNodeFromBranchByIndex (i);
 
             SpawnNode (parentNode, childNode, i);
             SpawnBranch (parentNode, childNode, i);

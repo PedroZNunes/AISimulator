@@ -4,9 +4,6 @@ using System.Collections.Generic;
 public class TreeSearcher : MonoBehaviour
 {
 
-    public delegate void AllLeavesUpdated (TreeNode[] leafs);
-    static public event AllLeavesUpdated allLeavesUpdated;
-
     private GamesAlgorithm algorithm;
 
     //links and nodes prefabs
@@ -17,6 +14,7 @@ public class TreeSearcher : MonoBehaviour
     [SerializeField] private Sprite exploredBranch;
     [SerializeField] private Sprite exploredNode;
     [SerializeField] private Sprite prunedNode;
+    [SerializeField] private Sprite prunedBranch;
 
     static private TreeSearcher instance;
 
@@ -25,8 +23,6 @@ public class TreeSearcher : MonoBehaviour
         UIGamesTheory.resetClicked += ResetSprites;
         UIGamesTheory.searchClicked += StartSearching;
         GamesAlgorithm.leafActivated += UpdateLeaves;
-        allLeavesUpdated += UpdatePaths;
-
     }
 
     private void OnDisable ()
@@ -34,7 +30,6 @@ public class TreeSearcher : MonoBehaviour
         UIGamesTheory.resetClicked -= ResetSprites;
         UIGamesTheory.searchClicked -= StartSearching;
         GamesAlgorithm.leafActivated -= UpdateLeaves;
-        allLeavesUpdated -= UpdatePaths;
     }
 
     private void Awake ()
@@ -65,10 +60,37 @@ public class TreeSearcher : MonoBehaviour
             if (this.algorithm != null) {
                 Debug.LogFormat ("Reading Tree using {0}.", algorithm);
                 this.algorithm.Search (TreeGenerator.Root, branching, depth);
+
+                if (TreeGenerator.Root.leafID.HasValue) {
+                    int leafID = TreeGenerator.Root.leafID.Value;
+                    UpdateLeaves (TreeNode.GetByID (leafID));
+                }
             }
         }
         else
             Debug.LogWarning ("Algorithm not set. Search canceled.");
+    }
+
+    /// <summary>
+    /// updates the leaves states. this happens one each frame
+    /// </summary>
+    /// <param name="activeLeaf"></param>
+    private void UpdateLeaves (TreeNode activeLeaf)
+    {
+        TreeNode[] leaves = TreeNode.Leaves.ToArray ();
+        for (int i = 0; i < leaves.Length; i++) {
+            if (leaves[i].ID == activeLeaf.ID && activeLeaf.State != NodeState.Pruned) {
+                leaves[i].SetState (NodeState.Active);
+            }
+            else if (leaves[i].State == NodeState.Explored) {
+                continue;
+            }
+            else if (leaves[i].State == NodeState.Active) {
+                leaves[i].SetState (NodeState.Explored);
+            }
+        }
+
+        UpdatePaths(leaves);
     }
 
 
@@ -80,14 +102,14 @@ public class TreeSearcher : MonoBehaviour
     {
         SpriteRenderer sr = new SpriteRenderer ();
         TreeNode activeLeaf = null;
-        //update everything except for the active leaf
-        for (int i = 0; i < leafs.Length; i++) {
-            TreeNode leaf = leafs[i];
+
+        foreach (TreeNode leaf in leafs) {
             sr = leaf.GO.GetComponent<SpriteRenderer> ();
             switch (leaf.State) {
                 case NodeState.Active:
                     sr.sprite = activeNode;
-                    break;
+                    activeLeaf = leaf;
+                    continue;
                 case NodeState.Inactive:
                     sr.sprite = inactiveNode;
                     break;
@@ -98,13 +120,8 @@ public class TreeSearcher : MonoBehaviour
                     sr.sprite = prunedNode;
                     break;
                 default:
-                    sr.sprite = inactiveNode;
+                    Debug.LogErrorFormat ("Stateless leaf, id{0}", leaf.ID);
                     break;
-            }
-
-            if (leaf.State == NodeState.Active) {
-                activeLeaf = leaf;
-                continue;
             }
 
             TracePathToRoot (leaf);
@@ -123,14 +140,15 @@ public class TreeSearcher : MonoBehaviour
         SpriteRenderer sr = new SpriteRenderer ();
 
         TreeNode parent = leaf;
+        //queue up all nodes from the leaf to the root
         while (parent != TreeGenerator.Root) {
             path.Enqueue (parent.parentBranch);
             parent = parent.GetParent ();
         }
-
+        //change all subsequent branches according to the leaf's state
         while (path.Count > 0) {
-            TreeBranch link = path.Dequeue ();
-            sr = link.GO.GetComponent<SpriteRenderer> ();
+            TreeBranch branch = path.Dequeue ();
+            sr = branch.GO.GetComponent<SpriteRenderer> ();
             switch (leaf.State) {
                 case NodeState.Active:
                     sr.sprite = activeBranch;
@@ -138,13 +156,23 @@ public class TreeSearcher : MonoBehaviour
                 case NodeState.Explored:
                     sr.sprite = exploredBranch;
                     break;
+                case NodeState.Inactive:
+                    sr.sprite = inactiveBranch;
+                    break;
+                case NodeState.Pruned:
+                    sr.sprite = prunedBranch;
+                    if (branch.a.State != NodeState.Pruned)
+                        return;
+                    break;
                 default:
                     break;
             }
         }
     }
-
-    private void ResetSprites ()
+    /// <summary>
+    /// Resets sprites. Useful for reseting the path without resetting everything
+    /// </summary>
+    private void ResetSprites () //TODO: this is weird. this should not be here.
     {
         foreach (TreeBranch branch in TreeBranch.Branches) {
             branch.GO.GetComponent<SpriteRenderer> ().sprite = inactiveBranch;
@@ -153,11 +181,6 @@ public class TreeSearcher : MonoBehaviour
         foreach (TreeNode leaf in TreeNode.Leaves) {
             leaf.GO.GetComponent<SpriteRenderer> ().sprite = inactiveNode;
         }
-
-        foreach (TreeNode node in TreeNode.Nodes) {
-            if (TreeNode.Leaves.Contains (node))
-                continue;
-        }
     }
 
     public void SetAlgorithm (GamesAlgorithm algorithm)
@@ -165,35 +188,4 @@ public class TreeSearcher : MonoBehaviour
         this.algorithm = algorithm;
     }
 
-    private void UpdateLeaves (TreeNode activeLeaf)
-    {
-        TreeNode[] leafs = TreeNode.Leaves.ToArray ();
-        for (int i = 0; i < leafs.Length; i++) {
-
-            if (leafs[i].ID == activeLeaf.ID) {
-                leafs[i].SetState (NodeState.Active);
-            }
-            else if (leafs[i].State == NodeState.Explored) {
-                continue;
-            }
-            else if (leafs[i].State == NodeState.Active) {
-                leafs[i].SetState (NodeState.Explored);
-            }
-            else if (leafs[i].ID < activeLeaf.ID) {
-                leafs[i].SetState (NodeState.Pruned);
-            }
-            else {
-                leafs[i].SetState (NodeState.Inactive);
-            }
-        }
-
-        OnAllLeavesUpdated (leafs);
-    }
-
-    private static void OnAllLeavesUpdated (TreeNode[] leafs)
-    {
-        if (allLeavesUpdated != null) {
-            allLeavesUpdated (leafs);
-        }
-    }
 }

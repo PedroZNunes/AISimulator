@@ -60,12 +60,12 @@ public class UIGamesTheory : MonoBehaviour
     private void OnEnable ()
     {
         GamesAlgorithm.leafActivated += IncrementAnalyzed;
-        GamesAlgorithm.searchEnded += CountPruned;
+        GamesAlgorithm.searchEnded += CountPrunedAndAnalyzed;
     }
     private void OnDisable ()
     {
         GamesAlgorithm.leafActivated -= IncrementAnalyzed;
-        GamesAlgorithm.searchEnded -= CountPruned;
+        GamesAlgorithm.searchEnded -= CountPrunedAndAnalyzed;
     }
 
     private void Awake ()
@@ -200,25 +200,23 @@ public class UIGamesTheory : MonoBehaviour
     /// <summary>
     /// Count how many nodes have been cut-off from the process
     /// </summary>
-    private void CountPruned ()
+    private void CountPrunedAndAnalyzed ()
     {
-        int analyzed = Int32.Parse (analyzedValue.text);
-        float total = Mathf.Pow (branching, depth);
+        int analyzed = 0;
+        foreach (TreeNode leaf in TreeNode.Leaves) {
+            if (leaf.State == NodeState.Explored || leaf.State == NodeState.Active)
+                analyzed++;
+        }
 
-        prunedValue.text = (total - analyzed).ToString ();
-        UpdatePercent ();
-    }
-    /// <summary>
-    /// Calculates the percentage of nodes analyzed
-    /// </summary>
-    private void UpdatePercent ()
-    {
-        int skipped = Int32.Parse (prunedValue.text);
-        float total = Mathf.Pow (branching, depth);
-        float percent = skipped / total * 100;
+        int pruned = TreeNode.Leaves.Count - analyzed;
 
+        float percent = pruned / TreeNode.Leaves.Count * 100;
+
+        prunedValue.text = pruned.ToString ();
+        analyzedValue.text = analyzed.ToString ();
         percentValue.text = String.Format ("{0:0.00}%", percent);
     }
+
     /// <summary>
     /// Resets output values like percent, pruned, analyzed, etc
     /// </summary>
