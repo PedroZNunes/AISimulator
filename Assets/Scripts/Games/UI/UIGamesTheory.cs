@@ -11,24 +11,19 @@ public class UIGamesTheory : MonoBehaviour
     /// </summary>
     /// <param name="branching">how wide</param>
     /// <param name="depth">how high</param>
-    public delegate void GenerateMapHandler (int branching, int depth);
-    static public event GenerateMapHandler GenerateMapEvent;
-
-    /// <summary>
-    /// Event that calls out when the map generation is done
-    /// </summary>
-    static public event Action MapGeneratedEvent;
+    public delegate void GenerateClicked (int branching, int depth);
+    static public event GenerateClicked generateClicked;
 
     /// <summary>
     /// Event that calls out when you want to just reset the path the search algorithm made, and not the whole thing
     /// </summary>
-    static public event Action ResetSearchEvent;
+    static public event Action resetClicked;
 
     /// <summary>
     /// Event that calls out for the object responsible for starting the search
     /// </summary>
-    public delegate void SearchHandler (string algorithm, int branching, int depth, int fps);
-    static public event SearchHandler SearchEvent;
+    public delegate void SearchClicked (string algorithm, int branching, int depth, int fps);
+    static public event SearchClicked searchClicked;
     #endregion
 
     #region OutputValues
@@ -64,13 +59,13 @@ public class UIGamesTheory : MonoBehaviour
 
     private void OnEnable ()
     {
-        GamesAlgorithm.NodeAnalyzedEvent += IncrementAnalyzed;
-        GamesAlgorithm.PrunedNodesEvent += CountPruned;
+        GamesAlgorithm.leafActivated += IncrementAnalyzed;
+        GamesAlgorithm.searchEnded += CountPruned;
     }
     private void OnDisable ()
     {
-        GamesAlgorithm.NodeAnalyzedEvent -= IncrementAnalyzed;
-        GamesAlgorithm.PrunedNodesEvent -= CountPruned;
+        GamesAlgorithm.leafActivated -= IncrementAnalyzed;
+        GamesAlgorithm.searchEnded -= CountPruned;
     }
 
     private void Awake ()
@@ -88,7 +83,7 @@ public class UIGamesTheory : MonoBehaviour
     private void Start ()
     {
         //generate a map when opening scene with standard values
-        OnPressGenerate ();
+        OnClickGenerate ();
     }
 
     private void InitializeUI ()
@@ -149,36 +144,47 @@ public class UIGamesTheory : MonoBehaviour
 
     #region Button Pressing
 
-    public void OnPressGenerate ()
+    public void OnClickGenerate ()
     {
         ResetOutput ();
 
-        if (GenerateMapEvent != null)
-            GenerateMapEvent (branching, depth);
-
-        if (MapGeneratedEvent != null)
-            MapGeneratedEvent ();
+        OnGenerateClicked ();
     }
 
-    public void OnPressSearch ()
+    public void OnClickSearch ()
     {
-        OnPressReset ();
+        OnClickReset ();
 
-        if (SearchEvent != null)
-            SearchEvent (algorithm, branching, depth, fps);
+        OnSearchClicked ();
     }
 
-    public void OnPressReset ()
+    public void OnClickReset ()
     {
         ResetOutput ();
         TreeNode.ResetNodes ();
-        if (ResetSearchEvent != null)
-            ResetSearchEvent ();
+
+        OnResetClicked ();
     }
 
-    public void OnPressQuit ()
+    public void OnClickQuit ()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene (0);
+    }
+
+    private void OnGenerateClicked ()
+    {
+        if (generateClicked != null)
+            generateClicked (branching, depth);
+    }
+    private void OnSearchClicked ()
+    {
+        if (searchClicked != null)
+            searchClicked (algorithm, branching, depth, fps);
+    }
+    private static void OnResetClicked ()
+    {
+        if (resetClicked != null)
+            resetClicked ();
     }
     #endregion
 

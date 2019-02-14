@@ -4,34 +4,37 @@ using Object = UnityEngine.Object;
 public class TreeGenerator : MonoBehaviour
 {
 
-    public delegate void SetCameraHandler (int depth, int branch, float stepY);
-    static public event SetCameraHandler SetCameraEvent;
-
-    //prefabs
-    [SerializeField] private GameObject minPrefab;
-    [SerializeField] private GameObject maxPrefab;
-    [SerializeField] private GameObject leafPrefab;
-    [SerializeField] private GameObject linkPrefab;
-
     private const float hwRatio = 0.4f;
-
-    private int branching; //how many branches leave each node
-    static public int depth { get; private set; } // the amount of levels the tree has
-
-    private float spacingY; //used for placement in the grid, spacing in Y
-
-    static public TreeNode Root { get; private set; } //the root node
 
     static private TreeGenerator instance;
 
-    //events
+    private int branching; //how many branches leave each node
+    [SerializeField] private GameObject leafPrefab;
+    [SerializeField] private GameObject linkPrefab;
+    [SerializeField] private GameObject maxPrefab;
+
+
+    [SerializeField] private GameObject minPrefab;
+
+    private float spacingY; //used for placement in the grid, spacing in Y
+
+    public delegate void TreeGenerated (int depth, int branch, float stepY);
+
+    static public event TreeGenerated treeGenerated;
+
+    static public int depth { get; private set; } // the amount of levels the tree has
+
+    static public TreeNode Root { get; private set; } //the root node
+
+
+    #region Initialization
     private void OnEnable ()
     {
-        UIGamesTheory.GenerateMapEvent += Generate;
+        UIGamesTheory.generateClicked += Generate;
     }
     private void OnDisable ()
     {
-        UIGamesTheory.GenerateMapEvent -= Generate;
+        UIGamesTheory.generateClicked -= Generate;
     }
 
     private void Awake ()
@@ -41,9 +44,11 @@ public class TreeGenerator : MonoBehaviour
         if (instance != this)
             Destroy (this.gameObject);
     }
+    #endregion
 
     /// <summary>
-    /// generate the map
+    /// this function generates the map.
+    /// It spawns the first node, the top-most one, and then it calls a recursive method for spawning the branches.
     /// </summary>
     /// <param name="b">branches per node</param>
     /// <param name="d">depth: number of floors or levels</param>
@@ -58,12 +63,10 @@ public class TreeGenerator : MonoBehaviour
 
         ResetTree ();
 
+        //spawn the first node
         Root = new TreeNode (b, 0, nodeType);
 
-
-        //spawn the first node
         GameObject rootGO = (GameObject)Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
-
         rootGO.name = Root.Type.ToString () + " " + Root.ID;
         rootGO.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, depth - 2) / 2, 1f, float.MaxValue);
 
@@ -72,11 +75,9 @@ public class TreeGenerator : MonoBehaviour
         //spawn the nodes linked to it
         SpawnBranchesOf (Root);
 
-        if (SetCameraEvent != null) {
-            SetCameraEvent (depth, branching, spacingY);
-        }
-
+        OnTreeGenerated ();
     }
+    
 
     /// <summary>
     /// recursive spawning 
@@ -84,66 +85,77 @@ public class TreeGenerator : MonoBehaviour
     /// <param name="parentNode"></param>
     private void SpawnBranchesOf (TreeNode parentNode)
     {
-
         if (parentNode.depth == depth)
             return;
 
         //spawn node with position relative to parent.
         for (int i = 0; i < branching; i++) {
-            TreeNode toSpawn = parentNode.GetOther (i);
-            //calculate position
-            Vector2 step = new Vector2 ();
-            step.x = Mathf.Pow (branching, depth - toSpawn.depth);
-            step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
+            TreeNode childNode = parentNode.GetOther (i);
 
-            Vector2 position = new Vector2 ();
-            float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
-            position.x = initialPosX + (step.x * i);
-            position.y = parentNode.GO.transform.position.y - step.y;
-            //Debug.LogFormat ("initial posX: {0}. stepX: {1}. pos{2}", initialPosX, step.x, pos);
+            SpawnNode (parentNode, childNode, i);
+            SpawnBranch (parentNode, childNode, i);
 
-            //assign prefab according to node type (leaf, min or max)
-            Object prefab;
-            if (depth == toSpawn.depth)
-                prefab = leafPrefab;
-            else if (toSpawn.Type == NodeType.Max)
-                prefab = maxPrefab;
-            else
-                prefab = minPrefab;
-
-            //instantiate the node
-            GameObject go = (GameObject)Instantiate (prefab, position, Quaternion.identity, this.transform);
-            go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
-
-            if (prefab == leafPrefab) {
-                go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
-                go.name = "Leaf " + toSpawn.ID;
-            }
-            else {
-                go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
-            }
-
-            toSpawn.GO = go;
-
-
-            //prepare the link
-            position = (toSpawn.GO.transform.position + parentNode.GO.transform.position) / 2;
-            //angle
-            double branchAngle = Mathf.Atan2 (toSpawn.GO.transform.position.y - parentNode.GO.transform.position.y, toSpawn.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
-            //scale
-            float branchScale = Vector2.Distance (parentNode.GO.transform.position, toSpawn.GO.transform.position);
-            //float width = Mathf.Max (depth - toSpawn.depth, 1f) + ((branching - 1) / 2) * (depth - toSpawn.depth);
-
-            //spawn the link
-            go = Instantiate (linkPrefab, position, Quaternion.identity, transform);
-            go.transform.localScale = new Vector3 (1f, branchScale * 4, 1f);
-            go.transform.eulerAngles = new Vector3 (0f, 0f, (float)branchAngle);
-
-            parentNode.branches[i].GO = go;
-
-            //then spawn the nodes linked to each linked node
-            SpawnBranchesOf (toSpawn);
+            //then proceed to spawning the children
+            SpawnBranchesOf (childNode);
         }
+    }
+
+    private void SpawnBranch (TreeNode parentNode, TreeNode childNode, int i)
+    {
+        //prepare the link
+        Vector2 position = (childNode.GO.transform.position + parentNode.GO.transform.position) / 2;
+        //angle
+        double branchAngle = Mathf.Atan2 (childNode.GO.transform.position.y - parentNode.GO.transform.position.y, childNode.GO.transform.position.x - parentNode.GO.transform.position.x) * Mathf.Rad2Deg + 90;
+        //scale
+        float branchScale = Vector2.Distance (parentNode.GO.transform.position, childNode.GO.transform.position);
+
+        //spawn the link
+        GameObject go = Instantiate (linkPrefab, position, Quaternion.identity, transform);
+        go.transform.localScale = new Vector3 (1f, branchScale * 4, 1f);
+        go.transform.eulerAngles = new Vector3 (0f, 0f, (float)branchAngle);
+
+        parentNode.branches[i].GO = go;
+    }
+
+    /// <summary>
+    /// deals with transform operations and prefab stuff. it spawns a node
+    /// </summary>
+    /// <param name="parentNode">node's parent for positioning reference</param>
+    /// <param name="toSpawn">node to be spawned</param>
+    /// <param name="i">current branch index</param>
+    private void SpawnNode (TreeNode parentNode, TreeNode toSpawn, int i)
+    {
+        //calculate position
+        Vector2 step = new Vector2 ();
+        step.x = Mathf.Pow (branching, depth - toSpawn.depth);
+        step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
+
+        Vector2 position = new Vector2 ();
+        float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
+        position.x = initialPosX + (step.x * i);
+        position.y = parentNode.GO.transform.position.y - step.y;
+
+        //assign prefab according to node type (leaf, min or max)
+        Object prefab;
+        if (depth == toSpawn.depth)
+            prefab = leafPrefab;
+        else if (toSpawn.Type == NodeType.Max)
+            prefab = maxPrefab;
+        else
+            prefab = minPrefab;
+
+        //instantiate the node
+        GameObject go = (GameObject)Instantiate (prefab, position, Quaternion.identity, this.transform);
+        go.transform.localScale *= Mathf.Clamp (step.x / (2 * branching), 1f, float.MaxValue);
+
+        if (prefab == leafPrefab) {
+            go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
+            go.name = "Leaf " + toSpawn.ID;
+        }
+        else
+            go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
+
+        toSpawn.GO = go;
     }
 
     /// <summary>
@@ -162,4 +174,10 @@ public class TreeGenerator : MonoBehaviour
         TreeBranch.Reset ();
     }
 
+    private void OnTreeGenerated ()
+    {
+        if (treeGenerated != null) {
+            treeGenerated (depth, branching, spacingY);
+        }
+    }
 }

@@ -7,10 +7,10 @@ public class Minimax : GamesAlgorithm
     {
         CheckNode (root);
 
-        CalculatePruned ();
+        OnSearchEnded ();
 
         if (root.leafID != null)
-            NodeAnalyzed (TreeNode.GetByID ((int)root.leafID));
+            OnLeafActivated (TreeNode.GetByID ((int)root.leafID));
 
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
@@ -41,7 +41,7 @@ public class Minimax : GamesAlgorithm
         }
 
         if (node.branches.Length == 0) {
-            NodeAnalyzed (node);
+            OnLeafActivated (node);
         }
 
     }

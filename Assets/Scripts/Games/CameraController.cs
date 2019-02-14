@@ -22,10 +22,10 @@ public class CameraController : MonoBehaviour {
     static private CameraController instance;
 
     private void OnEnable () {
-        TreeGenerator.SetCameraEvent += SetCamera;
+        TreeGenerator.treeGenerated += SetCamera;
     }
     private void OnDisable () {
-        TreeGenerator.SetCameraEvent -= SetCamera;
+        TreeGenerator.treeGenerated -= SetCamera;
     }
 
     private void Awake () {

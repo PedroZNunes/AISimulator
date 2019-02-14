@@ -4,8 +4,8 @@ using System.Collections.Generic;
 public class TreeSearcher : MonoBehaviour
 {
 
-    public delegate void TreeUpdatedHandler (TreeNode[] leafs);
-    static public event TreeUpdatedHandler TreeUpdatedEvent;
+    public delegate void AllLeavesUpdated (TreeNode[] leafs);
+    static public event AllLeavesUpdated allLeavesUpdated;
 
     private GamesAlgorithm algorithm;
 
@@ -22,18 +22,19 @@ public class TreeSearcher : MonoBehaviour
 
     private void OnEnable ()
     {
-        UIGamesTheory.ResetSearchEvent += ResetSprites;
-        UIGamesTheory.SearchEvent += StartSearching;
-        GamesAlgorithm.NodeAnalyzedEvent += SetLeafStates;
-        TreeUpdatedEvent += UpdatePaths;
+        UIGamesTheory.resetClicked += ResetSprites;
+        UIGamesTheory.searchClicked += StartSearching;
+        GamesAlgorithm.leafActivated += UpdateLeaves;
+        allLeavesUpdated += UpdatePaths;
+
     }
 
     private void OnDisable ()
     {
-        UIGamesTheory.ResetSearchEvent -= ResetSprites;
-        UIGamesTheory.SearchEvent -= StartSearching;
-        GamesAlgorithm.NodeAnalyzedEvent -= SetLeafStates;
-        TreeUpdatedEvent -= UpdatePaths;
+        UIGamesTheory.resetClicked -= ResetSprites;
+        UIGamesTheory.searchClicked -= StartSearching;
+        GamesAlgorithm.leafActivated -= UpdateLeaves;
+        allLeavesUpdated -= UpdatePaths;
     }
 
     private void Awake ()
@@ -164,12 +165,12 @@ public class TreeSearcher : MonoBehaviour
         this.algorithm = algorithm;
     }
 
-    private void SetLeafStates (TreeNode node)
+    private void UpdateLeaves (TreeNode activeLeaf)
     {
         TreeNode[] leafs = TreeNode.Leaves.ToArray ();
         for (int i = 0; i < leafs.Length; i++) {
 
-            if (leafs[i].ID == node.ID) {
+            if (leafs[i].ID == activeLeaf.ID) {
                 leafs[i].SetState (NodeState.Active);
             }
             else if (leafs[i].State == NodeState.Explored) {
@@ -178,7 +179,7 @@ public class TreeSearcher : MonoBehaviour
             else if (leafs[i].State == NodeState.Active) {
                 leafs[i].SetState (NodeState.Explored);
             }
-            else if (leafs[i].ID < node.ID) {
+            else if (leafs[i].ID < activeLeaf.ID) {
                 leafs[i].SetState (NodeState.Pruned);
             }
             else {
@@ -186,10 +187,13 @@ public class TreeSearcher : MonoBehaviour
             }
         }
 
-        if (TreeUpdatedEvent != null) {
-            TreeUpdatedEvent (leafs);
-        }
-
+        OnAllLeavesUpdated (leafs);
     }
 
+    private static void OnAllLeavesUpdated (TreeNode[] leafs)
+    {
+        if (allLeavesUpdated != null) {
+            allLeavesUpdated (leafs);
+        }
+    }
 }
