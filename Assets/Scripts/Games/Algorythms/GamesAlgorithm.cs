@@ -1,13 +1,28 @@
 ﻿using System;
 
-public class GamesAlgorithm {
+
+public class GamesAlgorithm
+{
 
     public delegate void LeafActivated (TreeNode node);
     static public event LeafActivated leafActivated;
 
     static public event Action searchEnded;
 
-    public virtual void Search (TreeNode root, int branching, int depth) { }
+    private bool isSearching;
+
+    public bool IsSearching
+    {
+        get {
+            return isSearching;
+        }
+
+        protected set {
+            isSearching = value;
+        }
+    }
+
+    public virtual void Search (TreeNode root, int branching, int depth) {}
 
     /// <summary>
     /// function to proc the event warning that a node has been analyzed. This is useful for separating the search in frames.

@@ -210,11 +210,12 @@ public class UIGamesTheory : MonoBehaviour
 
         int pruned = TreeNode.Leaves.Count - analyzed;
 
-        float percent = pruned / TreeNode.Leaves.Count * 100;
+        float percent = (float) pruned / TreeNode.Leaves.Count * 100f;
 
         prunedValue.text = pruned.ToString ();
         analyzedValue.text = analyzed.ToString ();
         percentValue.text = String.Format ("{0:0.00}%", percent);
+        Debug.Log ("percent" + percent);
     }
 
     /// <summary>

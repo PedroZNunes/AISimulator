@@ -1,18 +1,20 @@
 ﻿using System;
 using UnityEngine;
 
+
 public class AlphaBeta : GamesAlgorithm
 {
 
     public override void Search (TreeNode root, int branching, int depth)
     {
+        IsSearching = true;
         CheckNode (root);
 
         if (root.leafID.HasValue)
             OnLeafActivated (TreeNode.GetByID (root.leafID.Value));
 
         OnSearchEnded ();
-
+        IsSearching = false;
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
 
@@ -63,6 +65,7 @@ public class AlphaBeta : GamesAlgorithm
         }
 
         if (node.branches.Length == 0) {
+            node.SetState (NodeState.Explored);
             OnLeafActivated (node);
         }
 

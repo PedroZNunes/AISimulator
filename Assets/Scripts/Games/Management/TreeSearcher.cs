@@ -80,14 +80,19 @@ public class TreeSearcher : MonoBehaviour
         TreeNode[] leaves = TreeNode.Leaves.ToArray ();
         for (int i = 0; i < leaves.Length; i++) {
             if (leaves[i].ID == activeLeaf.ID && activeLeaf.State != NodeState.Pruned) {
-                leaves[i].SetState (NodeState.Active);
-            }
-            else if (leaves[i].State == NodeState.Explored) {
-                continue;
-            }
-            else if (leaves[i].State == NodeState.Active) {
                 leaves[i].SetState (NodeState.Explored);
             }
+            else if (TreeGenerator.Root.leafID.HasValue) {
+                if (leaves[i].ID == TreeGenerator.Root.leafID)
+                    leaves[i].SetState (NodeState.Active);
+            }
+            
+            //else if (leaves[i].State == NodeState.Explored) {
+            //    continue;
+            //}
+            //else if (leaves[i].State == NodeState.Active) {
+            //    leaves[i].SetState (NodeState.Explored);
+            //}
         }
 
         UpdatePaths(leaves);
@@ -139,11 +144,11 @@ public class TreeSearcher : MonoBehaviour
         Queue<TreeBranch> path = new Queue<TreeBranch> ();
         SpriteRenderer sr = new SpriteRenderer ();
 
-        TreeNode parent = leaf;
+        TreeNode node = leaf;
         //queue up all nodes from the leaf to the root
-        while (parent != TreeGenerator.Root) {
-            path.Enqueue (parent.parentBranch);
-            parent = parent.GetParent ();
+        while (node != TreeGenerator.Root) {
+            path.Enqueue (node.parentBranch);
+            node = node.GetParent ();
         }
         //change all subsequent branches according to the leaf's state
         while (path.Count > 0) {
@@ -172,7 +177,7 @@ public class TreeSearcher : MonoBehaviour
     /// <summary>
     /// Resets sprites. Useful for reseting the path without resetting everything
     /// </summary>
-    private void ResetSprites () //TODO: this is weird. this should not be here.
+    private void ResetSprites () 
     {
         foreach (TreeBranch branch in TreeBranch.Branches) {
             branch.GO.GetComponent<SpriteRenderer> ().sprite = inactiveBranch;

@@ -190,6 +190,8 @@ public class TreeNode
         else {
             bestScoreMin = node.Score;
         }
+
+        GO.GetComponent<UITreeNode> ().AssignValue (Score);
     }
 
 

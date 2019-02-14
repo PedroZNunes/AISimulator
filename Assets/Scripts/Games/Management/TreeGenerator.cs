@@ -150,10 +150,8 @@ public class TreeGenerator : MonoBehaviour
 
         if (prefab == leafPrefab) {
             go.GetComponent<UITreeNode> ().AssignValue (toSpawn.Score);
-            go.name = "Leaf " + toSpawn.ID;
         }
-        else
-            go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
+        go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
 
         toSpawn.GO = go;
     }

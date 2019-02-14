@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+
 
 public class Minimax : GamesAlgorithm
 {
 
     public override void Search (TreeNode root, int branching, int depth)
     {
+        IsSearching = true;
+
         CheckNode (root);
 
         OnSearchEnded ();
@@ -12,6 +16,7 @@ public class Minimax : GamesAlgorithm
         if (root.leafID != null)
             OnLeafActivated (TreeNode.GetByID ((int)root.leafID));
 
+        IsSearching = false;
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
 
@@ -42,8 +47,8 @@ public class Minimax : GamesAlgorithm
 
         if (node.branches.Length == 0) {
             OnLeafActivated (node);
-        }
 
+        }
     }
 
 }
