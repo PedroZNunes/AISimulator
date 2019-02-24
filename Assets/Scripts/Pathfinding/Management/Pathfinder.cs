@@ -35,6 +35,8 @@ public class Pathfinder : MonoBehaviour {
 
     private Coroutine searchCoroutine;
 
+    static private int sortingOrderCount = 1;
+
     static private Pathfinder instance;
 
     private void OnEnable () {
@@ -155,6 +157,8 @@ public class Pathfinder : MonoBehaviour {
             if (link != null) {
                 //change sprite on the link GO
                 renderer = link.GO.GetComponent<SpriteRenderer> ();
+                renderer.sortingOrder = sortingOrderCount;
+                sortingOrderCount++;
                 if (renderer != null) {
                     renderer.sprite = instance.activeLinkSprite;
                     activeLinks.Push (link);
@@ -177,7 +181,7 @@ public class Pathfinder : MonoBehaviour {
 
     //Resetting
     static private void ResetActivePath () {
-
+        sortingOrderCount = 1;
         while (activeLinks.Count > 0) {
             Link link = activeLinks.Pop ();
 

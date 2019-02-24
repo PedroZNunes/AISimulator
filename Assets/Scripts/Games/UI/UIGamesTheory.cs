@@ -22,7 +22,7 @@ public class UIGamesTheory : MonoBehaviour
     /// <summary>
     /// Event that calls out for the object responsible for starting the search
     /// </summary>
-    public delegate void SearchClicked (string algorithm, int branching, int depth, int fps);
+    public delegate void SearchClicked (string algorithm, int branching, int depth);
     static public event SearchClicked searchClicked;
     #endregion
 
@@ -39,7 +39,6 @@ public class UIGamesTheory : MonoBehaviour
 
     //search inputs
     [SerializeField] private Dropdown algorythmDropdownInput;
-    [SerializeField] private InputField fpsInput;
     #endregion
 
     #region Locals
@@ -100,8 +99,6 @@ public class UIGamesTheory : MonoBehaviour
         algorythmDropdownInput.ClearOptions ();
         algorythmDropdownInput.AddOptions (algorythms);
         algorythmDropdownInput.value = 0;
-
-        fpsInput.text = "3";
     }
 
     private void Initialize ()
@@ -110,14 +107,12 @@ public class UIGamesTheory : MonoBehaviour
         SetBranchingAndDepth ();
 
         //search
-        SetFPS ();
         SetAlgorithm ();
     }
     #endregion
 
     #region Input Handling
 
-    public void SetFPS () { fps = Int32.Parse (instance.fpsInput.text); }
     public void SetAlgorithm () { algorithm = instance.algorythmDropdownInput.options[instance.algorythmDropdownInput.value].text; }
 
     /// <summary>
@@ -180,7 +175,7 @@ public class UIGamesTheory : MonoBehaviour
     private void OnSearchClicked ()
     {
         if (searchClicked != null)
-            searchClicked (algorithm, branching, depth, fps);
+            searchClicked (algorithm, branching, depth);
     }
     private static void OnResetClicked ()
     {

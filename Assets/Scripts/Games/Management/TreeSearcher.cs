@@ -38,7 +38,7 @@ public class TreeSearcher : MonoBehaviour
             Destroy (this.gameObject);
     }
 
-    public void StartSearching (string algorithm, int branching, int depth, int framesPerSecond)
+    public void StartSearching (string algorithm, int branching, int depth)
     {
         if (algorithm != null) {
             switch (algorithm) {
@@ -80,6 +80,7 @@ public class TreeSearcher : MonoBehaviour
         
         foreach (TreeBranch branch in TreeBranch.Branches) {
             sr = branch.GO.GetComponent<SpriteRenderer> ();
+
             switch (branch.State) {
                 case NodeState.Active:
                     sr.sprite = activeBranch;
