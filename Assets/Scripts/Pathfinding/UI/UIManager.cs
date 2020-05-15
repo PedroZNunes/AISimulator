@@ -110,7 +110,6 @@ public class UIManager : MonoBehaviour {
         sizes.Add ("33 x 33");
         sizes.Add ("65 x 65");
         sizes.Add ("129 x 129");
-        sizes.Add ("257 x 257");
 
         sizeDropdownInput.ClearOptions ();
         sizeDropdownInput.AddOptions (sizes);
