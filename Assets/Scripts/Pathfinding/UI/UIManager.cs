@@ -3,6 +3,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
+using System.Drawing;
 
 public class UIManager : MonoBehaviour {
 
@@ -179,18 +181,18 @@ public class UIManager : MonoBehaviour {
         nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
     }
 
-    public void OnPressGenerateMap () {
+    public void OnPressGenerateMap() {
         if (PathfindingAlgorythm.IsSearching)
             return;
 
         nodeSetup.ResetStartAndGoalNodes();
 
         if (GenerateMapEvent != null)
-            GenerateMapEvent (Size, Int32.Parse (sNodeCountInput.text), Int32.Parse (sMaxLinksInput.text), Int32.Parse (sGrainInput.text));
+            GenerateMapEvent(Size, Int32.Parse(sNodeCountInput.text), Int32.Parse(sMaxLinksInput.text), Int32.Parse(sGrainInput.text));
     }
 
-    //Called by the Search button
-    public void OnPressSearch () {
+        //Called by the Search button
+    public void OnPressSearch() { 
         //if not searching yet, search
         if (!PathfindingAlgorythm.IsSearching) {
             string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
