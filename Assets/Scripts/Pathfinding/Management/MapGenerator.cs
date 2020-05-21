@@ -59,6 +59,9 @@ public class MapGenerator : MonoBehaviour {
         SetLinks ();
         CleanUpSingleNodes ();
         ToScreen ();
+
+        //TEST
+        
     }
 
     private void Initialize (int size, int maxNodes , int maxLinksPerNode , int grain) {

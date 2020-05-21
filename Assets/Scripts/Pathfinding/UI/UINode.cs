@@ -6,10 +6,19 @@ public class UINode : MonoBehaviour {
     public delegate void NodeSelectedHandler (Node node);
     static public event NodeSelectedHandler NodeSelectedEvent;
 
+
+    public delegate void NodeHoveredHandler(Node node);
+    static public event NodeHoveredHandler NodeHoveredEvent;
+
+
+    public delegate void NodeHoveredExitHandler(Node node);
+    static public event NodeHoveredExitHandler NodeHoveredExitEvent;
+
     public Node node;
 
     [SerializeField]
     private Sprite inactiveNode;
+
 
     private BoxCollider2D col;
     private SpriteRenderer spriteRenderer;
@@ -39,6 +48,17 @@ public class UINode : MonoBehaviour {
             }
         }
     }
+
+    private void OnMouseEnter() {
+        if (NodeHoveredEvent != null)
+            NodeHoveredEvent(node);
+    }
+
+    private void OnMouseExit() {
+        if (NodeHoveredExitEvent != null)
+            NodeHoveredExitEvent(node);
+    }
+
 
     public void EnableArea (bool isStart) {
         col.enabled = true;

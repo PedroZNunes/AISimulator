@@ -28,7 +28,7 @@ public class UIManager : MonoBehaviour {
     [SerializeField] private Dropdown sizeDropdownInput;
     static private Dropdown sSizeDropdownInput;
 
-    static public int Size { get; private set; }
+    static public int sSize { get; private set; }
 
     [SerializeField] private InputField nodeCountInput;
     static private InputField sNodeCountInput;
@@ -150,7 +150,7 @@ public class UIManager : MonoBehaviour {
     public void OnChangeSize () {
         string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
         sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
-        Size = Int32.Parse (sizeString);
+        sSize = Int32.Parse (sizeString);
 
         CapMaxNodeCount ();
     }
@@ -160,7 +160,7 @@ public class UIManager : MonoBehaviour {
             nodeCountInput.text = "0";
         else {
             int count = Int32.Parse (nodeCountInput.text);
-            int maxNodeCount = ((Size * Size) / 5);
+            int maxNodeCount = ((sSize * sSize) / 5);
             nodeCountInput.text = Mathf.Min (count, maxNodeCount).ToString ();
         }
     }
@@ -187,8 +187,14 @@ public class UIManager : MonoBehaviour {
 
         nodeSetup.ResetStartAndGoalNodes();
 
+        int size = sSize;
+        int nodeCount = Int32.Parse(sNodeCountInput.text);
+        int maxLinks = Int32.Parse(sMaxLinksInput.text);
+        int grain = Int32.Parse(sGrainInput.text);
+
+
         if (GenerateMapEvent != null)
-            GenerateMapEvent(Size, Int32.Parse(sNodeCountInput.text), Int32.Parse(sMaxLinksInput.text), Int32.Parse(sGrainInput.text));
+            GenerateMapEvent(size, nodeCount, maxLinks, grain);
     }
 
         //Called by the Search button
