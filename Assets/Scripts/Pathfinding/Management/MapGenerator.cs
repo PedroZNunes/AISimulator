@@ -69,6 +69,7 @@ public class MapGenerator : MonoBehaviour {
         this.maxNodes = maxNodes;
         this.maxLinksPerNode = maxLinksPerNode;
         this.grain = grain;
+
     }
 
     private void Diamond () {

@@ -27,6 +27,12 @@ public class Pathfinder : MonoBehaviour {
     [SerializeField]
     private Sprite exploredNodeSprite;
 
+    [SerializeField]
+    private Sprite queuedLinkSprite;
+
+    [SerializeField]
+    private Sprite queuedNodeSprite;
+
 
     private static Stack<Link> activeLinks = new Stack<Link> ();
     private static Stack<Link> exploredLinks = new Stack<Link> ();
@@ -58,7 +64,7 @@ public class Pathfinder : MonoBehaviour {
             Destroy (instance.gameObject);
     }
 
-    ~Pathfinder() {
+    ~Pathfinder() { //finalizador
         activeLinks = new Stack<Link>();
         exploredLinks = new Stack<Link>();
         activeNodes = new Stack<Node>();
@@ -141,6 +147,9 @@ public class Pathfinder : MonoBehaviour {
                 if (!exploredNodes.Contains (current))
                     exploredNodes.Push (current);
             }
+            else {
+                Debug.LogError("Sprite renderer not found.");
+            }
 
             previous = current;
             current = cameFrom[current];
@@ -155,7 +164,7 @@ public class Pathfinder : MonoBehaviour {
             }
 
             if (link != null) {
-                //change sprite on the link GO
+                //change sprite on the link's Game Object
                 renderer = link.GO.GetComponent<SpriteRenderer> ();
                 renderer.sortingOrder = sortingOrderCount;
                 sortingOrderCount++;
@@ -179,7 +188,7 @@ public class Pathfinder : MonoBehaviour {
 
     }
 
-    //Resetting
+    //Reseta o caminho ativo e o transforma em explorado (visual)
     static private void ResetActivePath () {
         sortingOrderCount = 1;
         while (activeLinks.Count > 0) {

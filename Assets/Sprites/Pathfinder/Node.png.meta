@@ -19,12 +19,15 @@ TextureImporter:
     second: Node_goal
   - first:
       213: 21300010
-    second: Node_Inactive
+    second: Node_Queued
   - first:
       213: 21300012
     second: Node_Active
+  - first:
+      213: -3384411708189302445
+    second: Node_Inactive
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -78,6 +81,7 @@ TextureImporter:
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  applyGammaDecoding: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -206,7 +210,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Node_Inactive
+      name: Node_Queued
       rect:
         serializedVersion: 2
         x: 0
@@ -243,6 +247,27 @@ TextureImporter:
       bones: []
       spriteID: 5dc83044566b9624ea6c3b1f82e927f7
       internalID: 21300012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Node_Inactive
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35124b79b772801d0800000000000000
+      internalID: -3384411708189302445
       vertices: []
       indices: 
       edges: []
