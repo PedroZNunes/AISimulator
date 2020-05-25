@@ -13,8 +13,8 @@ public class CameraController : MonoBehaviour {
 
     private Bounds area;
 
-    [SerializeField]
-    private float panSensitivity = 0.3f;
+    
+    private float panSensitivity = 2f;
     private bool isPanning = false;
     private Vector3 origCamPos;
     private Vector3 origMousePos;
@@ -77,7 +77,7 @@ public class CameraController : MonoBehaviour {
             //make sure the camera does not leave the bounds set by the first camera generation
             cam.transform.position = ClampMovement (targetPos);
         }
-
+        // on press wheel button, pan
         if (Input.GetMouseButtonDown (2)) {
             //press
             isPanning = true;
@@ -96,6 +96,34 @@ public class CameraController : MonoBehaviour {
             //leave
             isPanning = false;
         }
+
+
+
+        //on press left mouse button
+        if (Input.GetMouseButtonDown(0)) {
+            //set original mouse and camera pos for reference
+            isPanning = true;
+            origCamPos = cam.transform.position;
+            origMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
+        }
+        if (Input.GetMouseButton(0)) {
+            if (isPanning) {
+                Vector3 dragMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
+
+                Vector3 displacement = ((dragMousePos - origMousePos) * panSensitivity * cam.orthographicSize);
+                displacement.x *= cam.aspect;
+
+                cam.transform.position = ClampMovement(origCamPos - displacement);
+                print(displacement.ToString()) ;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0)) {
+            //leave
+            isPanning = false;
+            origCamPos = cam.transform.position;
+        }
+
     }
 
     private Vector3 ClampMovement (Vector3 movePos) {

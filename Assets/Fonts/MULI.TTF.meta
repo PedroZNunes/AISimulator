@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2e6a73c466fd6624591704d78991e545
+guid: a7b0defada4bb424c8a257f0bee3784c
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,10 +8,14 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Optimus
+  fontName: Muli
   fontNames:
-  - Optimus
-  fallbackFontReferences: []
+  - Muli
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 426f260419cfee74386c873bf9c7f199, type: 3}
+  - {fileID: 12800000, guid: f3542239a8cff5f498244bdef9e93b61, type: 3}
+  - {fileID: 12800000, guid: 042a2dc9d2d498f4bab019dc497efda2, type: 3}
+  - {fileID: 12800000, guid: 04b5aa7e4177e1343b882ba3c3be81a8, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
