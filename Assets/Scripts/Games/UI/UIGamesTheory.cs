@@ -47,9 +47,9 @@ public class UIGamesTheory : MonoBehaviour
     private string algorithm;
     private int fps;
 
-    private int maxLeafCount = 81;
-    private int minDepth = 2;
-    private int maxDepth = 5;
+    private int maxLeafCount = 150;
+    private int minBranching = 2;
+    private int maxBranching = 4;
     #endregion
 
     static private UIGamesTheory instance;
@@ -120,17 +120,21 @@ public class UIGamesTheory : MonoBehaviour
     /// </summary>
     public void SetBranchingAndDepth ()
     {
-        depth = Mathf.Clamp (Int32.Parse (instance.depthInput.text), minDepth, maxDepth);
-        instance.depthInput.text = depth.ToString ();
+        branching = Int32.Parse(instance.branchingInput.text);
+        branching = Mathf.Clamp(branching, minBranching, maxBranching);
+        instance.branchingInput.text = branching.ToString ();
 
-        branching = Int32.Parse (instance.branchingInput.text);
-        int totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
+
+        depth = Int32.Parse(instance.depthInput.text);
+        
+        int totalLeafCount = Mathf.RoundToInt (Mathf.Pow (branching, depth));
+
         while (totalLeafCount > maxLeafCount) {
-            branching--;
-            totalLeafCount = Mathf.RoundToInt (Mathf.Pow (depth, branching));
+            depth--;
+            totalLeafCount = Mathf.RoundToInt (Mathf.Pow (branching, depth));
         }
 
-        instance.branchingInput.text = branching.ToString ();
+        instance.depthInput.text = depth.ToString ();
         Debug.LogFormat ("Branches: {0}, Depth: {1}", branching, depth);
     }
 

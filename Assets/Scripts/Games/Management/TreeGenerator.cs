@@ -67,6 +67,9 @@ public class TreeGenerator : MonoBehaviour
         Root = new TreeNode (b, 0, nodeType);
 
         GameObject rootGO = (GameObject)Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
+        SetNodeScale (ref rootGO, Root.depth);
+
+
         rootGO.name = Root.Type.ToString () + " " + Root.ID;
 
         Root.GO = rootGO;
@@ -127,7 +130,13 @@ public class TreeGenerator : MonoBehaviour
         //calculate position
         Vector2 step = new Vector2 ();
         step.x = Mathf.Pow (branching, depth - toSpawn.depth);
-        step.y = spacingY;
+
+        //distance between rows
+        //float verticalSize = Mathf.Pow(branching, depth) / Camera.main.aspect;
+        //step.y = verticalSize / depth;
+
+        step.y = 1 + ((branching * (depth - toSpawn.depth)) * (1 / Camera.main.aspect));
+
 
         Vector2 position = new Vector2 ();
         float initialPosX = parentNode.GO.transform.position.x - ((branching - 1) * step.x / 2); //left-most position
@@ -145,6 +154,7 @@ public class TreeGenerator : MonoBehaviour
 
         //instantiate the node
         GameObject go = (GameObject)Instantiate (prefab, position, Quaternion.identity, this.transform);
+        SetNodeScale(ref go, toSpawn.depth);
 
         if (prefab == leafPrefab) {
             go.GetComponent<UITreeNode> ().AssignScore (toSpawn.Score);
@@ -152,6 +162,13 @@ public class TreeGenerator : MonoBehaviour
         go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
 
         toSpawn.GO = go;
+    }
+
+    private void SetNodeScale (ref GameObject nodeGO, int currentDepth) {
+        //if the grid gets too big, scale nodes a bit so they are visible
+        int totalLeafs = Mathf.RoundToInt(Mathf.Pow(branching, depth));
+
+        nodeGO.transform.localScale *= Mathf.Max( 1 + ((branching * (depth - currentDepth - 1)) / (2 * Camera.main.aspect)), 1 );
     }
 
     /// <summary>

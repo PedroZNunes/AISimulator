@@ -174,7 +174,7 @@ public class TreeSearcher : MonoBehaviour
     private void ResetSprites () 
     {
         foreach (TreeBranch branch in TreeBranch.Branches) {
-            branch.GO.GetComponent<SpriteRenderer> ().sprite = inactiveBranch;
+            branch.GO.GetComponent<SpriteRenderer> ().sprite = prunedBranch;
         }
 
         foreach (TreeNode leaf in TreeNode.Leaves) {

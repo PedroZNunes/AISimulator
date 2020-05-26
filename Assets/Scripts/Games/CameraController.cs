@@ -34,11 +34,13 @@ public class CameraController : MonoBehaviour {
         if (instance != this)
             Destroy (this.gameObject);
     }
-
+        
     private void SetCamera (int depth, int branching, float stepY) {
         float totalLeafs = Mathf.Pow (branching, depth);
 
-        float sizeY = ((stepY * depth) + 1) / 2;
+        float rootSize = 1 + ((branching * (depth)) / (2 * cam.aspect));
+
+        float sizeY = ((stepY * depth) / 2) + rootSize;
 
         float sizeX = ((totalLeafs + 1) / cam.aspect) / 2;
 
