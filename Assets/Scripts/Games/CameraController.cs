@@ -49,6 +49,13 @@ public class CameraController : MonoBehaviour {
 
         area = new Bounds (cam.transform.position, new Vector3 (2 * cam.orthographicSize * cam.aspect, 2 * cam.orthographicSize));
 
+        //setup the collider size for checking mouse interactions properly
+        BoxCollider2D clickArea= this.GetComponent<BoxCollider2D>();
+        if (clickArea != null) {
+            clickArea.size = new Vector2(2 * cam.orthographicSize * cam.aspect, 2 * cam.orthographicSize);
+            clickArea.offset = new Vector2 (0, posY);
+        }
+
     }
 
     private void OnDrawGizmos () {
@@ -57,55 +64,48 @@ public class CameraController : MonoBehaviour {
 
     private void Update () {
         //zooming
-        if (Input.GetAxis ("Mouse ScrollWheel") != 0) {
-            float wheel = Mathf.Abs (Input.GetAxis ("Mouse ScrollWheel"));
+        CheckMovement();
+    }
+
+    private void OnMouseOver() {
+        if (Input.GetMouseButtonDown(0)) {
+            isPanning = true;
+            origCamPos = cam.transform.position;
+            origMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
+        }
+
+        if (Input.GetAxis("Mouse ScrollWheel") != 0) {
+            float wheel = Mathf.Abs(Input.GetAxis("Mouse ScrollWheel"));
             //store the mouse pos in world coords.
-            Vector3 origMousePos = cam.ScreenToWorldPoint (Input.mousePosition);
+            Vector3 origMousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
             //Zoom
-            if (Input.GetAxis ("Mouse ScrollWheel") < 0) //zoom out
-                cam.orthographicSize = Mathf.Min (cam.orthographicSize + cam.orthographicSize * wheel, area.extents.y);
-            else if (Input.GetAxis ("Mouse ScrollWheel") > 0) //zoom in
-                cam.orthographicSize = Mathf.Max (Camera.main.orthographicSize - cam.orthographicSize * wheel, minSize);
+            if (Input.GetAxis("Mouse ScrollWheel") < 0) //zoom out
+                cam.orthographicSize = Mathf.Min(cam.orthographicSize + cam.orthographicSize * wheel, area.extents.y);
+            else if (Input.GetAxis("Mouse ScrollWheel") > 0) //zoom in
+                cam.orthographicSize = Mathf.Max(Camera.main.orthographicSize - cam.orthographicSize * wheel, minSize);
 
             //Get the new Viewport coordinates for the new position of the object.
-            Vector3 finalMousePos = cam.ScreenToWorldPoint (Input.mousePosition);
+            Vector3 finalMousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
             //move the camera by the difference between the two points
             Vector3 targetPos = cam.transform.position + (origMousePos - finalMousePos);
 
             //make sure the camera does not leave the bounds set by the first camera generation
-            cam.transform.position = ClampMovement (targetPos);
-        }
-        // on press wheel button, pan
-        if (Input.GetMouseButtonDown (2)) {
-            //press
-            isPanning = true;
-            origCamPos = cam.transform.position;
-            origMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
-        }
-        if (Input.GetMouseButton (2)) {
-            if (isPanning) {
-                Vector3 dragMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
-                Vector3 displacement = ((dragMousePos - origMousePos) * panSensitivity) * (cam.orthographicSize / 3f);
-                cam.transform.position = ClampMovement (origCamPos + displacement);
-                origCamPos = cam.transform.position;
-            }
-        }
-        if (Input.GetMouseButtonUp (2)) {
-            //leave
-            isPanning = false;
+            cam.transform.position = ClampMovement(targetPos);
         }
 
 
+    }
 
-        //on press left mouse button
-        if (Input.GetMouseButtonDown(0)) {
-            //set original mouse and camera pos for reference
-            isPanning = true;
-            origCamPos = cam.transform.position;
-            origMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
-        }
+    
+    private void OnMouseUp() {
+        isPanning = false;
+    }
+
+
+    private void CheckMovement() {
+
         if (Input.GetMouseButton(0)) {
             if (isPanning) {
                 Vector3 dragMousePos = cam.ScreenToViewportPoint(Input.mousePosition);
@@ -114,7 +114,7 @@ public class CameraController : MonoBehaviour {
                 displacement.x *= cam.aspect;
 
                 cam.transform.position = ClampMovement(origCamPos - displacement);
-                print(displacement.ToString()) ;
+                print(displacement.ToString());
             }
         }
 
@@ -124,11 +124,13 @@ public class CameraController : MonoBehaviour {
             origCamPos = cam.transform.position;
         }
 
+
     }
 
     private Vector3 ClampMovement (Vector3 movePos) {
         Vector3 pos = new Vector3 ();
-        pos.x = Mathf.Clamp (movePos.x, area.min.x + cam.orthographicSize / 3 * 4, area.max.x - cam.orthographicSize / 3 * 4);
+        //pos.x = Mathf.Clamp (movePos.x, area.min.x + cam.orthographicSize / 3 * 4, area.max.x - cam.orthographicSize / 3 * 4);
+        pos.x = Mathf.Clamp (movePos.x, area.min.x + cam.orthographicSize * cam.aspect, area.max.x - cam.orthographicSize * cam.aspect);
         pos.y = Mathf.Clamp (movePos.y, area.min.y + cam.orthographicSize, area.max.y - cam.orthographicSize);
         pos.z = movePos.z;
         return pos;

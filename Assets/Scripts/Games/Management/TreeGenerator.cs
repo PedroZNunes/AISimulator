@@ -68,7 +68,6 @@ public class TreeGenerator : MonoBehaviour
 
         GameObject rootGO = (GameObject)Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
         rootGO.name = Root.Type.ToString () + " " + Root.ID;
-        //rootGO.transform.localScale *= Mathf.Clamp (Mathf.Pow (branching, depth - 2) / 2, 1f, float.MaxValue);
 
         Root.GO = rootGO;
 
@@ -128,9 +127,6 @@ public class TreeGenerator : MonoBehaviour
         //calculate position
         Vector2 step = new Vector2 ();
         step.x = Mathf.Pow (branching, depth - toSpawn.depth);
-        //step.y = spacingY = Mathf.Max (step.x * (branching - 1) * hwRatio, 1);
-        //step.y = spacingY = Mathf.Max(step.x * (branching - 1) * (1 / Camera.main.aspect), 1);
-        //step.y = spacingY = mathf.Max(step.x * (1 / Camera.main.aspect), 1);
         step.y = spacingY;
 
         Vector2 position = new Vector2 ();
@@ -149,7 +145,6 @@ public class TreeGenerator : MonoBehaviour
 
         //instantiate the node
         GameObject go = (GameObject)Instantiate (prefab, position, Quaternion.identity, this.transform);
-        //go.transform.localScale *= Mathf.Clamp ((step.x ), 1f, float.MaxValue);
 
         if (prefab == leafPrefab) {
             go.GetComponent<UITreeNode> ().AssignScore (toSpawn.Score);
