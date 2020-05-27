@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Drawing;
+using UnityEngine.Experimental.Rendering;
 
 public class UIManager : MonoBehaviour {
 
@@ -44,8 +45,8 @@ public class UIManager : MonoBehaviour {
     static private Dropdown sAlgorythmDropdownInput;
     [SerializeField] private InputField beamPathsInput;
     static private InputField sBeamPathsInput;
-    [SerializeField] private InputField fpsInput;
-    static private InputField sFpsInput;
+    [SerializeField] private Slider speedInput;
+    static private Slider sSpeedInput;
 
     static private UIManager instance;
 
@@ -101,7 +102,7 @@ public class UIManager : MonoBehaviour {
         //search
         sAlgorythmDropdownInput = instance.algorythmDropdownInput;
         sBeamPathsInput = instance.beamPathsInput;
-        sFpsInput = instance.fpsInput;
+        sSpeedInput = instance.speedInput;
     }
 
     private void InitializeUI () {
@@ -136,7 +137,9 @@ public class UIManager : MonoBehaviour {
         algorythmDropdownInput.value = 5;
 
         beamPathsInput.text = "2";
-        fpsInput.text = "3";
+        beamPathsInput.transform.parent.gameObject.SetActive( false );
+
+        speedInput.value = 4;
     }
     
     private void ResetOutput () {
@@ -154,6 +157,15 @@ public class UIManager : MonoBehaviour {
         sSize = Int32.Parse (sizeString);
 
         CapMaxNodeCount ();
+    }
+
+    public void OnChangeSearchAlgorithm() {
+        if (algorythmDropdownInput.options[algorythmDropdownInput.value].text.Trim() == "Beam") {
+            beamPathsInput.transform.parent.gameObject.SetActive( true );
+        }
+        else {
+            beamPathsInput.transform.parent.gameObject.SetActive( false );
+        }
     }
 
     public void CapMaxNodeCount () {
@@ -205,8 +217,9 @@ public class UIManager : MonoBehaviour {
             string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
 
             int beams = Int32.Parse (sBeamPathsInput.text);
-            int fps = Int32.Parse (sFpsInput.text);
+            float speedMult = sSpeedInput.value;
 
+            int fps = Mathf.RoundToInt (Mathf.Pow( 2, speedMult ));
             Node start, goal;
             nodeSetup.AssignStartAndGoal(out start, out goal);
 
