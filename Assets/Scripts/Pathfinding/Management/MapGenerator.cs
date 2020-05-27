@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Text;
 using Random = UnityEngine.Random;
+using UnityEngine.UIElements;
 
 public class MapGenerator : MonoBehaviour {
 
@@ -11,6 +12,9 @@ public class MapGenerator : MonoBehaviour {
     [SerializeField]
     private GameObject linkPrefab;
 
+    [SerializeField]
+    private float border;
+
     static public int Size;
 
     private float grain = 0;
@@ -18,7 +22,7 @@ public class MapGenerator : MonoBehaviour {
     private int maxNodes = 10;
 
     private int maxLinksPerNode = 4;
-    [SerializeField]
+
     private readonly float maxCosAngle = 0.85f;
 
     private float maxDistance;
@@ -269,9 +273,11 @@ public class MapGenerator : MonoBehaviour {
 
     public void SetCamera () {
         Camera camera = Camera.main;
-        camera.orthographicSize = ((Size - 1) / 2) + 1;
-        
-        camera.transform.position = new Vector3 (camera.orthographicSize - 1 , camera.orthographicSize - 1 , camera.transform.position.z);
+        camera.orthographicSize = ((Size - 1) / 2) + border;
+
+        Vector3 position  = new Vector3 ((camera.orthographicSize - border), camera.orthographicSize - border, camera.transform.position.z);
+        position.x *= 0.95f;
+        camera.transform.position = position;
     }
 
     private void ToScreen () {
