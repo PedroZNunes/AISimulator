@@ -20,14 +20,12 @@ public class UIMessageSystem : MonoBehaviour
     {
         UINodeSetup.SettingUpNodesEvent += NodeSetup;
         UINodeSetup.NodeSelectedEvent += NodeSelected;
-        UINodeSetup.ResetNodesEvent += ResetNodes;
     }
 
     private void OnDisable()
     {
         UINodeSetup.SettingUpNodesEvent -= NodeSetup;
         UINodeSetup.NodeSelectedEvent -= NodeSelected;
-        UINodeSetup.ResetNodesEvent -= ResetNodes;
     }
 
     private void NodeSetup(bool isStart)

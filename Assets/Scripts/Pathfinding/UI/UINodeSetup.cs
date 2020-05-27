@@ -12,7 +12,6 @@ public class UINodeSetup : MonoBehaviour
     //node setup related events
     public delegate void SettingUpNodesHandler(bool isStart);
     static public event SettingUpNodesHandler SettingUpNodesEvent;
-    static public event Action ResetNodesEvent;
     static public event Action NodeSelectedEvent;
 
     static public event Action NodeHoveredEvent;
@@ -83,14 +82,6 @@ public class UINodeSetup : MonoBehaviour
         }
     }
 
-    public void OnPressReset()
-    {
-        ResetStartAndGoalNodes();
-
-        if (ResetNodesEvent != null) {
-            ResetNodesEvent();
-        }
-    }
 
     public void ResetStartAndGoalNodes() {
         settingGoalNode = false;

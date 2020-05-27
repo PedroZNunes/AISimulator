@@ -38,6 +38,7 @@ public class MapGenerator : MonoBehaviour {
     private void OnEnable () {
         UIManager.GenerateMapEvent += Generate;
     }
+
     private void OnDisable () {
         UIManager.GenerateMapEvent -= Generate;
     }
@@ -58,10 +59,7 @@ public class MapGenerator : MonoBehaviour {
         SetNodes ();
         SetLinks ();
         CleanUpSingleNodes ();
-        ToScreen ();
-
-        //TEST
-        
+        ToScreen ();        
     }
 
     private void Initialize (int size, int maxNodes , int maxLinksPerNode , int grain) {
@@ -138,16 +136,6 @@ public class MapGenerator : MonoBehaviour {
             DivideGrid (x + newSize , y + newSize , newSize + 1 , middle , edge2 , corner3 , edge3);
             DivideGrid (x , y + newSize , newSize + 1 , edge4 , middle , edge3 , corner4);
         }
-    }
-
-    private void ClearPreviousMap () {
-        Pathfinder.ResetAllPaths ();
-
-        foreach (Transform child in transform) {
-            GameObject.Destroy (child.gameObject);
-        }
-
-        Node.ResetIDs ();
     }
 
     private void SetNodes () {
@@ -277,14 +265,7 @@ public class MapGenerator : MonoBehaviour {
         
     }
 
-    private void CleanUpSingleNodes () {
-        for (int i = 0 ; i < Nodes.Count ; i++) {
-            if (Nodes[i].links.Count == 0) {
-                Nodes.RemoveAt (i);
-                i--;
-            }
-        }
-    }
+
 
     public void SetCamera () {
         Camera camera = Camera.main;
@@ -351,6 +332,28 @@ public class MapGenerator : MonoBehaviour {
 
     }
 
+
+
+    private void ClearPreviousMap () {
+        Pathfinder.ResetAllPaths ();
+
+        foreach (Transform child in transform) {
+            GameObject.Destroy (child.gameObject);
+        }
+
+        Node.ResetIDs ();
+    }
+
+    //part of the generating system that cleans up nodes that have no connections
+    private void CleanUpSingleNodes () {
+        for (int i = 0 ; i < Nodes.Count ; i++) {
+            if (Nodes[i].links.Count == 0) {
+                Nodes.RemoveAt (i);
+                i--;
+            }
+        }
+    }
+
     private void ResetAll () {
         grid = new float[Size , Size];
         nodesGrid = new bool[Size , Size];
@@ -361,6 +364,8 @@ public class MapGenerator : MonoBehaviour {
         maxDistance = ( Size * Size ) / ( 1.5f * maxNodes );
         Debug.LogFormat ("Max link distance: {0}" , maxDistance);
     }
+
+
 
     static public Node RandomNode () {
         Node node = Nodes[Random.Range (0 , instance.maxNodes - 1)];

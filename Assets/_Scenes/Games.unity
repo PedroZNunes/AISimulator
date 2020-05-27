@@ -2650,7 +2650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 1084513109}
-  border: 1
+  border: 0
   minSize: 2
 --- !u!61 &786498903
 BoxCollider2D:

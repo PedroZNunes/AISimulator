@@ -48,13 +48,13 @@ public class Pathfinder : MonoBehaviour {
     private void OnEnable () {
         UIManager.BeginSearchEvent += BeginSearch;
         UIManager.CancelSearchEvent += CancelSearch;
-
+        UIManager.ResetSearchEvent += ResetAllPaths;
     }
 
     private void OnDisable () {
         UIManager.BeginSearchEvent -= BeginSearch;
         UIManager.CancelSearchEvent -= CancelSearch;
-
+        UIManager.ResetSearchEvent -= ResetAllPaths;
     }
 
     private void Awake () {

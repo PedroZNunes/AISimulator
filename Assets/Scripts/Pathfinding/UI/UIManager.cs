@@ -16,6 +16,7 @@ public class UIManager : MonoBehaviour {
     public delegate void SearchHandler (string algorythm, Node start, Node goal, int framesPerSecond, int beamPaths);
     static public event SearchHandler BeginSearchEvent;
     static public event Action CancelSearchEvent;
+    static public event Action ResetSearchEvent;
 
     //output
     [SerializeField] private Text enqueuingsValue;
@@ -219,6 +220,19 @@ public class UIManager : MonoBehaviour {
             else
                 Debug.LogWarning("CancelSearchEvent is empty");
 
+        }
+    }
+
+    public void OnPressReset() {
+        //reset start and goal using the uinodesteup
+        UINodeSetup nodeSetup = GetComponentInChildren<UINodeSetup>();
+        if (nodeSetup != null) {
+            nodeSetup.ResetStartAndGoalNodes();
+        }
+
+        //reset all links on-screen to pruned
+        if (ResetSearchEvent != null) {
+            ResetSearchEvent();
         }
     }
 
