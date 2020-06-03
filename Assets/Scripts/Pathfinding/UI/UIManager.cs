@@ -58,6 +58,9 @@ public class UIManager : MonoBehaviour {
     [SerializeField] private Button quitButton;
 
 
+    [SerializeField] private TextAsset infoTextFile;
+    [SerializeField] private Text infoText;
+
 
     private void OnEnable () {
         PathfindingAlgorythm.UpdateUIEvent += UpdateOutputValues;
@@ -153,10 +156,14 @@ public class UIManager : MonoBehaviour {
     //Changing the size of the map
     public void OnChangeSize () {
         string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
-        sizeString = sizeString.Substring (0, sizeString.IndexOf (' '));
-        sSize = Int32.Parse (sizeString);
+        sizeString = sizeString.Substring( 0, sizeString.IndexOf( ' ' ) );
+        sSize = Int32.Parse( sizeString );
 
         CapMaxNodeCount ();
+    }
+
+    public void OnChangeAlgorithm() {
+
     }
 
     public void OnChangeSearchAlgorithm() {
@@ -166,6 +173,22 @@ public class UIManager : MonoBehaviour {
         else {
             beamPathsInput.transform.parent.gameObject.SetActive( false );
         }
+
+        //load info
+        string infoString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
+        string infoFile = infoTextFile.text;
+        //Separate text starting from the first time the algorithms name appears followed by an arrow
+        int startIndex = infoFile.IndexOf( infoString + "->" );
+        string textFromName = infoFile.Substring( startIndex );
+
+        //then get it from after the arrow and before the first $, which indicates the end of a description.
+        startIndex = textFromName.IndexOf( '>' ) + 1;
+
+        int length = (textFromName.IndexOf( '$' ) > 0) ? textFromName.IndexOf( '$' ) - startIndex - 1 : textFromName.Length - startIndex - 1;
+        string info = textFromName.Substring( startIndex, length );
+        info = "\n" + info.Trim() + "\n";
+
+        infoText.text = info;
     }
 
     public void CapMaxNodeCount () {
