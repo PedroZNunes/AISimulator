@@ -26,7 +26,7 @@ public class AStar : PathfindingAlgorythm {
             pathLength = frontier[0].distance - Mathf.Abs(Vector2.Distance (current.pos, goal.pos));
             frontier.RemoveAt (0);
 
-            UIUpdate (frontier.Count, pathLength);
+            UIUpdate( frontier.Count, pathLength, Mathf.Abs( Vector2.Distance( current.pos, goal.pos ) ) + pathLength );
 
             //visualize path to current
             Pathfinder.VisualizePath (cameFrom, current, start);

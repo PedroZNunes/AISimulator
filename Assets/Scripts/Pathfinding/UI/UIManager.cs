@@ -61,6 +61,9 @@ public class UIManager : MonoBehaviour {
     [SerializeField] private TextAsset infoTextFile;
     [SerializeField] private Text infoText;
 
+    [SerializeField] private Text AddInfoLabel;
+    [SerializeField] private Text AddInfoValue;
+
 
     private void OnEnable () {
         PathfindingAlgorythm.UpdateUIEvent += UpdateOutputValues;
@@ -189,6 +192,17 @@ public class UIManager : MonoBehaviour {
         info = "\n" + info.Trim() + "\n";
 
         infoText.text = info;
+
+        if (infoString == "A*") {
+            AddInfoLabel.text = "Est. Shortest Distance:";
+            AddInfoLabel.transform.parent.gameObject.SetActive( true );
+        }
+        else {
+            AddInfoLabel.text = "";
+            AddInfoLabel.transform.parent.gameObject.SetActive( false );
+        }
+
+
     }
 
     public void CapMaxNodeCount () {
@@ -202,7 +216,7 @@ public class UIManager : MonoBehaviour {
     }
 
     //Updating right panel text, triggered by event
-    private void UpdateOutputValues (int queueSize, float length) {
+    private void UpdateOutputValues( int queueSize, float length, float addInfoValue = 0f) {
         //update queue info
         if (queueSize > (Int32.Parse (maxQueueSizeValue.text))) {
             maxQueueSizeValue.text = queueSize.ToString();
@@ -215,6 +229,10 @@ public class UIManager : MonoBehaviour {
 
         //increment nodes expanded
         nodesExpandedValue.text = (Int32.Parse (nodesExpandedValue.text) + 1).ToString ();
+
+        //additional information
+        if (AddInfoValue.isActiveAndEnabled)
+            AddInfoValue.text = String.Format( "{0:0.00}", addInfoValue );
     }
 
     public void OnPressGenerateMap() {
@@ -277,11 +295,23 @@ public class UIManager : MonoBehaviour {
             generateButton.interactable = false;
             searchButton.GetComponentInChildren<Text>().text = "Cancel";
             quitButton.interactable = false;
+            algorythmDropdownInput.interactable = false;
+            grainInput.interactable = false;
+            maxLinksInput.interactable = false;
+            nodeCountInput.interactable = false;
+            sizeDropdownInput.interactable = false;
+            speedInput.interactable = false;
         }
         else {
             generateButton.interactable = true;
             searchButton.GetComponentInChildren<Text>().text = "Search";
             quitButton.interactable = true;
+            algorythmDropdownInput.interactable = true;
+            grainInput.interactable = true;
+            maxLinksInput.interactable = true;
+            nodeCountInput.interactable = true;
+            sizeDropdownInput.interactable = true;
+            speedInput.interactable = true;
         }
 
     }

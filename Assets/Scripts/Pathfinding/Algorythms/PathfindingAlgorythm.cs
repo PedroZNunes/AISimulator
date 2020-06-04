@@ -5,7 +5,7 @@ using System;
 
 public class PathfindingAlgorythm {
 
-    public delegate void UpdateQueueHandler (int queueSize, float  length);
+    public delegate void UpdateQueueHandler( int queueSize, float length, float addInfoValue = 0f );
     static public event UpdateQueueHandler UpdateUIEvent;
 
     static public event Action IncrementEnqueueEvent;
@@ -27,42 +27,43 @@ public class PathfindingAlgorythm {
     }
 
 
-    public virtual IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) { return null; }
+    public virtual IEnumerator Search( List<Node> nodes, int size, Node start, Node goal, int framesPerSecond ) { return null; }
 
     public void CancelSearch() {
         IsSearching = false;
     }
 
-    protected void SearchComplete (bool hasPath) {
+    protected void SearchComplete( bool hasPath ) {
         IsSearching = false;
 
         if (!hasPath) {
-            Debug.Log("No path exists.");
+            Debug.Log( "No path exists." );
         }
         else {
-            Debug.Log("Path complete.");
+            Debug.Log( "Path complete." );
         }
     }
 
 
-    protected float CalculatePathLength (Node start, Node current) {
+    protected float CalculatePathLength( Node start, Node current ) {
         float pathLength = 0;
         while (current != start) {
             Node next = cameFrom[current];
-            pathLength += Mathf.Abs (Vector2.Distance (current.pos, next.pos));
+            pathLength += Mathf.Abs( Vector2.Distance( current.pos, next.pos ) );
             current = next;
         }
 
         return pathLength;
     }
 
-    protected void UIIncrementEnqueuings () {
+    protected void UIIncrementEnqueuings() {
         if (IncrementEnqueueEvent != null)
-            IncrementEnqueueEvent ();
+            IncrementEnqueueEvent();
     }
 
-    protected void UIUpdate (int queueSize, float pathLength) {
+    protected void UIUpdate( int queueSize, float pathLength, float addInfoValue = 0f ) {
         if (UpdateUIEvent != null)
-            UpdateUIEvent (queueSize, pathLength);
+            UpdateUIEvent( queueSize, pathLength, addInfoValue );
     }
+
 }

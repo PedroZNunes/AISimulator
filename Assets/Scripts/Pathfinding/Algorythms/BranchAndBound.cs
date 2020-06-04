@@ -26,7 +26,7 @@ public class BranchAndBound : PathfindingAlgorythm {
             pathLength = frontier[0].distance;
             frontier.RemoveAt (0);
 
-            UIUpdate (frontier.Count, pathLength);
+            UIUpdate( frontier.Count, pathLength );
 
             //visualize path to current
             Pathfinder.VisualizePath (cameFrom, current, start);
