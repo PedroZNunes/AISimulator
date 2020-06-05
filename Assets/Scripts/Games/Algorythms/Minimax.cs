@@ -1,7 +1,12 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-
+/// <summary>
+/// MinMax checks the tree in a top-down fashion, dealing with each row as turns in a game.
+/// In your turn the bot should look for the best possible option, a MAX. In your oponents turn the bot should look for the best enemy option, which would be the bots own worst outcome, in other words, a MIN.
+/// The MAX filters the best outcome of possible ones, denotes by numbered scores. The Min does the same, but looks for the worst one. 
+/// MAX Stands for Maximum and is denoted in the graph by a red triangle.
+/// MIN stands for Minimum and is denoted in the graph by a blue upside-down triangle.
+/// </summary>
 public class Minimax : GamesAlgorithm
 {
 
