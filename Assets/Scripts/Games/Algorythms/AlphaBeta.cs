@@ -69,7 +69,7 @@ public class AlphaBeta : GamesAlgorithm
             }
             
             node.SetState (NodeState.Explored);
-            if (node != TreeGenerator.Root)
+            if (node != TreeGenerator.root)
                 node.parentBranch.SetState (NodeState.Explored);
         }
 

@@ -4,27 +4,23 @@ using Object = UnityEngine.Object;
 public class TreeGenerator : MonoBehaviour
 {
 
-    private const float hwRatio = 0.4f;
-
     static private TreeGenerator instance;
 
-    private int branching; //how many branches leave each node
+
     [SerializeField] private GameObject leafPrefab;
     [SerializeField] private GameObject linkPrefab;
     [SerializeField] private GameObject maxPrefab;
-
-
     [SerializeField] private GameObject minPrefab;
 
-    private float spacingY = 1.2f; //used for placement in the grid, spacing in Y
 
     public delegate void TreeGenerated (int depth, int branch);
 
     static public event TreeGenerated treeGenerated;
 
     static public int depth { get; private set; } // the amount of levels the tree has
+    private int branching; //how many branches leave each node
 
-    static public TreeNode Root { get; private set; } //the root node
+    static public TreeNode root { get; private set; } //the root node
 
 
     #region Initialization
@@ -50,8 +46,8 @@ public class TreeGenerator : MonoBehaviour
     /// this function generates the map.
     /// It spawns the first node, the top-most one, and then it calls a recursive method for spawning the branches.
     /// </summary>
-    /// <param name="b">branches per node</param>
-    /// <param name="d">depth: number of floors or levels</param>
+    /// <param name="b">branches per node, or children per parent</param>
+    /// <param name="d">depth: number of levels or generations</param>
     private void Generate (int b, int d)
     {
         //setup
@@ -64,18 +60,18 @@ public class TreeGenerator : MonoBehaviour
         ResetTree ();
 
         //spawn the first node
-        Root = new TreeNode (b, 0, nodeType);
+        root = new TreeNode (b, 0, nodeType);
 
         GameObject rootGO = (GameObject)Instantiate (maxPrefab, Vector2.zero, Quaternion.identity, this.transform);
-        SetNodeScale (ref rootGO, Root.depth);
+        SetNodeScale (ref rootGO, root.depth);
 
 
-        rootGO.name = Root.Type.ToString () + " " + Root.ID;
+        rootGO.name = root.Type.ToString () + " " + root.ID;
 
-        Root.GO = rootGO;
+        root.GO = rootGO;
 
         //spawn the nodes linked to it
-        SpawnBranchesOf (Root);
+        SpawnBranchesOf (root);
 
         OnTreeGenerated ();
     }
@@ -132,9 +128,6 @@ public class TreeGenerator : MonoBehaviour
         step.x = Mathf.Pow (branching, depth - toSpawn.depth);
 
         //distance between rows
-        //float verticalSize = Mathf.Pow(branching, depth) / Camera.main.aspect;
-        //step.y = verticalSize / depth;
-
         step.y = 1 + ((branching * (depth - toSpawn.depth)) * (1 / Camera.main.aspect));
 
 

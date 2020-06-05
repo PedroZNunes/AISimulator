@@ -57,10 +57,10 @@ public class TreeSearcher : MonoBehaviour
 
             if (this.algorithm != null) {
                 Debug.LogFormat ("Reading Tree using {0}.", algorithm);
-                this.algorithm.Search (TreeGenerator.Root, branching, depth);
+                this.algorithm.Search (TreeGenerator.root, branching, depth);
 
-                if (TreeGenerator.Root.leafID.HasValue) {
-                    TreeNode.GetByID (TreeGenerator.Root.leafID.Value).SetState (NodeState.Active);
+                if (TreeGenerator.root.leafID.HasValue) {
+                    TreeNode.GetByID (TreeGenerator.root.leafID.Value).SetState (NodeState.Active);
                     UpdateSprites ();
                 }
             }
@@ -76,7 +76,7 @@ public class TreeSearcher : MonoBehaviour
     /// <param name="leafs">leaf array used as base for the tree's link states</param>
     private void UpdateSprites ()
     {
-        SpriteRenderer sr = new SpriteRenderer ();
+        SpriteRenderer sr;
         
         foreach (TreeBranch branch in TreeBranch.Branches) {
             sr = branch.GO.GetComponent<SpriteRenderer> ();
@@ -120,26 +120,25 @@ public class TreeSearcher : MonoBehaviour
                     break;
             }
 
-//            TracePathToRoot (leaf);
         }
-        if (TreeGenerator.Root.leafID.HasValue) {
-            TreeNode activeLeaf = TreeNode.GetByID (TreeGenerator.Root.leafID);
+        if (TreeGenerator.root.leafID.HasValue) {
+            TreeNode activeLeaf = TreeNode.GetByID (TreeGenerator.root.leafID);
             TracePathToRoot (activeLeaf);
         }
     }
 
     /// <summary>
-    ///traces the path from the leaf back to the root
+    /// traces the path from the leaf back to the root
     /// </summary>
     /// <param name="leaf"></param>
     private void TracePathToRoot (TreeNode leaf)
     {
         Queue<TreeBranch> path = new Queue<TreeBranch> ();
-        SpriteRenderer sr = new SpriteRenderer ();
+        SpriteRenderer sr;
 
         TreeNode node = leaf;
         //queue up all nodes from the leaf to the root
-        while (node != TreeGenerator.Root) {
+        while (node != TreeGenerator.root) {
             path.Enqueue (node.parentBranch);
             node = node.GetParent ();
         }
@@ -148,24 +147,6 @@ public class TreeSearcher : MonoBehaviour
             TreeBranch branch = path.Dequeue ();
             sr = branch.GO.GetComponent<SpriteRenderer> ();
             sr.sprite = activeBranch;
-            //switch (leaf.State) {
-            //    case NodeState.Active:
-            //        sr.sprite = activeBranch;
-            //        break;
-            //    case NodeState.Explored:
-            //        sr.sprite = exploredBranch;
-            //        break;
-            //    case NodeState.Inactive:
-            //        sr.sprite = inactiveBranch;
-            //        break;
-            //    case NodeState.Pruned:
-            //        sr.sprite = prunedBranch;
-            //        if (branch.a.State != NodeState.Pruned)
-            //            return;
-            //        break;
-            //    default:
-            //        break;
-            //}
         }
     }
     /// <summary>
