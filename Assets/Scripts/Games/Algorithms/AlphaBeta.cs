@@ -9,7 +9,7 @@
 /// For example when a MIN is comparing his children and sees a MAX already calculated with a score of '3' on one side, and the other side has a MAX that already has '4' in it and is still checking his own children.
 /// The MAX will not return anything smaller than 3, since it already has a 4, therefore it can be pruned along with whatever was under it that was unchecked. This clears up memory for other operations.
 /// </summary>
-public class AlphaBeta : GamesAlgorithm
+public class AlphaBeta : TreeSearchAlgorithm
 {
 
     public override void Search (TreeNode root, int branching, int depth)

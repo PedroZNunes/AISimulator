@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIGamesTheory : MonoBehaviour
+public class TreeUIManagement : MonoBehaviour
 {
     #region Events
     /// <summary>
@@ -45,32 +45,31 @@ public class UIGamesTheory : MonoBehaviour
     private int branching;
     private int depth;
     private string algorithm;
-    private int fps;
 
     private int maxLeafCount = 150;
     private int minBranching = 2;
     private int maxBranching = 4;
     #endregion
 
-    static private UIGamesTheory instance;
+    static private TreeUIManagement instance;
 
     #region Initialization
 
     private void OnEnable ()
     {
-        GamesAlgorithm.leafActivated += IncrementAnalyzed;
-        GamesAlgorithm.searchEnded += CountPrunedAndAnalyzed;
+        TreeSearchAlgorithm.leafActivated += IncrementAnalyzed;
+        TreeSearchAlgorithm.searchEnded += CountPrunedAndAnalyzed;
     }
     private void OnDisable ()
     {
-        GamesAlgorithm.leafActivated -= IncrementAnalyzed;
-        GamesAlgorithm.searchEnded -= CountPrunedAndAnalyzed;
+        TreeSearchAlgorithm.leafActivated -= IncrementAnalyzed;
+        TreeSearchAlgorithm.searchEnded -= CountPrunedAndAnalyzed;
     }
 
     private void Awake ()
     {
         if (instance == null)
-            instance = FindObjectOfType<UIGamesTheory> ();
+            instance = FindObjectOfType<TreeUIManagement> ();
         if (instance != this)
             Destroy (this.gameObject);
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class TreeSearcher : MonoBehaviour
 {
 
-    private GamesAlgorithm algorithm;
+    private TreeSearchAlgorithm algorithm;
 
     //links and nodes prefabs
     [SerializeField] private Sprite inactiveBranch;
@@ -17,17 +17,17 @@ public class TreeSearcher : MonoBehaviour
     [SerializeField] private Sprite prunedBranch;
 
     static private TreeSearcher instance;
-
+    #region Initialization
     private void OnEnable ()
     {
-        UIGamesTheory.resetClicked += ResetSprites;
-        UIGamesTheory.searchClicked += StartSearching;
+        TreeUIManagement.resetClicked += ResetSprites;
+        TreeUIManagement.searchClicked += StartSearching;
     }
 
     private void OnDisable ()
     {
-        UIGamesTheory.resetClicked -= ResetSprites;
-        UIGamesTheory.searchClicked -= StartSearching;
+        TreeUIManagement.resetClicked -= ResetSprites;
+        TreeUIManagement.searchClicked -= StartSearching;
     }
 
     private void Awake ()
@@ -37,6 +37,7 @@ public class TreeSearcher : MonoBehaviour
         if (instance != this)
             Destroy (this.gameObject);
     }
+    #endregion
 
     public void StartSearching (string algorithm, int branching, int depth)
     {
@@ -68,7 +69,6 @@ public class TreeSearcher : MonoBehaviour
         else
             Debug.LogWarning ("Algorithm not set. Search canceled.");
     }
-
 
     /// <summary>
     /// Updates the path sprites
@@ -149,6 +149,7 @@ public class TreeSearcher : MonoBehaviour
             sr.sprite = activeBranch;
         }
     }
+
     /// <summary>
     /// Resets sprites. Useful for reseting the path without resetting everything
     /// </summary>
@@ -163,7 +164,7 @@ public class TreeSearcher : MonoBehaviour
         }
     }
 
-    public void SetAlgorithm (GamesAlgorithm algorithm)
+    public void SetAlgorithm (TreeSearchAlgorithm algorithm)
     {
         this.algorithm = algorithm;
     }

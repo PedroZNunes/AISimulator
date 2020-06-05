@@ -176,7 +176,7 @@ public class TreeNode
                 continue;
             }
 
-            node.GO.GetComponent<UITreeNode> ().AssignScore (null);
+            node.GO.GetComponent<TreeUINode> ().AssignScore (null);
         }
     }
 
@@ -196,7 +196,7 @@ public class TreeNode
             bestScoreMin = node.Score;
         }
 
-        GO.GetComponent<UITreeNode> ().AssignScore (Score);
+        GO.GetComponent<TreeUINode> ().AssignScore (Score);
     }
 
 

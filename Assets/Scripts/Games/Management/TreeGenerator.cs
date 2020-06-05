@@ -26,11 +26,11 @@ public class TreeGenerator : MonoBehaviour
     #region Initialization
     private void OnEnable ()
     {
-        UIGamesTheory.generateClicked += Generate;
+        TreeUIManagement.generateClicked += Generate;
     }
     private void OnDisable ()
     {
-        UIGamesTheory.generateClicked -= Generate;
+        TreeUIManagement.generateClicked -= Generate;
     }
 
     private void Awake ()
@@ -150,7 +150,7 @@ public class TreeGenerator : MonoBehaviour
         SetNodeScale(ref go, toSpawn.depth);
 
         if (prefab == leafPrefab) {
-            go.GetComponent<UITreeNode> ().AssignScore (toSpawn.Score);
+            go.GetComponent<TreeUINode> ().AssignScore (toSpawn.Score);
         }
         go.name = toSpawn.Type.ToString () + " " + toSpawn.ID;
 

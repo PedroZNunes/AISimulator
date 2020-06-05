@@ -7,7 +7,7 @@
 /// MAX Stands for Maximum and is denoted in the graph by a red triangle.
 /// MIN stands for Minimum and is denoted in the graph by a blue upside-down triangle.
 /// </summary>
-public class Minimax : GamesAlgorithm
+public class Minimax : TreeSearchAlgorithm
 {
 
     public override void Search (TreeNode root, int branching, int depth)

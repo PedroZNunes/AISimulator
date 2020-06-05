@@ -1,7 +1,7 @@
 ﻿using System;
 
 
-public class GamesAlgorithm
+public class TreeSearchAlgorithm
 {
 
     public delegate void LeafActivated (TreeNode node);
