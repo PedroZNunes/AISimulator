@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Expands the path with the sortest (distance so far + distance to the goal) 
 /// </summary>
-public class AStar : PathfindingAlgorythm {
+public class AStar : GraphSearchAlgorithm {
     
     public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
         IsSearching = true;
@@ -14,12 +14,14 @@ public class AStar : PathfindingAlgorythm {
 
         bool[,] visited = new bool[size, size];
         cameFrom = new Dictionary<Node, Node> ();
-        List<NodeDist> frontier = new List<NodeDist> ();
+        List<NodeDistance> frontier = new List<NodeDistance> ();
         Node current = new Node ();
-        float pathLength = 0;
+        float pathLength;
 
-        frontier.Add (new NodeDist (start, 0 + Mathf.Abs (Vector2.Distance (start.pos, goal.pos))));
+        frontier.Add (new NodeDistance (start, 0 + Mathf.Abs (Vector2.Distance (start.pos, goal.pos))));
         cameFrom[start] = null;
+        visited[(int)start.pos.x, (int)start.pos.y] = true;
+
 
         while (frontier.Count > 0) {
             current = frontier[0].node;
@@ -29,7 +31,7 @@ public class AStar : PathfindingAlgorythm {
             UIUpdate( frontier.Count, pathLength, Mathf.Abs( Vector2.Distance( current.pos, goal.pos ) ) + pathLength );
 
             //visualize path to current
-            Pathfinder.VisualizePath (cameFrom, current, start);
+            GraphSearcher.VisualizePath (cameFrom, current, start);
             yield return new WaitForSeconds (1f / framesPerSecond);
 
             if (current == goal) {
@@ -46,7 +48,7 @@ public class AStar : PathfindingAlgorythm {
 
                     cameFrom[neighbour] = current;
                     float totalDistance = pathLength + Mathf.Abs (Vector2.Distance (neighbour.pos, current.pos)) + Mathf.Abs (Vector2.Distance (neighbour.pos, goal.pos));
-                    frontier.Add (new NodeDist (neighbour, totalDistance));
+                    frontier.Add (new NodeDistance (neighbour, totalDistance));
                     UIIncrementEnqueuings ();
                 }
 

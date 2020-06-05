@@ -3,11 +3,11 @@
 /// <summary>
 /// node-distance pair
 /// </summary>
-public class NodeDist : IComparable {
+public class NodeDistance : IComparable {
     public float distance;
     public Node node;
 
-    public NodeDist ( Node node , float distance ) {
+    public NodeDistance ( Node node , float distance ) {
         this.distance = distance;
         this.node = node;
     }
@@ -15,7 +15,7 @@ public class NodeDist : IComparable {
     public int CompareTo ( object obj ) {
         if (obj == null) return 1;
 
-        NodeDist other = obj as NodeDist;
+        NodeDistance other = obj as NodeDistance;
         if (other != null)
             return this.distance.CompareTo (other.distance);
         else

@@ -2,12 +2,12 @@
 using UnityEngine;
 using System;
 
-public class Pathfinder : MonoBehaviour {
+public class GraphSearcher : MonoBehaviour {
 
 
     public static event Action ResettingPathsEvent;
 
-    private PathfindingAlgorythm searchAlgorythm;
+    private GraphSearchAlgorithm searchAlgorithm;
 
     [SerializeField]
     private Sprite inactiveLinkSprite;
@@ -43,7 +43,7 @@ public class Pathfinder : MonoBehaviour {
 
     static private int sortingOrderCount = 1;
 
-    static private Pathfinder instance;
+    static private GraphSearcher instance;
 
     private void OnEnable () {
         UIManager.BeginSearchEvent += BeginSearch;
@@ -59,12 +59,12 @@ public class Pathfinder : MonoBehaviour {
 
     private void Awake () {
         if (instance == null) 
-            instance = FindObjectOfType<Pathfinder> ();
+            instance = FindObjectOfType<GraphSearcher> ();
         if (instance != this)
             Destroy (instance.gameObject);
     }
 
-    ~Pathfinder() { //finalizador
+    ~GraphSearcher() { //finalizador
         activeLinks = new Stack<Link>();
         exploredLinks = new Stack<Link>();
         activeNodes = new Stack<Node>();
@@ -77,40 +77,40 @@ public class Pathfinder : MonoBehaviour {
             switch (algorythm)
             {
                 case ("BFS"):
-                    searchAlgorythm = new BFS();
+                    searchAlgorithm = new BFS();
                     break;
 
                 case ("DFS"):
-                    searchAlgorythm = new DFS();
+                    searchAlgorithm = new DFS();
                     break;
 
                 case ("Hill Climbing"):
-                    searchAlgorythm = new HillClimbing();
+                    searchAlgorithm = new HillClimbing();
                     break;
 
                 case ("Beam"):
-                    searchAlgorythm = new Beam(beamPaths);
+                    searchAlgorithm = new Beam(beamPaths);
                     break;
 
                 case ("Branch and Bound"):
-                    searchAlgorythm = new BranchAndBound();
+                    searchAlgorithm = new BranchAndBound();
                     break;
 
                 case ("A*"):
-                    searchAlgorythm = new AStar();
+                    searchAlgorithm = new AStar();
                     break;
 
                 default:
-                    searchAlgorythm = null;
+                    searchAlgorithm = null;
                     break;
             }
 
-            if (searchAlgorythm != null)
+            if (searchAlgorithm != null)
             {
                 ResetAllPaths();
 
                 Debug.LogFormat("Building a path using {0}.", algorythm);
-                searchCoroutine = StartCoroutine(searchAlgorythm.Search(MapGenerator.Nodes, MapGenerator.Size, start, goal, framesPerSecond));
+                searchCoroutine = StartCoroutine(searchAlgorithm.Search(GraphGenerator.Nodes, GraphGenerator.Size, start, goal, framesPerSecond));
             }
             else
                 Debug.LogWarning("Invalid algorythm. Search canceled.");
@@ -123,12 +123,12 @@ public class Pathfinder : MonoBehaviour {
     {
         Debug.LogFormat("Process aborted by user.");
 
-        searchAlgorythm.CancelSearch();
+        searchAlgorithm.CancelSearch();
         StopCoroutine(searchCoroutine);
     }
 
-    public void SetAlgorythm ( PathfindingAlgorythm algorythm ) {
-        searchAlgorythm = algorythm;
+    public void SetAlgorythm ( GraphSearchAlgorithm algorythm ) {
+        searchAlgorithm = algorythm;
     }
 
     static public void VisualizePath ( Dictionary<Node , Node> cameFrom , Node current , Node start ) {
@@ -155,8 +155,8 @@ public class Pathfinder : MonoBehaviour {
             current = cameFrom[current];
 
             Link link = null;
-            for (int i = 0 ; i < MapGenerator.AllLinks.Count ; i++) {
-                Link currentLink = MapGenerator.AllLinks[i];
+            for (int i = 0 ; i < GraphGenerator.AllLinks.Count ; i++) {
+                Link currentLink = GraphGenerator.AllLinks[i];
                 if (currentLink.HasNodes (current , previous)) {
                     link = currentLink;
                     break;

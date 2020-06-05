@@ -3,9 +3,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-using System.Collections;
-using System.Drawing;
-using UnityEngine.Experimental.Rendering;
+
+using Random = System.Random;
 
 public class UIManager : MonoBehaviour {
 
@@ -28,25 +27,23 @@ public class UIManager : MonoBehaviour {
 
     //map generation inputs
     [SerializeField] private Dropdown sizeDropdownInput;
-    static private Dropdown sSizeDropdownInput;
 
-    static public int sSize { get; private set; }
+    static public int size { get; private set; }
 
     [SerializeField] private InputField nodeCountInput;
-    static private InputField sNodeCountInput;
-
     [SerializeField] private InputField maxLinksInput;
-    static private InputField sMaxLinksInput;
-    [SerializeField] private InputField grainInput;
-    static private InputField sGrainInput;
+
+    static private int nodeCount;
+    static private int maxLinks;
 
     //search inputs
-    [SerializeField] private Dropdown algorythmDropdownInput;
-    static private Dropdown sAlgorythmDropdownInput;
-    [SerializeField] private InputField beamPathsInput;
-    static private InputField sBeamPathsInput;
+    [SerializeField] private Dropdown algorithmsDropdownInput;
+    [SerializeField] private InputField beamsInput;
     [SerializeField] private Slider speedInput;
-    static private Slider sSpeedInput;
+
+    static private string algorithm;
+    static private int beams;
+    static private int speed;
 
     static private UIManager instance;
 
@@ -66,19 +63,19 @@ public class UIManager : MonoBehaviour {
 
 
     private void OnEnable () {
-        PathfindingAlgorythm.UpdateUIEvent += UpdateOutputValues;
-        PathfindingAlgorythm.IncrementEnqueueEvent += IncrementEnqueue;
-        PathfindingAlgorythm.AlteredSearchStateEvent += UpdateButtons;
+        GraphSearchAlgorithm.UpdateUIEvent += UpdateOutputValues;
+        GraphSearchAlgorithm.IncrementEnqueueEvent += IncrementEnqueue;
+        GraphSearchAlgorithm.AlteredSearchStateEvent += UpdateButtons;
 
-        Pathfinder.ResettingPathsEvent += ResetOutput;
+        GraphSearcher.ResettingPathsEvent += ResetOutput;
     }
 
     private void OnDisable () {
-        PathfindingAlgorythm.UpdateUIEvent -= UpdateOutputValues;
-        PathfindingAlgorythm.IncrementEnqueueEvent -= IncrementEnqueue;
-        PathfindingAlgorythm.AlteredSearchStateEvent -= UpdateButtons;
+        GraphSearchAlgorithm.UpdateUIEvent -= UpdateOutputValues;
+        GraphSearchAlgorithm.IncrementEnqueueEvent -= IncrementEnqueue;
+        GraphSearchAlgorithm.AlteredSearchStateEvent -= UpdateButtons;
 
-        Pathfinder.ResettingPathsEvent -= ResetOutput;
+        GraphSearcher.ResettingPathsEvent -= ResetOutput;
     }
 
     private void Awake () {
@@ -88,8 +85,8 @@ public class UIManager : MonoBehaviour {
         else if (instance == null)
             Debug.LogError("No UIManager found in the scene.");
 
-        Initialize ();
         InitializeUI ();
+        Initialize ();
         ResetOutput ();       
     }
 
@@ -98,17 +95,17 @@ public class UIManager : MonoBehaviour {
     }
 
     //UI Preparation Setup
-    static private void Initialize () {
+    private void Initialize () {
         //map generation
-        sSizeDropdownInput = instance.sizeDropdownInput;
-        sNodeCountInput = instance.nodeCountInput;
-        sMaxLinksInput = instance.maxLinksInput;
-        sGrainInput = instance.grainInput;
+        OnChangeSize();
+        OnChangeNodeCount();
+
+        OnChangeLinks();
 
         //search
-        sAlgorythmDropdownInput = instance.algorythmDropdownInput;
-        sBeamPathsInput = instance.beamPathsInput;
-        sSpeedInput = instance.speedInput;
+        OnChangeAlgorithm();
+        OnChangeBeams();
+        OnChangeSpeed();
     }
 
     private void InitializeUI () {
@@ -127,23 +124,23 @@ public class UIManager : MonoBehaviour {
 
         nodeCountInput.text = "100";
         maxLinksInput.text = "10";
-        grainInput.text = "5";
 
         //search panel
-        List<string> algorythms = new List<string> ();
-        algorythms.Add ("BFS");
-        algorythms.Add ("DFS");
-        algorythms.Add ("Hill Climbing");
-        algorythms.Add ("Beam");
-        algorythms.Add ("Branch and Bound");
-        algorythms.Add ("A*");
+        List<string> algorithms = new List<string> {
+            "BFS",
+            "DFS",
+            "Hill Climbing",
+            "Beam",
+            "Branch and Bound",
+            "A*"
+        };
 
-        algorythmDropdownInput.ClearOptions ();
-        algorythmDropdownInput.AddOptions (algorythms);
-        algorythmDropdownInput.value = 5;
+        algorithmsDropdownInput.ClearOptions ();
+        algorithmsDropdownInput.AddOptions (algorithms);
+        algorithmsDropdownInput.value = 5;
 
-        beamPathsInput.text = "2";
-        beamPathsInput.transform.parent.gameObject.SetActive( false );
+        beamsInput.text = "2";
+        beamsInput.transform.parent.gameObject.SetActive( false );
 
         speedInput.value = 4;
     }
@@ -158,30 +155,28 @@ public class UIManager : MonoBehaviour {
 
     //Changing the size of the map
     public void OnChangeSize () {
-        string sizeString = (sSizeDropdownInput.options[sSizeDropdownInput.value].text);
+        string sizeString = (sizeDropdownInput.options[sizeDropdownInput.value].text);
         sizeString = sizeString.Substring( 0, sizeString.IndexOf( ' ' ) );
-        sSize = Int32.Parse( sizeString );
+        size = Int32.Parse( sizeString );
 
         CapMaxNodeCount ();
     }
 
+
     public void OnChangeAlgorithm() {
-
-    }
-
-    public void OnChangeSearchAlgorithm() {
-        if (algorythmDropdownInput.options[algorythmDropdownInput.value].text.Trim() == "Beam") {
-            beamPathsInput.transform.parent.gameObject.SetActive( true );
+        algorithm = algorithmsDropdownInput.options[algorithmsDropdownInput.value].text.Trim();
+        if (algorithm == "Beam") {
+            beamsInput.transform.parent.gameObject.SetActive( true );
         }
         else {
-            beamPathsInput.transform.parent.gameObject.SetActive( false );
+            beamsInput.transform.parent.gameObject.SetActive( false );
         }
 
         //load info
-        string infoString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
         string infoFile = infoTextFile.text;
+
         //Separate text starting from the first time the algorithms name appears followed by an arrow
-        int startIndex = infoFile.IndexOf( infoString + "->" );
+        int startIndex = infoFile.IndexOf( algorithm + "->" );
         string textFromName = infoFile.Substring( startIndex );
 
         //then get it from after the arrow and before the first $, which indicates the end of a description.
@@ -193,7 +188,7 @@ public class UIManager : MonoBehaviour {
 
         infoText.text = info;
 
-        if (infoString == "A*") {
+        if (algorithm == "A*") {
             AddInfoLabel.text = "Est. Shortest Distance:";
             AddInfoLabel.transform.parent.gameObject.SetActive( true );
         }
@@ -202,7 +197,24 @@ public class UIManager : MonoBehaviour {
             AddInfoLabel.transform.parent.gameObject.SetActive( false );
         }
 
+    }
 
+    public void OnChangeSpeed() {
+        speed = Mathf.RoundToInt( speedInput.value );
+    }
+
+    public void OnChangeBeams() {
+        beams = Int32.Parse( beamsInput.text );
+    }
+
+    public void OnChangeNodeCount() {
+        CapMaxNodeCount();
+        nodeCount = Int32.Parse( nodeCountInput.text );
+    }
+
+    public void OnChangeLinks() {
+        maxLinks = Mathf.Clamp( Int32.Parse( maxLinksInput.text ), 3, 99);
+        maxLinksInput.text = maxLinks.ToString();
     }
 
     public void CapMaxNodeCount () {
@@ -210,8 +222,8 @@ public class UIManager : MonoBehaviour {
             nodeCountInput.text = "0";
         else {
             int count = Int32.Parse (nodeCountInput.text);
-            int maxNodeCount = ((sSize * sSize) / 5);
-            nodeCountInput.text = Mathf.Min (count, maxNodeCount).ToString ();
+            int maxNodeCount = ((size * size) / 5);
+            nodeCountInput.text = Mathf.Clamp( count, 3, maxNodeCount ).ToString();
         }
     }
 
@@ -236,17 +248,11 @@ public class UIManager : MonoBehaviour {
     }
 
     public void OnPressGenerateMap() {
-        if (PathfindingAlgorythm.IsSearching)
+        if (GraphSearchAlgorithm.IsSearching)
             return;
 
         nodeSetup.ResetStartAndGoalNodes();
-
-        int size = sSize;
-        int nodeCount = Int32.Parse(sNodeCountInput.text);
-        int maxLinks = Int32.Parse(sMaxLinksInput.text);
-        int grain = Int32.Parse(sGrainInput.text);
-
-
+        int grain = new Random().Next( 1, 99 );
         if (GenerateMapEvent != null)
             GenerateMapEvent(size, nodeCount, maxLinks, grain);
     }
@@ -254,18 +260,14 @@ public class UIManager : MonoBehaviour {
         //Called by the Search button
     public void OnPressSearch() { 
         //if not searching yet, search
-        if (!PathfindingAlgorythm.IsSearching) {
-            string algorythmString = (sAlgorythmDropdownInput.options[sAlgorythmDropdownInput.value].text);
+        if (!GraphSearchAlgorithm.IsSearching) {
 
-            int beams = Int32.Parse (sBeamPathsInput.text);
-            float speedMult = sSpeedInput.value;
-
-            int fps = Mathf.RoundToInt (Mathf.Pow( 2, speedMult ));
+            int fps = Mathf.RoundToInt (Mathf.Pow( 2, speed ));
             Node start, goal;
             nodeSetup.AssignStartAndGoal(out start, out goal);
 
             if (BeginSearchEvent != null)
-                BeginSearchEvent (algorythmString, start, goal, fps, beams);
+                BeginSearchEvent (algorithm, start, goal, fps, beams);
         }
         //if already searching, cancel
         else {
@@ -291,12 +293,11 @@ public class UIManager : MonoBehaviour {
     }
 
     private void UpdateButtons() {
-        if (PathfindingAlgorythm.IsSearching) {
+        if (GraphSearchAlgorithm.IsSearching) {
             generateButton.interactable = false;
             searchButton.GetComponentInChildren<Text>().text = "Cancel";
             quitButton.interactable = false;
-            algorythmDropdownInput.interactable = false;
-            grainInput.interactable = false;
+            algorithmsDropdownInput.interactable = false;
             maxLinksInput.interactable = false;
             nodeCountInput.interactable = false;
             sizeDropdownInput.interactable = false;
@@ -306,8 +307,7 @@ public class UIManager : MonoBehaviour {
             generateButton.interactable = true;
             searchButton.GetComponentInChildren<Text>().text = "Search";
             quitButton.interactable = true;
-            algorythmDropdownInput.interactable = true;
-            grainInput.interactable = true;
+            algorithmsDropdownInput.interactable = true;
             maxLinksInput.interactable = true;
             nodeCountInput.interactable = true;
             sizeDropdownInput.interactable = true;

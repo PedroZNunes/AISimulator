@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Expands the shortest path so far
 /// </summary>
-public class BranchAndBound : PathfindingAlgorythm {
+public class BranchAndBound : GraphSearchAlgorithm {
     
     public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
         IsSearching = true;
@@ -14,12 +14,14 @@ public class BranchAndBound : PathfindingAlgorythm {
 
         bool[,] visited = new bool[size, size];
         cameFrom = new Dictionary<Node, Node> ();
-        List<NodeDist> frontier = new List<NodeDist> ();
+        List<NodeDistance> frontier = new List<NodeDistance> ();
         Node current = new Node ();
         float pathLength = 0;
 
-        frontier.Add (new NodeDist (start, 0));
+        frontier.Add (new NodeDistance (start, 0));
         cameFrom[start] = null;
+        visited[(int)start.pos.x, (int)start.pos.y] = true;
+
 
         while (frontier.Count > 0) {
             current = frontier[0].node;
@@ -29,7 +31,7 @@ public class BranchAndBound : PathfindingAlgorythm {
             UIUpdate( frontier.Count, pathLength );
 
             //visualize path to current
-            Pathfinder.VisualizePath (cameFrom, current, start);
+            GraphSearcher.VisualizePath (cameFrom, current, start);
             yield return new WaitForSeconds (1f / framesPerSecond);
 
             if (current == goal) {
@@ -45,7 +47,7 @@ public class BranchAndBound : PathfindingAlgorythm {
                     visited[(int) neighbour.pos.x, (int) neighbour.pos.y] = true;
 
                     cameFrom[neighbour] = current;
-                    frontier.Add (new NodeDist (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
+                    frontier.Add (new NodeDistance (neighbour, pathLength + Mathf.Abs(Vector2.Distance (neighbour.pos, current.pos))));
                     UIIncrementEnqueuings ();
                 }
 

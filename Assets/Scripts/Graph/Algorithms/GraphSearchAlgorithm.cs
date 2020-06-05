@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class PathfindingAlgorythm {
+public class GraphSearchAlgorithm {
 
     public delegate void UpdateQueueHandler( int queueSize, float length, float addInfoValue = 0f );
     static public event UpdateQueueHandler UpdateUIEvent;

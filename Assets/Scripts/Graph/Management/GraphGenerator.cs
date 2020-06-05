@@ -2,9 +2,9 @@
 using UnityEngine;
 using System.Text;
 using Random = UnityEngine.Random;
-using UnityEngine.UIElements;
 
-public class MapGenerator : MonoBehaviour {
+
+public class GraphGenerator : MonoBehaviour {
 
     [SerializeField]
     private GameObject nodePrefab;
@@ -33,7 +33,7 @@ public class MapGenerator : MonoBehaviour {
     static public List<Node> Nodes { get; private set; }
     static public List<Link> AllLinks { get; private set; }
 
-    static private MapGenerator instance;
+    static private GraphGenerator instance;
 
     private void OnValidate () {
         maxNodes = Mathf.Max(Size * Size / 2, maxNodes);
@@ -49,7 +49,7 @@ public class MapGenerator : MonoBehaviour {
 
     private void Awake () {
         if (instance == null) 
-            instance = FindObjectOfType<MapGenerator> ();
+            instance = FindObjectOfType<GraphGenerator> ();
         if (instance != this)
             Destroy (this.gameObject);
     }
@@ -182,7 +182,7 @@ public class MapGenerator : MonoBehaviour {
         for (int i = 0 ; i < Nodes.Count ; i++) {
             Node node = Nodes[i];
             //generate a list of possible connections for each node, getting everything from twice the max distance down and getting all of it into a table ordered by the closest to the furthest
-            List<NodeDist> possibleConnections = new List<NodeDist> ();
+            List<NodeDistance> possibleConnections = new List<NodeDistance> ();
             for (int j = 0 ; j < Nodes.Count ; j++) {
                 if (i == j)
                     continue;
@@ -190,7 +190,7 @@ public class MapGenerator : MonoBehaviour {
 
                 float distance = Vector2.Distance (node.pos , other.pos);
                 if (distance <= maxDistance) {
-                    possibleConnections.Add (new NodeDist (other , distance));
+                    possibleConnections.Add (new NodeDistance (other , distance));
                 }
             }
 
@@ -231,6 +231,7 @@ public class MapGenerator : MonoBehaviour {
                 }
             }
 
+            #if UNITY_EDITOR
             ///printing the connections
             //StringBuilder stringBuilder;
             //stringBuilder = new StringBuilder ();
@@ -241,6 +242,7 @@ public class MapGenerator : MonoBehaviour {
             //stringBuilder.AppendLine ();
             //Debug.Log (stringBuilder);
             ///end of printing
+            #endif
 
             //spawning links by chance
             for (int j = 0 ; j < possibleConnections.Count ; j++) {
@@ -341,7 +343,7 @@ public class MapGenerator : MonoBehaviour {
 
 
     private void ClearPreviousMap () {
-        Pathfinder.ResetAllPaths ();
+        GraphSearcher.ResetAllPaths ();
 
         foreach (Transform child in transform) {
             GameObject.Destroy (child.gameObject);

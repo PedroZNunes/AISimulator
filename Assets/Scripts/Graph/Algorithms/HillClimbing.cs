@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// goes straight to the goal by expanding only 1 path. is not optimal, but gives a path and is pretty fast. gets stuck often
 /// </summary>
-public class HillClimbing : PathfindingAlgorythm {
+public class HillClimbing : GraphSearchAlgorithm {
 
 	public override IEnumerator Search (List<Node> nodes, int size, Node start, Node goal, int framesPerSecond) {
         IsSearching = true;
@@ -26,7 +26,7 @@ public class HillClimbing : PathfindingAlgorythm {
             UIUpdate (frontier.Count, CalculatePathLength (start, current));
 
             //visualize path to current
-            Pathfinder.VisualizePath (cameFrom, current , start);
+            GraphSearcher.VisualizePath (cameFrom, current , start);
             yield return new WaitForSeconds (1f/framesPerSecond); 
 
             if (current == goal) {

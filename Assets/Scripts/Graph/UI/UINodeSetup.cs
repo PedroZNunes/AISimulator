@@ -38,22 +38,22 @@ public class UINodeSetup : MonoBehaviour
     private Node goalNode;
 
     private void OnEnable() {
-        PathfindingAlgorythm.AlteredSearchStateEvent += UpdateButtons;
+        GraphSearchAlgorithm.AlteredSearchStateEvent += UpdateButtons;
         UINode.NodeSelectedEvent += NodeSelected;
         UINode.NodeHoveredEvent += NodeHovered;
         UINode.NodeHoveredExitEvent += NodeHoveredExit;
     }
 
     private void OnDisable() {
-        PathfindingAlgorythm.AlteredSearchStateEvent -= UpdateButtons;
+        GraphSearchAlgorithm.AlteredSearchStateEvent -= UpdateButtons;
         UINode.NodeSelectedEvent -= NodeSelected;
         UINode.NodeHoveredEvent -= NodeHovered;
         UINode.NodeHoveredExitEvent -= NodeHoveredExit;
     }
 
     public void AssignStartAndGoal(out Node start, out Node goal) {
-        start = startNode ?? MapGenerator.RandomNode();
-        goal = goalNode ?? MapGenerator.RandomNode();
+        start = startNode ?? GraphGenerator.RandomNode();
+        goal = goalNode ?? GraphGenerator.RandomNode();
 
         SetStartNode(start);
         SetGoalNode(goal);
@@ -70,7 +70,7 @@ public class UINodeSetup : MonoBehaviour
 
     private void UpdateButtons()
     {
-        if (PathfindingAlgorythm.IsSearching) {
+        if (GraphSearchAlgorithm.IsSearching) {
             StartButton.GetComponent<Button>().interactable = false;
             GoalButton.GetComponent<Button>().interactable = false;
             ResetButton.GetComponent<Button>().interactable = false;
@@ -157,10 +157,10 @@ public class UINodeSetup : MonoBehaviour
         Vector2 mousePos = Input.mousePosition;
         print(mousePos.ToString());
 
-        if (MapGenerator.Nodes != null) {
+        if (GraphGenerator.Nodes != null) {
             string nodesPositions = "";
-            for (int i = 0; i < MapGenerator.Nodes.Count; i++) {
-                nodesPositions += MapGenerator.Nodes[i].pos.ToString() + ", ";
+            for (int i = 0; i < GraphGenerator.Nodes.Count; i++) {
+                nodesPositions += GraphGenerator.Nodes[i].pos.ToString() + ", ";
             }
             print (nodesPositions);
         }
