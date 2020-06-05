@@ -12,9 +12,14 @@ public class PathfindingAlgorythm {
 
     static public event Action AlteredSearchStateEvent;
 
-
+    /// <summary>
+    /// Dictionary that lists each node in the current path in relation to their previous one, or if you may, where you 'came from' to get to this node
+    /// </summary>
     public Dictionary<Node, Node> cameFrom { get; protected set; }
 
+    /// <summary>
+    /// Tracks if there's an ongoing search arlgorithm
+    /// </summary>
     static private bool isSearching = false;
     static public bool IsSearching {
         get { return isSearching; }
@@ -26,7 +31,15 @@ public class PathfindingAlgorythm {
         }
     }
 
-
+    /// <summary>
+    /// Coroutine responsible for searching.
+    /// </summary>
+    /// <param name="nodes"> list of all nodes </param>
+    /// <param name="size"> grid size </param>
+    /// <param name="start"> start node </param>
+    /// <param name="goal"> destination node </param>
+    /// <param name="framesPerSecond"> animation speed in frames per second</param>
+    /// <returns></returns>
     public virtual IEnumerator Search( List<Node> nodes, int size, Node start, Node goal, int framesPerSecond ) { return null; }
 
     public void CancelSearch() {
@@ -44,13 +57,18 @@ public class PathfindingAlgorythm {
         }
     }
 
-
-    protected float CalculatePathLength( Node start, Node current ) {
+    /// <summary>
+    /// Adds up every bit of path current active
+    /// </summary>
+    /// <param name="from"> Node you want to measure the path length from </param>
+    /// <param name="to"> Node you want to get the length to </param>
+    /// <returns></returns>
+    protected float CalculatePathLength( Node from, Node to ) {
         float pathLength = 0;
-        while (current != start) {
-            Node next = cameFrom[current];
-            pathLength += Mathf.Abs( Vector2.Distance( current.pos, next.pos ) );
-            current = next;
+        while (to != from) {
+            Node next = cameFrom[to];
+            pathLength += Mathf.Abs( Vector2.Distance( to.pos, next.pos ) );
+            to = next;
         }
 
         return pathLength;

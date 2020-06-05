@@ -3,7 +3,15 @@ using UnityEngine.SceneManagement;
 
 public class StartMenuManager : MonoBehaviour {
 
-	public void LoadScene (int index) {
+    [SerializeField] private GameObject QuitButton;
+
+    #if UNITY_WEBGL
+    private void Start() {
+        QuitButton.SetActive( false );
+    }
+    #endif
+
+    public void LoadScene (int index) {
         SceneManager.LoadScene (index);
     }
 

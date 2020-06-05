@@ -18,7 +18,7 @@ public class TreeGenerator : MonoBehaviour
 
     private float spacingY = 1.2f; //used for placement in the grid, spacing in Y
 
-    public delegate void TreeGenerated (int depth, int branch, float stepY);
+    public delegate void TreeGenerated (int depth, int branch);
 
     static public event TreeGenerated treeGenerated;
 
@@ -190,7 +190,7 @@ public class TreeGenerator : MonoBehaviour
     private void OnTreeGenerated ()
     {
         if (treeGenerated != null) {
-            treeGenerated (depth, branching, spacingY);
+            treeGenerated (depth, branching);
         }
     }
 }
