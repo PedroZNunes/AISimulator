@@ -16,9 +16,6 @@ public class Minimax : TreeSearchAlgorithm
 
         OnSearchEnded ();
 
-        if (root.leafID != null)
-            OnLeafActivated (TreeNode.GetByID ((int)root.leafID));
-
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
 

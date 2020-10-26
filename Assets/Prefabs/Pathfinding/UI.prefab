@@ -498,7 +498,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1332118993}
   m_HandleRect: {fileID: 1332118992}
   m_Direction: 2
-  m_Value: 1.0132483
+  m_Value: 1
   m_Size: 0.3792652
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -594,7 +594,7 @@ GameObject:
   - component: {fileID: 1599318030}
   - component: {fileID: 1599318029}
   - component: {fileID: 1599318028}
-  - component: {fileID: 1599318031}
+  - component: {fileID: 1280982699}
   m_Layer: 5
   m_Name: Viewport
   m_TagString: Untagged
@@ -672,7 +672,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 0
---- !u!114 &1599318031
+--- !u!114 &1280982699
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -686,17 +686,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding:
     m_Left: 5
-    m_Right: 3
-    m_Top: 5
+    m_Right: 0
+    m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
   m_Spacing: 0
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
   m_ChildControlHeight: 0
-  m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
 --- !u!1 &1602115957
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,19 +915,19 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2132037395}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1044,7 +1044,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0000
+  m_Text: 0
 --- !u!1 &678949873153253854
 GameObject:
   m_ObjectHideFlags: 0
@@ -1055,7 +1055,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6998755086609952145}
   m_Layer: 5
-  m_Name: Max Beam Paths
+  m_Name: Max Beams
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1534,7 +1534,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 320
+  m_Text: 0
 --- !u!1 &3977442799480166976
 GameObject:
   m_ObjectHideFlags: 0
@@ -1545,7 +1545,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4027226144037874744}
   m_Layer: 5
-  m_Name: Algorythm
+  m_Name: Algorithm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2038,7 +2038,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 320
+  m_Text: 0
 --- !u!1 &4019394485012363965
 GameObject:
   m_ObjectHideFlags: 0
@@ -2314,7 +2314,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -52.532654, y: -32.15036}
+  m_SizeDelta: {x: -130.52692, y: -41.899693}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4019394485065014432
 CanvasRenderer:
@@ -2640,7 +2640,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 320
+  m_Text: 0
 --- !u!1 &4019394485244189224
 GameObject:
   m_ObjectHideFlags: 0
@@ -2701,7 +2701,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.89417946, g: 0.9375061, b: 0.9622642, a: 0.5882353}
+  m_Color: {r: 0.89417946, g: 0.9375061, b: 0.9622642, a: 0.7372549}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3067,8 +3067,8 @@ MonoBehaviour:
   sizeDropdownInput: {fileID: 4019394486605269952}
   nodeCountInput: {fileID: 4019394486854169255}
   maxLinksInput: {fileID: 4019394486015537066}
-  algorithmsDropdownInput: {fileID: 0}
-  beamsInput: {fileID: 0}
+  algorithmsDropdownInput: {fileID: 4019394485883517670}
+  beamsInput: {fileID: 4019394486796848537}
   speedInput: {fileID: 6015679514754684366}
   nodeSetup: {fileID: 4019394485468139558}
   generateButton: {fileID: 4019394485299065910}
@@ -3488,7 +3488,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 320
+  m_Text: 0
 --- !u!1 &4019394485468139562
 GameObject:
   m_ObjectHideFlags: 0
@@ -4097,7 +4097,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.89417946, g: 0.9375061, b: 0.9622642, a: 0.5882353}
+  m_Color: {r: 0.89417946, g: 0.9375061, b: 0.9622642, a: 0.7372549}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4506,7 +4506,7 @@ GameObject:
   - component: {fileID: 4019394485883517671}
   - component: {fileID: 4019394485883517670}
   m_Layer: 5
-  m_Name: Algorythm Dropdown
+  m_Name: Algorithm Dropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4629,7 +4629,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4019394485312162432}
-        m_MethodName: OnChangeSearchAlgorithm
+        m_MethodName: OnChangeAlgorithm
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5103,7 +5103,18 @@ MonoBehaviour:
   m_CharacterLimit: 2
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4019394485312162432}
+        m_MethodName: OnChangeLinks
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -5154,7 +5165,7 @@ GameObject:
   - component: {fileID: 4019394486036386782}
   - component: {fileID: 4019394486036386753}
   m_Layer: 5
-  m_Name: Beam Paths Text
+  m_Name: Beams Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5661,7 +5672,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 320
+  m_Text: 0
 --- !u!1 &4019394486275844523
 GameObject:
   m_ObjectHideFlags: 0
@@ -6137,7 +6148,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Back to Menu
+  m_Text: Back
 --- !u!1 &4019394486386314788
 GameObject:
   m_ObjectHideFlags: 0
@@ -7783,7 +7794,7 @@ GameObject:
   - component: {fileID: 4019394486796848537}
   - component: {fileID: 1495607785}
   m_Layer: 5
-  m_Name: Beam Paths InputField
+  m_Name: Beams InputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7896,10 +7907,21 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 1
-  m_CharacterLimit: 3
+  m_CharacterLimit: 2
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4019394485312162432}
+        m_MethodName: OnChangeBeams
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -8068,12 +8090,9 @@ MonoBehaviour:
   m_CharacterLimit: 5
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
-  m_OnValueChanged:
-    m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4019394485312162432}
-        m_MethodName: CapMaxNodeCount
+        m_MethodName: OnChangeNodeCount
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8083,6 +8102,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.7902249, g: 0.8497344, b: 0.9264706, a: 0.7529412}
@@ -8283,7 +8305,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 9.5, y: 0}
-  m_SizeDelta: {x: 159.055, y: 21.596802}
+  m_SizeDelta: {x: 161.96698, y: 21.596802}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &784417254192369491
 CanvasRenderer:
@@ -8957,7 +8979,7 @@ GameObject:
   - component: {fileID: 3664037143786496570}
   - component: {fileID: 1588834260763981252}
   m_Layer: 5
-  m_Name: Algorythm Info Panel
+  m_Name: Algorithm Info Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9187,7 +9209,18 @@ MonoBehaviour:
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4019394485312162432}
+        m_MethodName: OnChangeSpeed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8924895869902220488
 GameObject:
   m_ObjectHideFlags: 0

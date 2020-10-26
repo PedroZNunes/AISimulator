@@ -213,7 +213,7 @@ public class UIManager : MonoBehaviour {
     }
 
     public void OnChangeLinks() {
-        maxLinks = Mathf.Clamp( Int32.Parse( maxLinksInput.text ), 3, 99);
+        maxLinks = Mathf.Clamp( Int32.Parse( maxLinksInput.text ), 3, 20);
         maxLinksInput.text = maxLinks.ToString();
     }
 
@@ -302,6 +302,7 @@ public class UIManager : MonoBehaviour {
             nodeCountInput.interactable = false;
             sizeDropdownInput.interactable = false;
             speedInput.interactable = false;
+            beamsInput.interactable = false;
         }
         else {
             generateButton.interactable = true;
@@ -312,6 +313,7 @@ public class UIManager : MonoBehaviour {
             nodeCountInput.interactable = true;
             sizeDropdownInput.interactable = true;
             speedInput.interactable = true;
+            beamsInput.interactable = true;
         }
 
     }

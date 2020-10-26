@@ -4,9 +4,6 @@
 public class TreeSearchAlgorithm
 {
 
-    public delegate void LeafActivated (TreeNode node);
-    static public event LeafActivated leafActivated;
-
     static public event Action searchEnded;
 
     /// <summary>
@@ -17,14 +14,6 @@ public class TreeSearchAlgorithm
     /// <param name="depth">How many generations</param>
     public virtual void Search (TreeNode root, int branching, int depth) {}
 
-    /// <summary>
-    /// Procs the event warning that a node has been analyzed.
-    /// </summary>
-    /// <param name="activeLeaf"> the leaf is that is active in the algorithm. </param>
-    protected void OnLeafActivated (TreeNode activeLeaf) {
-        if (leafActivated != null)
-            leafActivated (activeLeaf);
-    }
 
     /// <summary>
     /// Procs the event warning that the UI should calculate the nodes that were pruned.

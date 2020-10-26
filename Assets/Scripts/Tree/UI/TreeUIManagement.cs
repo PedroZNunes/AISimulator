@@ -57,12 +57,10 @@ public class TreeUIManagement : MonoBehaviour
 
     private void OnEnable ()
     {
-        TreeSearchAlgorithm.leafActivated += IncrementAnalyzed;
         TreeSearchAlgorithm.searchEnded += CountPrunedAndAnalyzed;
     }
     private void OnDisable ()
     {
-        TreeSearchAlgorithm.leafActivated -= IncrementAnalyzed;
         TreeSearchAlgorithm.searchEnded -= CountPrunedAndAnalyzed;
     }
 
@@ -188,13 +186,6 @@ public class TreeUIManagement : MonoBehaviour
     #endregion
 
     #region OutputData
-
-    private void IncrementAnalyzed (TreeNode node)
-    {
-        int analyzed = Int32.Parse (analyzedValue.text);
-
-        analyzedValue.text = (++analyzed).ToString ();
-    }
 
     /// <summary>
     /// Count how many nodes have been cut-off from the process

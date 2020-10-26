@@ -17,9 +17,6 @@ public class AlphaBeta : TreeSearchAlgorithm
         //starts recursive searching
         CheckNode (root);
 
-        if (root.leafID.HasValue)
-            OnLeafActivated (TreeNode.GetByID (root.leafID.Value));
-
         OnSearchEnded ();
         Debug.LogFormat ("The output is {0}, from leaf {1}", root.Score, root.leafID);
     }
