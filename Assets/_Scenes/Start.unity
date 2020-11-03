@@ -659,6 +659,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36358bfe97bdf00469b3ef327236431d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  QuitButton: {fileID: 1738285769}
 --- !u!4 &711874432
 Transform:
   m_ObjectHideFlags: 0
@@ -1021,7 +1022,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Game Tree
+  m_Text: Tree Searcher
 --- !u!222 &1713593131
 CanvasRenderer:
   m_ObjectHideFlags: 0
